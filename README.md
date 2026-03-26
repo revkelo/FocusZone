@@ -23,6 +23,15 @@ VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY=TU_SUPABASE_ANON_KEY
 
 Tambien tienes referencia en `.env.example`.
 
+Variables adicionales para chat Lumi:
+
+```bash
+OPENROUTER_API_KEY=TU_OPENROUTER_API_KEY
+OPENROUTER_MODEL=openai/gpt-4o-mini
+OPENROUTER_SITE_URL=https://focuszone.app
+OPENROUTER_SITE_NAME=FocusZone
+```
+
 ## Supabase
 
 - Cliente: `src/utils/supabase.js`
@@ -48,6 +57,14 @@ Vercel (ideal para mini proyecto):
 3. Define variables de entorno en Vercel Project Settings.
 4. Build command: `npm run build`
 5. Output directory: `dist`
+
+## Endpoint de chat sin persistencia (Lumi)
+
+- Ruta: `POST /api/lumi-chat`
+- Body JSON: `{ "message": "..." }`
+- Respuesta: `{ "reply": "...", "model": "..." }`
+
+Este endpoint siempre envia el prompt de contexto de Lumi como `system` en cada peticion y no guarda historial en base de datos.
 
 ## Seguridad aplicada
 

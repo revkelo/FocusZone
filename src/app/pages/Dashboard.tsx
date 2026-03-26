@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import {
   Bell,
@@ -9,6 +9,7 @@ import {
   ListTodo,
   LogOut,
   Mail,
+  MessageCircle,
   Minus,
   PauseCircle,
   PlayCircle,
@@ -101,6 +102,13 @@ interface AppToast {
   type: ToastType;
   title: string;
   description?: string;
+}
+
+interface ChatMessage {
+  id: number;
+  role: "user" | "assistant";
+  text: string;
+  pending?: boolean;
 }
 
 type TimerMode = "focus" | "shortBreak" | "longBreak";
@@ -259,6 +267,15 @@ export default function Dashboard() {
   const [dailyReminderHour, setDailyReminderHour] = useState(String(DEFAULT_DAILY_REMINDER_HOUR));
   const [pomodoroReminderEnabled, setPomodoroReminderEnabled] = useState(true);
   const [pomodoroReminderMinutes, setPomodoroReminderMinutes] = useState(String(DEFAULT_POMODORO_REMINDER_MINUTES));
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
+    {
+      id: 1,
+      role: "assistant",
+      text: "Soy Lumi. Te ayudo con Zone Focus, biblioteca, pausa digital y concentracion.",
+    },
+  ]);
+  const [chatInput, setChatInput] = useState("");
+  const [isSendingChat, setIsSendingChat] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [toasts, setToasts] = useState<AppToast[]>([]);
@@ -309,6 +326,56 @@ export default function Dashboard() {
   const sanitizeDigitsInput = (value: string, maxLength = MAX_NUMERIC_INPUT_LENGTH) => value.replace(/\D/g, "").slice(0, maxLength);
   const normalizeInputText = (value: string) => value.replace(/\s+/g, " ").trim();
   const ALLOWED_TEXT_PATTERN = /^[\p{L}\p{N}\s.,:;!?'"()\-_/+#&]+$/u;
+  const renderInlineMarkdown = (value: string) => {
+    const parts = value.split(/(\*\*[^*]+\*\*)/g);
+    return parts.map((part, index) => {
+      if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
+        return (
+          <strong key={`${part}-${index}`} className="font-extrabold">
+            {part.slice(2, -2)}
+          </strong>
+        );
+      }
+      return <span key={`${part}-${index}`}>{part}</span>;
+    });
+  };
+  const renderChatMessageText = (value: string) => {
+    const blocks = value
+      .split(/\n\s*\n/)
+      .map((block) => block.trim())
+      .filter(Boolean);
+
+    return (
+      <div className="space-y-2 leading-relaxed">
+        {blocks.map((block, blockIndex) => {
+          const lines = block.split("\n").map((line) => line.trimEnd());
+          const nonEmptyLines = lines.filter((line) => line.trim().length > 0);
+          const isListBlock = nonEmptyLines.length > 0 && nonEmptyLines.every((line) => line.trim().startsWith("- "));
+
+          if (isListBlock) {
+            return (
+              <ul key={`list-${blockIndex}`} className="list-disc space-y-1 pl-5">
+                {nonEmptyLines.map((line, lineIndex) => (
+                  <li key={`item-${blockIndex}-${lineIndex}`}>{renderInlineMarkdown(line.trim().replace(/^- /, ""))}</li>
+                ))}
+              </ul>
+            );
+          }
+
+          return (
+            <p key={`paragraph-${blockIndex}`}>
+              {lines.map((line, lineIndex) => (
+                <Fragment key={`line-${blockIndex}-${lineIndex}`}>
+                  {renderInlineMarkdown(line)}
+                  {lineIndex < lines.length - 1 ? <br /> : null}
+                </Fragment>
+              ))}
+            </p>
+          );
+        })}
+      </div>
+    );
+  };
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -1253,20 +1320,18 @@ export default function Dashboard() {
       setTimeLeft(nextMode === "longBreak" ? longDurationSeconds : shortDurationSeconds);
       setSuccessMessage(`Sesión completada. +${SESSION_POINTS} puntos.`);
 
-      if (typeof window !== "undefined" && "Notification" in window && window.Notification.permission === "granted") {
-        new window.Notification("FocusZone | Pomodoro completado", {
-          body: `Sumaste +${SESSION_POINTS} puntos. Sigue así.`,
-          icon: "/favicon.svg",
-          badge: "/favicon.svg",
-          tag: "focuszone-pomodoro-complete",
-        });
-      }
+      void notifyUser("FocusZone | Pomodoro completado", `Sumaste +${SESSION_POINTS} puntos. Sigue asi.`, "focuszone-pomodoro-complete");
       return;
     }
 
     setTimerMode("focus");
     setTimeLeft(focusDurationSeconds);
     setSuccessMessage(completedMode === "shortBreak" ? "Descanso corto terminado. Volvemos al foco." : "Descanso largo terminado. Volvemos al foco.");
+    void notifyUser(
+      "FocusZone | Descanso terminado",
+      completedMode === "shortBreak" ? "Descanso corto finalizado. Volvemos al foco." : "Descanso largo finalizado. Volvemos al foco.",
+      "focuszone-break-complete",
+    );
   };
 
   const adjustDuration = (mode: TimerMode, delta: number) => {
@@ -1929,6 +1994,72 @@ export default function Dashboard() {
       setSuccessMessage("");
     }
   };
+  const handleSendChat = async () => {
+    const message = normalizeInputText(chatInput);
+    if (!message) {
+      return;
+    }
+
+    const baseId = Date.now();
+    const pendingAssistantId = baseId + 1;
+    const userMessage: ChatMessage = {
+      id: baseId,
+      role: "user",
+      text: message,
+    };
+    const pendingAssistantMessage: ChatMessage = {
+      id: pendingAssistantId,
+      role: "assistant",
+      text: "Lumi esta escribiendo...",
+      pending: true,
+    };
+
+    setChatMessages((previous) => [...previous, userMessage, pendingAssistantMessage]);
+    setChatInput("");
+    setIsSendingChat(true);
+
+    try {
+      const response = await fetch("/api/lumi-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
+      });
+      const payload = (await response.json().catch(() => ({}))) as { reply?: string; error?: string };
+
+      if (!response.ok || !payload.reply) {
+        throw new Error(payload.error ?? "No se pudo obtener respuesta.");
+      }
+      const cleanedReply = payload.reply.replace(/^lumi\s*[:\n-]?\s*/i, "").trim();
+
+      setChatMessages((previous) =>
+        previous.map((item) =>
+          item.id === pendingAssistantId
+            ? {
+                ...item,
+                text: cleanedReply,
+                pending: false,
+              }
+            : item,
+        ),
+      );
+      playEventSound("notification");
+    } catch {
+      setChatMessages((previous) =>
+        previous.map((item) =>
+          item.id === pendingAssistantId
+            ? {
+                ...item,
+                text: "No pude responder ahora. Intenta de nuevo en unos segundos.",
+                pending: false,
+              }
+            : item,
+        ),
+      );
+      setError("No se pudo consultar a Lumi en este momento.");
+    } finally {
+      setIsSendingChat(false);
+    }
+  };
   const handleLogout = async () => {
     await pausePomodoroAndSync();
     await supabase.auth.signOut();
@@ -2028,6 +2159,7 @@ export default function Dashboard() {
             <TabsList className="mb-6 hidden h-auto w-full flex-wrap rounded-none bg-[#5b30d9] p-1 md:flex">
               <TabsTrigger value="pomodoro" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Pomodoro</TabsTrigger>
               <TabsTrigger value="resumen" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Resumen</TabsTrigger>
+              <TabsTrigger value="chatbot" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Chatbot</TabsTrigger>
               <TabsTrigger value="tareas" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Tareas</TabsTrigger>
               <TabsTrigger value="cuenta" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Cuenta</TabsTrigger>
             </TabsList>
@@ -2327,6 +2459,55 @@ export default function Dashboard() {
               </Card>
             </TabsContent>
 
+            <TabsContent value="chatbot" className="focus-reveal">
+              <Card className="focus-card rounded-none p-6 md:p-8">
+                <div className="mb-5 flex items-center gap-2">
+                  <MessageCircle className="size-5 text-[#f47c0f]" />
+                  <h2 className="display-font text-5xl text-[#5b30d9]">Chatbot Lumi</h2>
+                </div>
+
+                <div className="mb-4 max-h-[52vh] space-y-3 overflow-y-auto border border-[#5b30d9]/20 bg-white/70 p-4">
+                  {chatMessages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`w-fit max-w-[90%] rounded-2xl border px-3 py-2 text-sm shadow-[0_10px_24px_-18px_rgba(17,24,39,0.65)] ${
+                        message.role === "user"
+                          ? "ml-auto border-[#f47c0f]/35 bg-[#fff4ea] text-[#6a3a00]"
+                          : "border-[#5b30d9]/20 bg-[linear-gradient(180deg,#f6f2ff_0%,#f0e9ff_100%)] text-[#4a22be]"
+                      }`}
+                    >
+                      <p className="mb-1 text-[11px] font-black uppercase tracking-wide opacity-80">
+                        {message.role === "user" ? "Tu" : "Lumi"}
+                      </p>
+                      <div className={`${message.pending ? "animate-pulse" : ""}`}>{renderChatMessageText(message.text)}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="space-y-3">
+                  <textarea
+                    value={chatInput}
+                    onChange={(event) => setChatInput(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" && !event.shiftKey) {
+                        event.preventDefault();
+                        void handleSendChat();
+                      }
+                    }}
+                    placeholder="Preguntale a Lumi sobre Zone Focus..."
+                    className="min-h-24 w-full border border-[#5b30d9]/25 bg-white p-3 text-sm text-[#2a2a2a] outline-none transition focus:border-[#5b30d9]"
+                  />
+                  <Button
+                    disabled={isSendingChat || !normalizeInputText(chatInput)}
+                    onClick={() => void handleSendChat()}
+                    className="rounded-none bg-[#5b30d9] text-white hover:bg-[#4a22be]"
+                  >
+                    {isSendingChat ? "Enviando..." : "Enviar a Lumi"}
+                  </Button>
+                </div>
+              </Card>
+            </TabsContent>
+
             <TabsContent value="tareas" className="focus-reveal">
               <Card className="focus-card rounded-none p-7 md:p-8">
                 <div className="mb-5 flex items-center justify-between">
@@ -2619,7 +2800,7 @@ export default function Dashboard() {
         </main>
 
         <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-[#5b30d9]/30 bg-[#f2f0f3]/95 px-4 py-2 backdrop-blur md:hidden">
-          <div className="mx-auto grid w-full max-w-md grid-cols-4 gap-1 rounded-2xl border border-[#7d4cd8]/30 bg-white p-1">
+          <div className="mx-auto grid w-full max-w-md grid-cols-5 gap-1 rounded-2xl border border-[#7d4cd8]/30 bg-white p-1">
             <button
               onClick={() => setActiveTab("pomodoro")}
               className={`flex flex-col items-center gap-1 rounded-xl py-2 text-[11px] font-bold ${
@@ -2637,6 +2818,15 @@ export default function Dashboard() {
             >
               <Trophy className="size-4" />
               <span>Resumen</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("chatbot")}
+              className={`flex flex-col items-center gap-1 rounded-xl py-2 text-[11px] font-bold ${
+                activeTab === "chatbot" ? "bg-[#5b30d9] text-white" : "text-[#5b30d9]"
+              }`}
+            >
+              <MessageCircle className="size-4" />
+              <span>Chat</span>
             </button>
             <button
               onClick={() => setActiveTab("tareas")}
@@ -2662,3 +2852,4 @@ export default function Dashboard() {
     </div>
   );
 }
+

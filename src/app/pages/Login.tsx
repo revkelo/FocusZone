@@ -20,16 +20,36 @@ export default function Login() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    let cancelled = false;
+
     const checkSession = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) {
-        navigate("/dashboard");
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!cancelled && user) {
+          navigate("/dashboard");
+        }
+      } catch (sessionError) {
+        const message = sessionError instanceof Error ? sessionError.message : "";
+        const isLockContention =
+          message.includes("NavigatorLockAcquireTimeoutError") ||
+          message.includes("lock") ||
+          message.includes("was released because another request stole it");
+
+        // In dev (StrictMode), duplicated auth checks can race for this lock.
+        // We ignore lock-contention errors and let the next auth event/read settle.
+        if (!isLockContention && !cancelled) {
+          setError("No se pudo validar la sesión. Intenta de nuevo.");
+        }
       }
     };
 
     void checkSession();
+    return () => {
+      cancelled = true;
+    };
   }, [navigate]);
 
   const handleSubmit = async (event: React.FormEvent) => {

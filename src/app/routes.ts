@@ -1,5 +1,8 @@
 import { createBrowserRouter, redirect } from "react-router";
 import { supabase } from "./lib/supabase";
+import Dashboard from "./pages/Dashboard";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
 
 const requireAuth = async () => {
   const {
@@ -18,24 +21,15 @@ const requireAuth = async () => {
 export const router = createBrowserRouter([
   {
     path: "/",
-    lazy: async () => {
-      const module = await import("./pages/Home");
-      return { Component: module.default };
-    },
+    Component: Home,
   },
   {
     path: "/login",
-    lazy: async () => {
-      const module = await import("./pages/Login");
-      return { Component: module.default };
-    },
+    Component: Login,
   },
   {
     path: "/dashboard",
     loader: requireAuth,
-    lazy: async () => {
-      const module = await import("./pages/Dashboard");
-      return { Component: module.default };
-    },
+    Component: Dashboard,
   },
 ]);
