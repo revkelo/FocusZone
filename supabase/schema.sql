@@ -486,6 +486,21 @@ where p.room_id = r.room_id
 create unique index if not exists idx_pomodoro_room_members_user_unique on public.pomodoro_room_members (user_id);
 create unique index if not exists idx_pomodoro_room_presence_user_unique on public.pomodoro_room_presence (user_id);
 
+with ranked_rooms as (
+  select
+    id,
+    owner_id,
+    created_at,
+    row_number() over (partition by owner_id order by created_at desc, id desc) as rn
+  from public.pomodoro_rooms
+)
+delete from public.pomodoro_rooms r
+using ranked_rooms rr
+where r.id = rr.id
+  and rr.rn > 1;
+
+create unique index if not exists idx_pomodoro_rooms_owner_unique on public.pomodoro_rooms (owner_id);
+
 insert into public.reward_catalog (title, description, cost_points)
 values
   ('Bono Kokoriko', 'Cupon de ejemplo para redimir en aliados.', 120),

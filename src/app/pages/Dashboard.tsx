@@ -644,6 +644,7 @@ export default function Dashboard() {
     }
     return rooms.filter((room) => room.name.toLowerCase().includes(query));
   }, [rooms, roomSearchQuery]);
+  const ownedRoom = useMemo(() => rooms.find((room) => room.ownerId === userId) ?? null, [rooms, userId]);
 
   const completedCount = allChallenges.filter((challenge) => completedChallenges.has(challenge.id)).length;
   const completedBaseCount = baseChallenges.filter((challenge) => completedChallenges.has(challenge.id)).length;
@@ -1471,6 +1472,12 @@ export default function Dashboard() {
       return;
     }
 
+    if (ownedRoom) {
+      setError("Solo puedes ser dueño de 1 sala. Elimina tu sala actual para crear otra.");
+      setSuccessMessage("");
+      return;
+    }
+
     const roomName = normalizeInputText(newRoomName);
     if (roomName.length < 3 || roomName.length > MAX_ROOM_NAME_LENGTH || !ALLOWED_TEXT_PATTERN.test(roomName)) {
       setError("El nombre de la sala debe tener al menos 3 caracteres.");
@@ -1899,13 +1906,18 @@ export default function Dashboard() {
                   </div>
                   <div className="mb-4 space-y-3 border border-[#5b30d9]/20 bg-white/70 p-3 sm:p-4">
                     <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Crear sala</p>
+                    {ownedRoom && (
+                      <p className="text-xs font-bold text-[#d4183d]">
+                        Ya eres dueño de "{ownedRoom.name}". Solo puedes tener 1 sala propia.
+                      </p>
+                    )}
                     <Input
                       value={newRoomName}
                       maxLength={MAX_ROOM_NAME_LENGTH}
                       onChange={(event) => setNewRoomName(event.target.value.slice(0, MAX_ROOM_NAME_LENGTH))}
                       placeholder="Ej: Diseno nocturno"
                     />
-                    <Button disabled={isCreatingRoom} onClick={() => void handleCreateRoom()} className="w-full rounded-none bg-[#5b30d9] text-white hover:bg-[#4a22be] sm:w-auto">
+                    <Button disabled={isCreatingRoom || Boolean(ownedRoom)} onClick={() => void handleCreateRoom()} className="w-full rounded-none bg-[#5b30d9] text-white hover:bg-[#4a22be] sm:w-auto">
                       {isCreatingRoom ? "Creando..." : "Crear sala"}
                     </Button>
                   </div>
