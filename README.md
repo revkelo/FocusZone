@@ -32,6 +32,18 @@ OPENROUTER_SITE_URL=https://focuszone.app
 OPENROUTER_SITE_NAME=FocusZone
 ```
 
+Variables adicionales para verificacion por codigo (registro y recuperar clave):
+
+```bash
+SUPABASE_SERVICE_ROLE_KEY=TU_SUPABASE_SERVICE_ROLE_KEY
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=focuszoneueb@gmail.com
+SMTP_PASS=TU_APP_PASSWORD_DE_GOOGLE
+SMTP_FROM_EMAIL=focuszoneueb@gmail.com
+SMTP_FROM_NAME=Focus Zone
+```
+
 ## Supabase
 
 - Cliente: `src/utils/supabase.js`
@@ -49,25 +61,18 @@ OPENROUTER_SITE_NAME=FocusZone
    - `public.pomodoro_sessions`
 4. Prueba en `/app`: al marcar retos o completar pomodoro, los datos quedan guardados por usuario.
 
-### Verificacion de correo y recuperacion de clave (SMTP)
+### Verificacion por codigo de 4 digitos (registro y recuperacion)
 
 El login ya incluye:
-- Envio de verificacion al crear cuenta.
-- Boton para reenviar verificacion.
-- Boton "Olvide mi contrasena".
-- Pantalla para establecer nueva contrasena al volver desde el enlace de recuperacion.
+- Registro en 2 pasos (datos + codigo de 4 digitos).
+- Validacion de contrasena repetida en registro.
+- Recuperacion de clave por codigo de 4 digitos.
+- Cambio de contrasena usando ese codigo.
 
-Para que los correos salgan por tu cuenta `focuszoneueb@gmail.com`, configuralo en Supabase:
-1. Ve a `Authentication > Providers > Email`.
-2. Activa `Confirm email` (verificacion obligatoria).
-3. Ve a `Authentication > Settings > SMTP Settings`.
-4. SMTP Host: `smtp.gmail.com`
-5. SMTP Port: `587`
-6. SMTP User: `focuszoneueb@gmail.com`
-7. SMTP Pass: tu contrasena de aplicacion de Gmail.
-8. Sender email: `focuszoneueb@gmail.com`
-9. Sender name: `Focus Zone`
-10. Guarda y prueba plantillas de `Confirm signup` y `Reset password`.
+Para usarlo debes:
+1. Ejecutar `supabase/schema.sql` (incluye tabla `public.auth_email_codes`).
+2. Definir `SUPABASE_SERVICE_ROLE_KEY` y variables SMTP en Vercel/entorno.
+3. Desplegar.
 
 Importante: la contrasena de aplicacion es secreta. Si ya se compartio publicamente, revocala y genera una nueva.
 
