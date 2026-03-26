@@ -330,11 +330,14 @@ export default function Home() {
 
           <section className="grid gap-4">
             <Card className="focus-campaign-card focus-reveal focus-reveal-delay-2 p-5 md:p-7">
-              <h2 className="display-font text-3xl text-[#5b30d9] md:text-4xl">Cómo funciona Focus Zone</h2>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2 className="display-font text-3xl text-[#5b30d9] md:text-4xl">Cómo funciona Focus Zone</h2>
+                <span className="focus-kicker border-[#b7d989]/55 bg-[#f4fbe8] text-[#7aa048]">Ruta de enfoque</span>
+              </div>
               <div className="focus-divider focus-divider-animated mt-4" />
               <div className="mt-5 grid gap-2 md:grid-cols-2">
                 {howFocusZoneWorks.map((item, index) => (
-                  <div key={item} className="flex items-center gap-3 border-2 border-[#d4c8f6] bg-white/90 p-3">
+                  <div key={item} className="flex items-center gap-3 border-2 border-[#d4c8f6] bg-[linear-gradient(90deg,#f5faee_0_7px,#ffffff_7px)] p-3">
                     <span className="grid size-8 place-items-center border border-[#f47c0f]/55 bg-[#fff0df] text-sm font-black text-[#f47c0f]">
                       {index + 1}
                     </span>
@@ -348,11 +351,12 @@ export default function Home() {
           <section className="focus-reveal focus-reveal-delay-1 space-y-4">
             <div className="flex items-center justify-between gap-3">
               <h2 className="display-font text-3xl text-[#5b30d9] md:text-4xl">Lo que descubrimos</h2>
-              <span className="focus-kicker hidden md:inline-flex">Datos de investigación</span>
+              <span className="focus-kicker hidden border-[#b7d989]/55 bg-[#f4fbe8] text-[#7aa048] md:inline-flex">Datos de investigación</span>
             </div>
             <div className="grid gap-4 md:grid-cols-4">
               {researchStats.map((stat) => (
                 <Card key={stat.label} className="focus-campaign-card rounded-[1rem] border-[#d3c7f5] p-4">
+                  <div className="mb-2 h-1.5 w-14 rounded-full bg-[#d4ebad]" />
                   <p className="display-font text-4xl text-[#f47c0f] md:text-5xl">{stat.value}</p>
                   <p className="mt-2 text-sm font-bold text-[#5b30d9]">{stat.label}</p>
                 </Card>
@@ -360,28 +364,30 @@ export default function Home() {
             </div>
           </section>
 
-          <section className="grid gap-4 lg:grid-cols-2">
-            <Card className="focus-campaign-card focus-reveal p-5 md:p-7">
+          <section className="grid items-stretch gap-4 pb-1 lg:grid-cols-2">
+            <Card className="focus-campaign-card focus-grid focus-reveal h-full p-5 md:p-7 lg:min-h-[430px]">
               <h3 className="display-font text-3xl text-[#5b30d9] md:text-4xl">Reflexión colectiva</h3>
-              <p className="mt-3 text-sm font-semibold text-[#5b30d9]/80 md:text-base">Distractores más repetidos en respuestas anónimas de estudiantes.</p>
-              <div className="mt-4 grid gap-2">
+              <p className="mt-3 text-sm font-semibold text-[#5b30d9]/85 md:text-base">Distractores más repetidos en respuestas anónimas de estudiantes.</p>
+              <p className="mt-1 text-xs font-medium text-[#5b30d9]/65 md:text-sm">Frases reales para reconocer patrones y tomar decisiones de enfoque.</p>
+              <div className="mt-4 grid gap-2.5">
                 {collectiveReflections.map((quote) => (
-                  <blockquote key={quote} className="rounded-[0.65rem] border-l-4 border-[#f47c0f] bg-white/90 p-3 text-sm font-semibold text-[#5b30d9]">
+                  <blockquote key={quote} className="rounded-[0.75rem] border border-[#d9cff7] border-l-4 border-l-[#f47c0f] bg-white/95 p-3 text-[1rem] font-semibold leading-[1.35] text-[#5b30d9]">
                     "{quote}"
                   </blockquote>
                 ))}
               </div>
             </Card>
 
-            <Card className="focus-campaign-card focus-heavy focus-grid focus-reveal focus-reveal-delay-1 rounded-[1.2rem] border-[#ad96f1] bg-[#fff1e3] p-5 md:p-7">
-              <h3 className="display-font text-4xl text-[#9ad95a] md:text-5xl">El problema no es lo digital</h3>
+            <Card className="focus-campaign-card focus-grid focus-reveal focus-reveal-delay-1 h-full rounded-[1.2rem] p-5 md:p-7 lg:min-h-[430px]">
+              <h3 className="display-font text-3xl text-[#5b30d9] md:text-4xl">El problema no es lo digital</h3>
               <p className="mt-2 text-sm font-bold uppercase tracking-[0.08em] text-[#5b30d9]/70">Manifiesto de atención consciente</p>
-              <div className="focus-divider mt-4" />
+              <p className="mt-1 text-xs text-[#5b30d9]/65 md:text-sm">Ideas clave para transformar hábitos digitales en acciones concretas.</p>
+              <div className="focus-divider mt-4 max-w-xl" />
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 {manifestoLines.map((line, index) => (
-                  <div key={line} className="rounded-[0.8rem] border border-[#5b30d9]/20 bg-white/70 p-3">
-                    <p className="mb-2 text-xs font-black uppercase tracking-[0.1em] text-[#f47c0f]">Punto {index + 1}</p>
-                    <p className="text-base font-bold leading-[1.25] text-[#4d33bf]">{line}</p>
+                  <div key={line} className="rounded-[0.75rem] border border-[#d9cff7] bg-white/95 p-3">
+                    <p className="mb-2 text-xs font-black uppercase tracking-[0.1em] text-[#f47c0f]">Clave {index + 1}</p>
+                    <p className="text-[1rem] font-semibold leading-[1.35] text-[#4d33bf]">{line}</p>
                   </div>
                 ))}
               </div>
