@@ -250,6 +250,7 @@ export default function Dashboard() {
   const [successMessage, setSuccessMessage] = useState("");
   const [toasts, setToasts] = useState<AppToast[]>([]);
   const [hydratedPomodoroKey, setHydratedPomodoroKey] = useState<string | null>(null);
+  const lastToastRef = useRef<{ signature: string; at: number } | null>(null);
   const ownPresenceRef = useRef({
     timeLeft: 40 * 60,
     isActive: false,
@@ -540,6 +541,13 @@ export default function Dashboard() {
   };
 
   const pushToast = (type: ToastType, title: string, description?: string) => {
+    const signature = `${type}|${title}|${description ?? ""}`;
+    const now = Date.now();
+    if (lastToastRef.current && lastToastRef.current.signature === signature && now - lastToastRef.current.at < 1800) {
+      return;
+    }
+    lastToastRef.current = { signature, at: now };
+
     const toastId = Date.now() + Math.floor(Math.random() * 1000);
     setToasts((previous) => [...previous.slice(-3), { id: toastId, type, title, description }]);
     window.setTimeout(() => {
@@ -1638,6 +1646,16 @@ export default function Dashboard() {
       return;
     }
 
+    const isIOS = /iPad|iPhone|iPod/i.test(navigator.userAgent);
+    const isStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (typeof navigator !== "undefined" && "standalone" in navigator && Boolean((navigator as Navigator & { standalone?: boolean }).standalone));
+    if (isIOS && !isStandalone) {
+      setError("En iPhone/iPad las notificaciones web requieren instalar la app en pantalla de inicio.");
+      setSuccessMessage("");
+      return;
+    }
+
     let permission = window.Notification.permission;
     if (permission === "default") {
       permission = await window.Notification.requestPermission();
@@ -1680,7 +1698,7 @@ export default function Dashboard() {
       setError("");
       setSuccessMessage("Notificacion de prueba enviada.");
     } catch {
-      setError("No se pudo mostrar la notificacion en este dispositivo/navegador.");
+      setError("Este navegador móvil no permite notificaciones web en este modo. Prueba instalar la app o usar Chrome/Edge.");
       setSuccessMessage("");
     }
   };

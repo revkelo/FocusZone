@@ -1,6 +1,6 @@
 ﻿import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { AlertCircle, Lock, Mail, Target, User } from "lucide-react";
+import { AlertCircle, Eye, EyeOff, Lock, Mail, Target, User } from "lucide-react";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
@@ -13,6 +13,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nickname, setNickname] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [loading, setLoading] = useState(false);
@@ -171,12 +172,20 @@ export default function Login() {
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-[#7d4cd8]/70" />
                 <Input
                   id="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="********"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
-                  className="h-11 rounded-none border-[#5b30d9]/25 pl-10"
+                  className="h-11 rounded-none border-[#5b30d9]/25 pl-10 pr-11"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((value) => !value)}
+                  className="absolute right-3 top-2.5 text-[#7d4cd8] hover:text-[#5b30d9]"
+                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
               </div>
             </div>
 
