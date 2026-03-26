@@ -1,12 +1,12 @@
+import { createElement } from "react";
 import { createBrowserRouter, redirect } from "react-router";
 import { supabase } from "./lib/supabase";
 import Dashboard from "./pages/Dashboard";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 
-const RouteHydrateFallback = () => (
-  <div className="focus-shell min-h-screen grid place-items-center text-xl font-bold">Cargando...</div>
-);
+const RouteHydrateFallback = () =>
+  createElement("div", { className: "focus-shell min-h-screen grid place-items-center text-xl font-bold" }, "Cargando...");
 
 const requireAuth = async () => {
   const {
