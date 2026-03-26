@@ -1,6 +1,6 @@
 ﻿import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
-import { Database, GraduationCap, Monitor, Sparkles, Target, Trophy, X } from "lucide-react";
+import { BookOpenText, Bot, Building2, Cpu, Database, GraduationCap, Lightbulb, MessageSquareQuote, Monitor, Sparkles, Target, Trophy, WandSparkles, X } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "../components/ui/carousel";
@@ -44,10 +44,10 @@ const howFocusZoneWorks = [
 ];
 
 const researchStats = [
-  { value: "89%", label: "Dedica más de 3 horas al día a redes sociales" },
-  { value: "64%", label: "Nota afiches físicos en la biblioteca" },
-  { value: "74%", label: "Ve pantallas digitales de biblioteca y universidad" },
-  { value: "52", label: "Personas participaron en la muestra del formulario" },
+  { value: "89%", label: "Dedica más de 3 horas al día a redes sociales", icon: "●" },
+  { value: "64%", label: "Nota afiches físicos en la biblioteca", icon: "◆" },
+  { value: "74%", label: "Ve pantallas digitales de biblioteca y universidad", icon: "◼" },
+  { value: "52", label: "Personas participaron en la muestra del formulario", icon: "▲" },
 ];
 
 const manifestoLines = [
@@ -57,7 +57,14 @@ const manifestoLines = [
   "Tu atención es un recurso valioso.",
 ];
 
-const libraryPillars = ["Recursos", "Espacios", "Tecnologías", "Cursos", "Bases de datos", "Experiencias"];
+const libraryPillars = [
+  { label: "Recursos", Icon: BookOpenText },
+  { label: "Espacios", Icon: Building2 },
+  { label: "Tecnologías", Icon: Cpu },
+  { label: "Cursos", Icon: GraduationCap },
+  { label: "Bases de datos", Icon: Database },
+  { label: "Experiencias", Icon: WandSparkles },
+];
 
 const libraryResourceHighlights = [
   { value: "+50", label: "Softwares especializados", Icon: Monitor },
@@ -198,15 +205,15 @@ export default function Home() {
         <div className="focus-figure-dot focus-figure-dot-b" />
       </div>
       <div className="relative z-10">
-        <header className="mx-auto flex w-full max-w-[calc(72rem-2.5rem)] items-center justify-between gap-3 rounded-[1rem] border-2 border-[#8f74ef]/55 bg-[#ece8f9]/90 px-4 py-3 shadow-[0_12px_22px_-18px_rgba(69,36,179,0.6),0_2px_0_0_rgba(143,116,239,0.55)] md:max-w-[calc(72rem-4rem)] md:px-8 md:py-5">
-          <div className="flex items-center gap-3">
+        <header className="mx-auto mt-2 flex w-[calc(100%-1rem)] max-w-[calc(72rem-2.5rem)] items-center justify-between gap-2 rounded-[1rem] border-2 border-[#8f74ef]/55 bg-[#ece8f9]/90 px-3 py-3 shadow-[0_12px_22px_-18px_rgba(69,36,179,0.6),0_2px_0_0_rgba(143,116,239,0.55)] md:mt-0 md:w-full md:max-w-[calc(72rem-4rem)] md:gap-3 md:px-8 md:py-5">
+          <div className="flex min-w-0 items-center gap-2.5 md:gap-3">
             <div className="relative grid size-10 place-items-center rounded-none bg-[#f47c0f] text-white shadow-[0_8px_16px_-10px_rgba(244,124,15,0.85)] md:size-11">
               <Target className="size-5" />
             </div>
-            <p className="display-font whitespace-nowrap text-[1.75rem] leading-none text-[#5b30d9] md:text-[2.25rem]">Focus Zone</p>
+            <p className="display-font truncate whitespace-nowrap text-[1.55rem] leading-none text-[#5b30d9] sm:text-[1.7rem] md:text-[2.25rem]">Focus Zone</p>
           </div>
           <Link to="/login" className="shrink-0">
-            <Button className="focus-cta h-10 rounded-none border-2 border-[#5b30d9] bg-white/60 px-4 text-base font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white md:h-11 md:px-5">
+            <Button className="focus-cta h-9 rounded-none border-2 border-[#5b30d9] bg-white/60 px-3 text-sm font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white sm:h-10 sm:px-4 sm:text-base md:h-11 md:px-5">
               Iniciar sesión
             </Button>
           </Link>
@@ -253,7 +260,7 @@ export default function Home() {
             </Card>
           </section>
 
-          <section className="grid items-stretch gap-4 lg:grid-cols-[1fr_0.9fr]">
+          <section className="grid items-stretch gap-4 lg:grid-cols-[1.15fr_0.85fr]">
             <div className="focus-campaign-card focus-reveal focus-reveal-delay-2 flex h-full flex-col rounded-[1.2rem] bg-[linear-gradient(165deg,#fcfbff_0%,#f3ecff_100%)] p-4 md:p-5">
               <div className="mb-4 flex items-center justify-between gap-2">
                 <h3 className="display-font text-3xl text-[#5b30d9] md:text-4xl">Recursos de la biblioteca</h3>
@@ -348,6 +355,52 @@ export default function Home() {
             </Card>
           </section>
 
+          <section className="focus-reveal focus-reveal-delay-1">
+            <Card className="focus-campaign-card rounded-[1.2rem] p-5 md:p-7">
+              <div className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr] lg:gap-5">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Bot className="size-5 text-[#f47c0f]" />
+                    <h2 className="display-font text-3xl text-[#5b30d9] md:text-4xl">Chatbot Lumi</h2>
+                  </div>
+                  <p className="mt-3 max-w-2xl text-base text-[#5b30d9] md:text-lg">
+                    Lumi te acompaña con orientación rápida para enfoque, pausas conscientes y uso estratégico de recursos de biblioteca.
+                  </p>
+                  <div className="mt-4 grid gap-2.5 sm:grid-cols-2">
+                    <div className="rounded-[0.75rem] border border-[#d9cff7] bg-white/95 p-3">
+                      <p className="text-xs font-black uppercase tracking-[0.1em] text-[#f47c0f]">Te ayuda con</p>
+                      <p className="mt-1 text-sm font-semibold text-[#4d33bf] md:text-base">Plan de estudio corto, manejo de distracciones y ritmo de trabajo.</p>
+                    </div>
+                    <div className="rounded-[0.75rem] border border-[#d9cff7] bg-white/95 p-3">
+                      <p className="text-xs font-black uppercase tracking-[0.1em] text-[#f47c0f]">Conecta contigo</p>
+                      <p className="mt-1 text-sm font-semibold text-[#4d33bf] md:text-base">Recomendaciones de recursos, cursos y rutas de exploración.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-[1rem] border-2 border-[#d4c8f6] bg-[linear-gradient(180deg,#f9f5ff_0%,#ffffff_100%)] p-4 md:p-5">
+                  <p className="text-xs font-black uppercase tracking-[0.12em] text-[#5b30d9]/70">Prueba estas preguntas</p>
+                  <div className="mt-3 space-y-2.5">
+                    <div className="rounded-[0.65rem] border border-[#d9cff7] bg-white p-2.5 text-sm font-semibold text-[#5b30d9]">
+                      "Dame un plan de enfoque de 25 minutos para empezar a estudiar."
+                    </div>
+                    <div className="rounded-[0.65rem] border border-[#d9cff7] bg-white p-2.5 text-sm font-semibold text-[#5b30d9]">
+                      "¿Qué recurso de biblioteca me sirve para mi tema?"
+                    </div>
+                    <div className="rounded-[0.65rem] border border-[#d9cff7] bg-white p-2.5 text-sm font-semibold text-[#5b30d9]">
+                      "Ayúdame a salir del scroll y volver al foco."
+                    </div>
+                  </div>
+                  <Link to="/login" className="mt-4 inline-block w-full">
+                    <Button className="focus-cta h-11 w-full rounded-none border-2 border-[#5b30d9] bg-white text-base font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white">
+                      Abrir chat con Lumi
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </Card>
+          </section>
+
           <section className="focus-reveal focus-reveal-delay-1 space-y-4">
             <div className="flex items-center justify-between gap-3">
               <h2 className="display-font text-3xl text-[#5b30d9] md:text-4xl">Lo que descubrimos</h2>
@@ -356,7 +409,10 @@ export default function Home() {
             <div className="grid gap-4 md:grid-cols-4">
               {researchStats.map((stat) => (
                 <Card key={stat.label} className="focus-campaign-card rounded-[1rem] border-[#d3c7f5] p-4">
-                  <div className="mb-2 h-1.5 w-14 rounded-full bg-[#d4ebad]" />
+                  <div className="mb-2 flex items-center justify-between">
+                    <div className="h-1.5 w-14 rounded-full bg-[#d4ebad]" />
+                    <span className="text-sm font-black text-[#7aa048]">{stat.icon}</span>
+                  </div>
                   <p className="display-font text-4xl text-[#f47c0f] md:text-5xl">{stat.value}</p>
                   <p className="mt-2 text-sm font-bold text-[#5b30d9]">{stat.label}</p>
                 </Card>
@@ -366,20 +422,26 @@ export default function Home() {
 
           <section className="grid items-stretch gap-4 pb-1 lg:grid-cols-2">
             <Card className="focus-campaign-card focus-grid focus-reveal h-full p-5 md:p-7 lg:min-h-[430px]">
-              <h3 className="display-font text-3xl text-[#5b30d9] md:text-4xl">Reflexión colectiva</h3>
+              <div className="flex items-center gap-2">
+                <MessageSquareQuote className="size-5 text-[#f47c0f]" />
+                <h3 className="display-font text-3xl text-[#5b30d9] md:text-4xl">Reflexión colectiva</h3>
+              </div>
               <p className="mt-3 text-sm font-semibold text-[#5b30d9]/85 md:text-base">Distractores más repetidos en respuestas anónimas de estudiantes.</p>
               <p className="mt-1 text-xs font-medium text-[#5b30d9]/65 md:text-sm">Frases reales para reconocer patrones y tomar decisiones de enfoque.</p>
               <div className="mt-4 grid gap-2.5">
                 {collectiveReflections.map((quote) => (
                   <blockquote key={quote} className="rounded-[0.75rem] border border-[#d9cff7] border-l-4 border-l-[#f47c0f] bg-white/95 p-3 text-[1rem] font-semibold leading-[1.35] text-[#5b30d9]">
-                    "{quote}"
+                    <span className="mr-2 text-[#f47c0f]">✦</span>"{quote}"
                   </blockquote>
                 ))}
               </div>
             </Card>
 
             <Card className="focus-campaign-card focus-grid focus-reveal focus-reveal-delay-1 h-full rounded-[1.2rem] p-5 md:p-7 lg:min-h-[430px]">
-              <h3 className="display-font text-3xl text-[#5b30d9] md:text-4xl">El problema no es lo digital</h3>
+              <div className="flex items-center gap-2">
+                <Lightbulb className="size-5 text-[#f47c0f]" />
+                <h3 className="display-font text-3xl text-[#5b30d9] md:text-4xl">El problema no es lo digital</h3>
+              </div>
               <p className="mt-2 text-sm font-bold uppercase tracking-[0.08em] text-[#5b30d9]/70">Manifiesto de atención consciente</p>
               <p className="mt-1 text-xs text-[#5b30d9]/65 md:text-sm">Ideas clave para transformar hábitos digitales en acciones concretas.</p>
               <div className="focus-divider mt-4 max-w-xl" />
@@ -394,14 +456,18 @@ export default function Home() {
             </Card>
 
             <Card className="focus-campaign-card focus-reveal focus-reveal-delay-1 rounded-[1.2rem] p-5 md:p-7 lg:col-span-2">
-              <h3 className="display-font text-3xl text-[#5b30d9] md:text-4xl">Biblioteca como alternativa</h3>
-              <p className="mt-3 text-base text-[#5b30d9] md:text-lg">
+              <div className="flex items-center gap-2">
+                <BookOpenText className="size-5 text-[#f47c0f]" />
+                <h3 className="display-font text-3xl text-[#5b30d9] md:text-4xl">Biblioteca como alternativa</h3>
+              </div>
+              <p className="mt-3 text-[1.02rem] leading-relaxed text-[#5b30d9] md:text-lg">
                 Focus Zone no es solo una app de pomodoro: conecta hábitos saludables con recursos reales de la biblioteca como espacio de exploración tecnológica y bienestar académico.
               </p>
-              <div className="mt-5 flex flex-wrap gap-2">
-                {libraryPillars.map((pillar) => (
-                  <span key={pillar} className="focus-pill">
-                    {pillar}
+              <div className="mt-5 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+                {libraryPillars.map(({ label, Icon }) => (
+                  <span key={label} className="focus-pill w-full justify-center sm:w-auto sm:justify-start">
+                    <Icon className="size-3.5 text-[#f47c0f]" />
+                    {label}
                   </span>
                 ))}
               </div>
@@ -431,7 +497,7 @@ export default function Home() {
                         <button
                           type="button"
                           onClick={() => setViewerIndex(originalIndex)}
-                          className="group w-full overflow-hidden border border-[#5b30d9]/20 bg-white text-left transition hover:border-[#5b30d9]/45"
+                          className="focus-gallery-tile group w-full overflow-hidden border border-[#5b30d9]/20 bg-white text-left transition hover:border-[#5b30d9]/45"
                         >
                           <div className="relative bg-[#f7f5ff] p-3">
                             <img src={item.src} alt={item.title} className="h-auto w-full object-contain" loading="lazy" />
@@ -465,7 +531,7 @@ export default function Home() {
                       key={item.src}
                       type="button"
                       onClick={() => setViewerIndex(originalIndex)}
-                      className="group block w-full overflow-hidden border border-[#5b30d9]/20 bg-white text-left shadow-[0_10px_24px_-18px_rgba(37,10,110,0.5)] transition hover:-translate-y-0.5 hover:border-[#5b30d9]/45"
+                      className="focus-gallery-tile group block w-full overflow-hidden border border-[#5b30d9]/20 bg-white text-left shadow-[0_10px_24px_-18px_rgba(37,10,110,0.5)] transition hover:-translate-y-0.5 hover:border-[#5b30d9]/45"
                     >
                       <div className="relative bg-[#f7f5ff] p-2">
                         <img src={item.src} alt={item.title} className="aspect-[3/4] w-full object-contain" loading="lazy" />
@@ -532,10 +598,15 @@ export default function Home() {
           </div>
         )}
 
-        <footer className="mx-auto w-full max-w-6xl px-5 pb-10 md:px-8">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[#5b30d9]/25 pt-5 text-sm text-[#5b30d9]">
-            <p>Proyecto de grado 2026</p>
-            <p className="font-bold">Focus Zone</p>
+        <footer className="mx-auto w-full max-w-6xl px-5 pb-10 pt-4 md:px-8">
+          <div className="border-t border-[#5b30d9]/25 pt-5 text-sm text-[#5b30d9]">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p>Proyecto de grado 2026 · Universidad El Bosque</p>
+              <p className="font-bold">Focus Zone</p>
+            </div>
+            <p className="mt-2 text-xs text-[#5b30d9]/75 md:text-sm">
+              Campaña para hábitos digitales saludables y visibilización de la biblioteca como espacio de pausa y enfoque.
+            </p>
           </div>
         </footer>
       </div>
