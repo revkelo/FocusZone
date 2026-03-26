@@ -187,9 +187,18 @@ export default function Home() {
   };
 
   return (
-    <div className="focus-shell focus-rings focus-no-stars min-h-screen overflow-x-hidden">
+    <div className="focus-shell focus-grain focus-rings focus-no-stars min-h-screen overflow-x-hidden">
+      <div className="focus-figure-layer" aria-hidden>
+        <div className="focus-figure-arc-left" />
+        <div className="focus-figure-arc-right" />
+        <div className="focus-figure-arc-right-2" />
+        <div className="focus-figure-right-pill" />
+        <div className="focus-figure-right-square" />
+        <div className="focus-figure-dot focus-figure-dot-a" />
+        <div className="focus-figure-dot focus-figure-dot-b" />
+      </div>
       <div className="relative z-10">
-        <header className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 border-b border-[#5b30d9]/20 bg-[#ece8f9]/65 px-5 py-4 md:flex-nowrap md:px-8 md:py-5">
+        <header className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 border-b-2 border-[#5b30d9]/35 bg-[#ece8f9]/75 px-5 py-4 md:flex-nowrap md:px-8 md:py-5">
           <div className="flex items-center gap-3">
             <div className="grid size-10 place-items-center rounded-none bg-[#f47c0f] text-white md:size-11">
               <Target className="size-5 md:size-6" />
@@ -197,7 +206,7 @@ export default function Home() {
             <p className="display-font text-[2.1rem] leading-none text-[#5b30d9] md:text-3xl">Focus Zone</p>
           </div>
           <Link to="/login" className="w-full sm:w-auto">
-            <Button className="w-full rounded-none border-2 border-[#5b30d9] bg-transparent font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white sm:w-auto">
+            <Button className="w-full rounded-none border-2 border-[#5b30d9] bg-white/60 font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white sm:w-auto">
               Iniciar sesión
             </Button>
           </Link>
@@ -205,12 +214,12 @@ export default function Home() {
 
         <main className="mx-auto w-full max-w-6xl space-y-6 px-5 pb-16 pt-6 md:px-8 md:space-y-8">
           <section className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
-            <Card className="focus-card focus-reveal rounded-none border-2 border-[#5b30d9]/25 p-5 md:p-7">
-              <p className="text-base italic text-[#7d4cd8] md:text-lg">La biblioteca como espacio de pausa digital.</p>
-              <h1 className="display-font mt-3 text-[3.9rem] leading-[0.84] text-[#f47c0f] sm:text-[4.8rem] lg:text-[5.6rem]">
+            <Card className="focus-campaign-card focus-reveal p-5 md:p-7">
+              <p className="mt-3 text-base italic text-[#7d4cd8] md:text-lg">La biblioteca como espacio de pausa digital.</p>
+              <h1 className="focus-poster-title mt-3 text-[3.9rem] leading-[0.84] sm:text-[4.8rem] lg:text-[5.6rem]">
                 Focus
                 <br />
-                <span className="text-[#5b30d9]">Zone</span>
+                <span className="text-[#f47c0f] [text-shadow:2px_2px_0_#5b30d9]">Zone</span>
               </h1>
               <div className="focus-divider mt-4 max-w-xl" />
               <p className="mt-4 max-w-xl text-[1.05rem] text-[#4a2dba] md:text-lg">
@@ -230,13 +239,13 @@ export default function Home() {
               </div>
             </Card>
 
-            <Card className="focus-card focus-reveal focus-reveal-delay-1 focus-heavy focus-noise focus-grid rounded-none border-2 border-[#5b30d9]/40 bg-[#5b30d9] p-5 text-white md:p-7">
+            <Card className="focus-campaign-purple focus-reveal focus-reveal-delay-1 focus-heavy !bg-[#5b30d9] p-5 md:p-7">
               <h2 className="display-font text-5xl text-[#b8ee73] md:text-6xl">Stop Doomscrolling</h2>
               <p className="mt-4 text-base text-[#f2f0f3] md:text-lg">
                 Algunas cosas te distraen. Otras te ayudan a enfocarte. Focus Zone convierte lo digital en aliado de tu estudio.
               </p>
               <div className="my-5 h-px w-full bg-gradient-to-r from-[#f47c0f] via-[#f2f0f3] to-[#b8ee73]/80" />
-              <div className="mt-6 space-y-3 text-base font-bold md:text-lg">
+              <div className="mt-6 space-y-3 text-base font-bold text-white md:text-lg">
                 <p>Educación</p>
                 <p>Concientización</p>
                 <p>Estrategias preventivas</p>
@@ -245,14 +254,14 @@ export default function Home() {
           </section>
 
           <section className="grid gap-4 lg:grid-cols-[1fr_0.9fr]">
-            <div className="focus-card focus-reveal focus-reveal-delay-2 rounded-none border-2 border-[#5b30d9]/20 bg-[linear-gradient(165deg,#fcfbff_0%,#f3ecff_100%)] p-4 md:p-5">
+            <div className="focus-campaign-card focus-reveal focus-reveal-delay-2 bg-[linear-gradient(165deg,#fcfbff_0%,#f3ecff_100%)] p-4 md:p-5">
               <div className="mb-3 flex items-center justify-between gap-2">
                 <h3 className="display-font text-4xl text-[#5b30d9] md:text-5xl">Recursos de la biblioteca</h3>
-                <span className="focus-pill hidden md:inline-flex">Disponibles hoy</span>
+                <span className="focus-kicker hidden md:inline-flex">Disponibles hoy</span>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 {libraryResourceHighlights.map((item) => (
-                  <div key={item.label} className="border border-[#5b30d9]/20 bg-white p-4 shadow-[0_10px_20px_-18px_rgba(69,36,179,0.45)]">
+                  <div key={item.label} className="border-2 border-[#d4c8f6] bg-white/90 p-4 shadow-[0_10px_20px_-18px_rgba(69,36,179,0.45)]">
                     <div className="flex items-start justify-between gap-2">
                       {item.value ? (
                         <p className="display-font text-5xl leading-none text-[#f47c0f]">{item.value}</p>
@@ -269,7 +278,7 @@ export default function Home() {
               </div>
             </div>
 
-            <Card className="focus-card focus-heavy focus-reveal focus-reveal-delay-2 flex h-full flex-col rounded-none border-2 border-[#f47c0f]/35 bg-[#fff8f0] p-5 md:p-7">
+            <Card className="focus-campaign-cream focus-heavy focus-reveal focus-reveal-delay-2 flex h-full flex-col p-5 md:p-7">
               <div className="mb-4 flex items-center gap-2 text-[#5b30d9]">
                 <Trophy className="size-5 text-[#f47c0f]" />
                 <h3 className="display-font text-4xl">Ranking en vivo</h3>
@@ -320,13 +329,13 @@ export default function Home() {
           </section>
 
           <section className="grid gap-4">
-            <Card className="focus-card focus-reveal focus-reveal-delay-2 rounded-none border-2 border-[#5b30d9]/25 p-5 md:p-7">
+            <Card className="focus-campaign-card focus-reveal focus-reveal-delay-2 p-5 md:p-7">
               <h2 className="display-font text-4xl text-[#5b30d9] md:text-5xl">Cómo funciona Focus Zone</h2>
               <div className="focus-divider mt-4" />
               <div className="mt-5 grid gap-2 md:grid-cols-2">
                 {howFocusZoneWorks.map((item, index) => (
-                  <div key={item} className="flex items-center gap-3 border border-[#5b30d9]/15 bg-white p-3">
-                    <span className="grid size-8 place-items-center border border-[#f47c0f]/45 bg-[#ffe8cf] text-sm font-black text-[#f47c0f]">
+                  <div key={item} className="flex items-center gap-3 border-2 border-[#d4c8f6] bg-white/90 p-3">
+                    <span className="grid size-8 place-items-center border border-[#f47c0f]/55 bg-[#fff0df] text-sm font-black text-[#f47c0f]">
                       {index + 1}
                     </span>
                     <p className="text-sm font-bold text-[#5b30d9] md:text-base">{item}</p>
@@ -339,11 +348,11 @@ export default function Home() {
           <section className="focus-reveal focus-reveal-delay-1 space-y-4">
             <div className="flex items-center justify-between gap-3">
               <h2 className="display-font text-4xl text-[#5b30d9] md:text-5xl">Lo que descubrimos</h2>
-              <span className="focus-pill hidden md:inline-flex">Datos de investigación</span>
+              <span className="focus-kicker hidden md:inline-flex">Datos de investigación</span>
             </div>
             <div className="grid gap-4 md:grid-cols-4">
               {researchStats.map((stat) => (
-                <Card key={stat.label} className="focus-card rounded-none border-2 border-[#5b30d9]/25 p-4">
+                <Card key={stat.label} className="focus-campaign-card border-[#d3c7f5] p-4">
                   <p className="display-font text-5xl text-[#f47c0f]">{stat.value}</p>
                   <p className="mt-2 text-sm font-bold text-[#5b30d9]">{stat.label}</p>
                 </Card>
@@ -352,12 +361,12 @@ export default function Home() {
           </section>
 
           <section className="grid gap-4">
-            <Card className="focus-card focus-reveal rounded-none border-2 border-[#5b30d9]/25 p-5 md:p-7">
+            <Card className="focus-campaign-card focus-reveal p-5 md:p-7">
               <h3 className="display-font text-4xl text-[#5b30d9] md:text-5xl">Reflexión colectiva</h3>
               <p className="mt-3 text-sm font-semibold text-[#5b30d9]/80 md:text-base">Distractores más repetidos en respuestas anónimas de estudiantes.</p>
               <div className="mt-4 grid gap-2">
                 {collectiveReflections.map((quote) => (
-                  <blockquote key={quote} className="border-l-4 border-[#f47c0f] bg-white p-3 text-sm font-semibold text-[#5b30d9]">
+                  <blockquote key={quote} className="border-l-4 border-[#f47c0f] bg-white/90 p-3 text-sm font-semibold text-[#5b30d9]">
                     "{quote}"
                   </blockquote>
                 ))}
@@ -366,7 +375,7 @@ export default function Home() {
           </section>
 
           <section className="grid gap-4">
-            <Card className="focus-card focus-reveal rounded-none border-2 border-[#5b30d9]/25 p-5 md:p-7">
+            <Card className="focus-campaign-card focus-reveal p-5 md:p-7">
               <h3 className="display-font text-4xl text-[#5b30d9] md:text-5xl">Biblioteca como alternativa</h3>
               <p className="mt-3 text-base text-[#5b30d9] md:text-lg">
                 Focus Zone no es solo una app de pomodoro: conecta hábitos saludables con recursos reales de la biblioteca como espacio de exploración tecnológica y bienestar académico.
@@ -382,7 +391,7 @@ export default function Home() {
           </section>
 
           <section className="focus-reveal focus-reveal-delay-1">
-            <Card className="focus-card focus-heavy focus-noise focus-grid rounded-none border-2 border-[#5b30d9]/35 bg-[#5b30d9] p-5 text-white md:p-7">
+            <Card className="focus-campaign-purple focus-heavy focus-noise focus-grid p-5 md:p-7">
               <h3 className="display-font text-5xl text-[#b8ee73] md:text-6xl">El problema no es lo digital</h3>
               <div className="mt-3 inline-block border border-[#8f74ef]/60 bg-[#4b24d6] px-3 py-2">
                 <p className="display-font text-5xl leading-[0.84] text-[#f47c0f] [text-shadow:2px_2px_0_#5b30d9] md:text-6xl">
@@ -401,12 +410,13 @@ export default function Home() {
             </Card>
           </section>
 
-          <Card className="focus-card focus-reveal focus-reveal-delay-1 rounded-none border-2 border-[#5b30d9]/25 bg-[linear-gradient(180deg,#ffffff_0%,#f8f5ff_100%)] p-4 md:p-6">
+          <Card className="focus-campaign-card focus-reveal focus-reveal-delay-1 bg-[linear-gradient(180deg,#ffffff_0%,#f8f5ff_100%)] p-4 md:p-6">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h3 className="display-font text-4xl text-[#5b30d9] md:text-5xl">Galería de arte</h3>
                 <p className="mt-1 text-sm font-semibold text-[#5b30d9]/75">Colección visual Focus Zone. Haz clic para ampliar.</p>
               </div>
+              <span className="focus-sticker">Piezas de campaña</span>
             </div>
 
             <div className="mb-5">
@@ -470,7 +480,7 @@ export default function Home() {
           </Card>
 
           <section className="focus-reveal focus-reveal-delay-2">
-            <Card className="focus-card rounded-none border-2 border-[#5b30d9]/25 p-5 md:p-7">
+            <Card className="focus-campaign-card p-5 md:p-7">
               <h3 className="display-font text-4xl text-[#5b30d9] md:text-5xl">Sobre el proyecto</h3>
               <p className="mt-3 text-base text-[#5b30d9] md:text-lg">
                 Proyecto de grado de la Universidad El Bosque. Focus Zone es una campaña transmedia orientada a hábitos digitales saludables y a la biblioteca como espacio de pausa digital, concentración y aprendizaje activo.

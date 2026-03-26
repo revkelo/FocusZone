@@ -133,7 +133,24 @@
   .focus-shell {
     position: relative;
     overflow: hidden;
-    background: #f2f0f3;
+    background:
+      radial-gradient(circle at 12% 10%, rgba(184, 238, 115, 0.35), transparent 36%),
+      radial-gradient(circle at 88% 0%, rgba(91, 48, 217, 0.24), transparent 34%),
+      radial-gradient(circle at 85% 78%, rgba(244, 124, 15, 0.12), transparent 28%),
+      linear-gradient(180deg, #f4f1ff 0%, #ece8f9 100%);
+  }
+
+  .focus-shell::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      conic-gradient(from 120deg at 8% 20%, transparent 0 70%, rgba(91, 48, 217, 0.14) 70% 88%, transparent 88%),
+      radial-gradient(circle at 95% 18%, rgba(244, 124, 15, 0.16) 0 8%, transparent 8%),
+      radial-gradient(circle at 18% 78%, rgba(91, 48, 217, 0.14) 0 12%, transparent 12%),
+      linear-gradient(135deg, transparent 0 82%, rgba(184, 238, 115, 0.24) 82% 100%);
+    z-index: 0;
   }
 
   .focus-shell::after {
@@ -190,7 +207,138 @@
   }
 
   .focus-card {
-    @apply bg-white/70 backdrop-blur border border-[#7d4cd8]/25 shadow-[0_14px_40px_rgba(69,36,179,0.12)];
+    @apply border border-[#7d4cd8]/25 bg-white/82 backdrop-blur shadow-[0_16px_38px_rgba(69,36,179,0.12)];
+  }
+
+  .focus-campaign-card {
+    @apply rounded-none border-2 border-[#cbbdf3] bg-[#f6f2ff] shadow-[0_14px_30px_-20px_rgba(69,36,179,0.35)];
+  }
+
+  .focus-campaign-purple {
+    @apply rounded-none border-2 border-[#5b30d9]/45 bg-[#5b30d9] text-white shadow-[0_18px_34px_-20px_rgba(49,18,128,0.65)];
+  }
+
+  .focus-campaign-green {
+    @apply rounded-none border-2 border-[#96c95d]/45 bg-[#d9f5a7] text-[#2f7908] shadow-[0_18px_34px_-20px_rgba(110,154,38,0.5)];
+  }
+
+  .focus-campaign-cream {
+    @apply rounded-none border-2 border-[#f0bc8b]/60 bg-[#fff5e8] text-[#5b30d9];
+  }
+
+  .focus-kicker {
+    @apply inline-flex items-center border border-[#8f74ef]/55 bg-[#f3ecff] px-2 py-1 text-[0.68rem] font-black uppercase tracking-[0.14em] text-[#5b30d9];
+  }
+
+  .focus-sticker {
+    @apply inline-flex items-center border border-[#f47c0f]/45 bg-[#fff1e4] px-2 py-1 text-[0.65rem] font-black uppercase tracking-[0.12em] text-[#f47c0f];
+  }
+
+  .focus-poster-title {
+    font-family: "Teko", sans-serif;
+    letter-spacing: 0.03em;
+    line-height: 0.95;
+    text-transform: uppercase;
+    color: #5b30d9;
+    text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.72);
+  }
+
+  .focus-grain {
+    background-image:
+      radial-gradient(rgba(255, 255, 255, 0.42) 0.65px, transparent 0.65px),
+      radial-gradient(rgba(91, 48, 217, 0.14) 0.7px, transparent 0.7px);
+    background-size: 2.7px 2.7px, 3.7px 3.7px;
+  }
+
+  .focus-figure-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+  }
+
+  .focus-figure-arc-left {
+    position: absolute;
+    inset: -12% auto -12% -32%;
+    width: 84vw;
+    max-width: 980px;
+    background:
+      radial-gradient(circle at 32% 50%, transparent 0 24%, rgba(184, 238, 115, 0.58) 24% 34%, transparent 34% 45%, rgba(184, 238, 115, 0.44) 45% 56%, transparent 56% 100%);
+    opacity: 0.7;
+    filter: saturate(105%);
+  }
+
+  .focus-figure-arc-right {
+    position: absolute;
+    inset: -8% -34% auto auto;
+    width: 62vw;
+    height: 62vw;
+    max-width: 760px;
+    max-height: 760px;
+    background:
+      radial-gradient(circle at 50% 50%, transparent 0 36%, rgba(184, 238, 115, 0.34) 36% 45%, transparent 45% 58%, rgba(91, 48, 217, 0.18) 58% 65%, transparent 65% 100%);
+    opacity: 0.62;
+  }
+
+  .focus-figure-dot {
+    position: absolute;
+    border-radius: 9999px;
+    background:
+      radial-gradient(rgba(91, 48, 217, 0.32) 0.9px, transparent 0.9px),
+      radial-gradient(rgba(255, 255, 255, 0.4) 0.8px, transparent 0.8px);
+    background-size: 4px 4px, 6px 6px;
+    mix-blend-mode: multiply;
+  }
+
+  .focus-figure-dot-a {
+    left: 76%;
+    top: 16%;
+    width: 120px;
+    height: 120px;
+    opacity: 0.45;
+  }
+
+  .focus-figure-dot-b {
+    left: 8%;
+    top: 72%;
+    width: 160px;
+    height: 160px;
+    opacity: 0.38;
+  }
+
+  .focus-figure-arc-right-2 {
+    position: absolute;
+    right: -20%;
+    top: 36%;
+    width: 56vw;
+    height: 56vw;
+    max-width: 700px;
+    max-height: 700px;
+    background:
+      radial-gradient(circle at 50% 50%, transparent 0 42%, rgba(184, 238, 115, 0.42) 42% 52%, transparent 52% 64%, rgba(91, 48, 217, 0.2) 64% 70%, transparent 70% 100%);
+    opacity: 0.6;
+  }
+
+  .focus-figure-right-pill {
+    position: absolute;
+    right: 2.5%;
+    top: 26%;
+    width: 10px;
+    height: 170px;
+    background: linear-gradient(180deg, rgba(91, 48, 217, 0.7) 0%, rgba(184, 238, 115, 0.35) 100%);
+    opacity: 0.5;
+  }
+
+  .focus-figure-right-square {
+    position: absolute;
+    right: 6%;
+    top: 66%;
+    width: 22px;
+    height: 22px;
+    border: 2px solid rgba(91, 48, 217, 0.45);
+    background: rgba(255, 255, 255, 0.35);
+    opacity: 0.6;
   }
 
   .focus-tag {
