@@ -1,6 +1,6 @@
 ﻿import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
-import { BookOpenText, Bot, Building2, Cpu, Database, GraduationCap, Lightbulb, MessageSquareQuote, Monitor, Sparkles, Target, Trophy, WandSparkles, X } from "lucide-react";
+import { BookOpenText, Bot, Building2, Cpu, Database, GraduationCap, Lightbulb, MessageSquareQuote, Monitor, Smartphone, Sparkles, Target, Trophy, WandSparkles, X } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "../components/ui/carousel";
@@ -79,9 +79,15 @@ const collectiveReflections = [
   "Entré a estudiar y terminé viendo reels",
 ];
 
+const appScreenshots = [
+  { src: "/assets/Captura de pantalla 2026-03-26 165341.png", title: "Vista de la aplicación 1" },
+  { src: "/assets/Captura de pantalla 2026-03-26 165431.png", title: "Vista de la aplicación 2" },
+];
+
 export default function Home() {
   const [ranking, setRanking] = useState<RankItem[]>([]);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
+  const [appScreenshotViewer, setAppScreenshotViewer] = useState<{ src: string; title: string } | null>(null);
   const [horizontalCarouselApi, setHorizontalCarouselApi] = useState<CarouselApi | null>(null);
   const [activeHorizontalSlide, setActiveHorizontalSlide] = useState(0);
   const [isViewerTransitioning, setIsViewerTransitioning] = useState(false);
@@ -194,7 +200,7 @@ export default function Home() {
   };
 
   return (
-    <div className="focus-shell focus-grain focus-rings focus-no-stars min-h-screen overflow-x-hidden">
+    <div className="focus-shell focus-grain focus-rings focus-no-stars focus-official-flat min-h-screen overflow-x-hidden">
       <div className="focus-figure-layer" aria-hidden>
         <div className="focus-figure-arc-left" />
         <div className="focus-figure-arc-right" />
@@ -351,6 +357,39 @@ export default function Home() {
                     <p className="text-sm font-bold text-[#5b30d9] md:text-base">{item}</p>
                   </div>
                 ))}
+              </div>
+            </Card>
+          </section>
+
+          <section className="focus-reveal focus-reveal-delay-1">
+            <Card className="focus-campaign-card rounded-[1.2rem] p-4 md:p-6">
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <Smartphone className="size-5 text-[#f47c0f]" />
+                  <h3 className="display-font text-3xl text-[#5b30d9] md:text-4xl">Screenshots de la app</h3>
+                </div>
+                <span className="focus-kicker border-[#b7d989]/55 bg-[#f4fbe8] text-[#7aa048]">Vista de interfaz</span>
+              </div>
+
+              <div className="overflow-x-auto border-2 border-[#5b30d9]/35 bg-[linear-gradient(180deg,#f7f5ff_0%,#f0ebff_100%)] p-3 md:p-5">
+                <div className="mx-auto flex w-max min-w-full gap-3 md:gap-4">
+                  {appScreenshots.map((shot) => (
+                    <article key={shot.src} className="w-[180px] shrink-0 sm:w-[210px] md:w-[230px]">
+                      <button
+                        type="button"
+                        onClick={() => setAppScreenshotViewer({ src: shot.src, title: shot.title })}
+                        className="w-full rounded-[1.1rem] border border-[#d9cff7] bg-white p-2 text-left shadow-[0_18px_30px_-24px_rgba(64,30,170,0.75)] transition hover:-translate-y-0.5 hover:border-[#5b30d9]/45 sm:p-3"
+                      >
+                        <div className="overflow-hidden rounded-[0.8rem] border border-[#cec1f5] bg-[#f7f5ff]">
+                          <div className="flex h-[320px] items-center justify-center sm:h-[360px] md:h-[390px]">
+                            <img src={shot.src} alt={shot.title} className="h-full w-full object-contain object-center" loading="lazy" />
+                          </div>
+                        </div>
+                      </button>
+                      <p className="mt-2 text-center text-sm font-semibold text-[#5b30d9]">{shot.title}</p>
+                    </article>
+                  ))}
+                </div>
               </div>
             </Card>
           </section>
@@ -552,6 +591,26 @@ export default function Home() {
             </Card>
           </section>
         </main>
+
+        {appScreenshotViewer && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#f2f0f3]/95 p-3 md:p-8" onClick={() => setAppScreenshotViewer(null)}>
+            <div className="relative w-full max-w-4xl" onClick={(event) => event.stopPropagation()}>
+              <div className="mb-3 flex items-center justify-end text-[#2a2a2a]">
+                <button
+                  type="button"
+                  onClick={() => setAppScreenshotViewer(null)}
+                  className="grid size-10 place-items-center border border-[#5b30d9]/60 bg-white/95 text-[#5b30d9] shadow-sm hover:bg-[#ece8f9]"
+                  aria-label="Cerrar visor de captura"
+                >
+                  <X className="size-5" />
+                </button>
+              </div>
+              <div className="overflow-hidden border border-[#5b30d9]/25 bg-white p-2 sm:p-3">
+                <img src={appScreenshotViewer.src} alt={appScreenshotViewer.title} className="max-h-[86vh] w-full object-contain" />
+              </div>
+            </div>
+          </div>
+        )}
 
         {viewerItem && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#f2f0f3]/95 p-3 md:p-8" onClick={() => setViewerIndex(null)}>

@@ -235,6 +235,8 @@ export default function Dashboard() {
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [redemptions, setRedemptions] = useState<Redemption[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [leaderboardTotalUsers, setLeaderboardTotalUsers] = useState(0);
+  const [myLeaderboardRank, setMyLeaderboardRank] = useState<number | null>(null);
   const [rooms, setRooms] = useState<PomodoroRoom[]>([]);
   const [joinedRoomIds, setJoinedRoomIds] = useState<Set<number>>(new Set());
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
@@ -970,12 +972,20 @@ export default function Dashboard() {
         updated_at: new Date().toISOString(),
       });
 
-      const leaderboardResult = await supabase
-        .from("user_leaderboard")
-        .select("user_id, display_name, total_points")
-        .order("total_points", { ascending: false })
-        .order("updated_at", { ascending: true })
-        .limit(10);
+      const [leaderboardResult, leaderboardCountResult, leaderboardRankResult] = await Promise.all([
+        supabase
+          .from("user_leaderboard")
+          .select("user_id, display_name, total_points")
+          .order("total_points", { ascending: false })
+          .order("updated_at", { ascending: true })
+          .limit(10),
+        supabase.from("user_leaderboard").select("user_id", { count: "exact", head: true }),
+        supabase
+          .from("user_leaderboard")
+          .select("user_id")
+          .order("total_points", { ascending: false })
+          .order("updated_at", { ascending: true }),
+      ]);
 
       if (leaderboardResult.data) {
         setLeaderboard(
@@ -985,6 +995,13 @@ export default function Dashboard() {
             totalPoints: item.total_points,
           })),
         );
+      }
+
+      setLeaderboardTotalUsers(leaderboardCountResult.count ?? 0);
+
+      if (leaderboardRankResult.data) {
+        const rankIndex = leaderboardRankResult.data.findIndex((item) => item.user_id === userId);
+        setMyLeaderboardRank(rankIndex >= 0 ? rankIndex + 1 : null);
       }
     };
 
@@ -2500,6 +2517,16 @@ export default function Dashboard() {
                     ))}
                   </div>
                 )}
+                {leaderboardTotalUsers > 30 && myLeaderboardRank && myLeaderboardRank > 10 ? (
+                  <div className="mt-3 border border-[#f47c0f]/35 bg-[#fff4ea] p-3 text-sm">
+                    <p className="font-bold text-[#5b30d9]">
+                      Tu posición actual: <span className="text-[#f47c0f]">#{myLeaderboardRank}</span> de {leaderboardTotalUsers}
+                    </p>
+                    <p className="mt-1 text-xs font-semibold text-[#5b30d9]/75">
+                      Se muestran los 10 primeros. Tu puesto global está actualizado.
+                    </p>
+                  </div>
+                ) : null}
               </Card>
             </TabsContent>
 

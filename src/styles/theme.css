@@ -262,6 +262,11 @@
     text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.72);
   }
 
+  .focus-official-flat,
+  .focus-official-flat * {
+    border-radius: 0 !important;
+  }
+
   .focus-grain {
     background-image:
       radial-gradient(rgba(255, 255, 255, 0.42) 0.65px, transparent 0.65px),
