@@ -39,6 +39,7 @@ export default function Home() {
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
   const [horizontalCarouselApi, setHorizontalCarouselApi] = useState<CarouselApi | null>(null);
   const [activeHorizontalSlide, setActiveHorizontalSlide] = useState(0);
+  const [isViewerTransitioning, setIsViewerTransitioning] = useState(false);
 
   const viewerItem = useMemo(() => (viewerIndex !== null ? artGallery[viewerIndex] : null), [viewerIndex]);
   const horizontalDesigns = useMemo(() => artGallery.filter((item) => item.orientation === "landscape"), []);
@@ -119,18 +120,32 @@ export default function Home() {
     };
   }, [horizontalCarouselApi]);
 
+  const switchDesign = (nextIndex: number) => {
+    if (isViewerTransitioning) {
+      return;
+    }
+
+    setIsViewerTransitioning(true);
+    window.setTimeout(() => {
+      setViewerIndex(nextIndex);
+      setIsViewerTransitioning(false);
+    }, 140);
+  };
+
   const goPrevDesign = () => {
     if (viewerIndex === null) {
       return;
     }
-    setViewerIndex((viewerIndex - 1 + artGallery.length) % artGallery.length);
+    const nextIndex = (viewerIndex - 1 + artGallery.length) % artGallery.length;
+    switchDesign(nextIndex);
   };
 
   const goNextDesign = () => {
     if (viewerIndex === null) {
       return;
     }
-    setViewerIndex((viewerIndex + 1) % artGallery.length);
+    const nextIndex = (viewerIndex + 1) % artGallery.length;
+    switchDesign(nextIndex);
   };
 
   return (
@@ -284,21 +299,16 @@ export default function Home() {
                           onClick={() => setViewerIndex(originalIndex)}
                           className="group w-full overflow-hidden border border-[#5b30d9]/20 bg-white text-left transition hover:border-[#5b30d9]/45"
                         >
-                          <div className="relative grid min-h-[260px] place-items-center bg-[#f7f5ff] p-3 sm:min-h-[320px] md:min-h-[420px]">
-                            <img
-                              src={item.src}
-                              alt={item.title}
-                              className="h-full max-h-[220px] w-full object-contain sm:max-h-[280px] md:max-h-[380px] lg:max-h-[420px]"
-                              loading="lazy"
-                            />
+                          <div className="relative bg-[#f7f5ff] p-3">
+                            <img src={item.src} alt={item.title} className="h-auto w-full object-contain" loading="lazy" />
                           </div>
                         </button>
                       </CarouselItem>
                     );
                   })}
                 </CarouselContent>
-                <CarouselPrevious className="size-8 border-[#5b30d9] bg-white/95 text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white left-2 md:size-9 md:left-3" />
-                <CarouselNext className="size-8 border-[#5b30d9] bg-white/95 text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white right-2 md:size-9 md:right-3" />
+                <CarouselPrevious className="hidden md:flex md:size-9 border-[#5b30d9]/55 bg-white/45 text-[#5b30d9]/90 hover:bg-[#5b30d9]/80 hover:text-white md:left-3" />
+                <CarouselNext className="hidden md:flex md:size-9 border-[#5b30d9]/55 bg-white/45 text-[#5b30d9]/90 hover:bg-[#5b30d9]/80 hover:text-white md:right-3" />
               </Carousel>
               <div className="mt-3 flex justify-center gap-1.5">
                 {horizontalDesigns.map((item, index) => (
@@ -341,7 +351,7 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={() => setViewerIndex(null)}
-                  className="grid size-10 place-items-center border border-[#5b30d9]/35 bg-white text-[#5b30d9] hover:bg-[#ece8f9]"
+                  className="grid size-10 place-items-center border border-[#5b30d9]/60 bg-white/95 text-[#5b30d9] shadow-sm hover:bg-[#ece8f9]"
                   aria-label="Cerrar visor"
                 >
                   <X className="size-5" />
@@ -356,12 +366,12 @@ export default function Home() {
                     viewerItem.orientation === "portrait"
                       ? "max-h-[88vh] w-auto max-w-[min(92vw,560px)]"
                       : "max-h-[84vh] w-full"
-                  }`}
+                  } transition-opacity duration-200 ${isViewerTransitioning ? "opacity-0" : "opacity-100"}`}
                 />
                 <button
                   type="button"
                   onClick={goPrevDesign}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 border border-[#5b30d9]/40 bg-white/90 px-3 py-2 text-sm font-bold text-[#5b30d9] hover:bg-white"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 border border-[#5b30d9]/40 bg-white/45 px-2 py-1 text-xs font-bold text-[#5b30d9] hover:bg-white/65 md:px-3 md:py-2 md:text-sm"
                   aria-label="Imagen anterior"
                 >
                   {"<"}
@@ -369,7 +379,7 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={goNextDesign}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 border border-[#5b30d9]/40 bg-white/90 px-3 py-2 text-sm font-bold text-[#5b30d9] hover:bg-white"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 border border-[#5b30d9]/40 bg-white/45 px-2 py-1 text-xs font-bold text-[#5b30d9] hover:bg-white/65 md:px-3 md:py-2 md:text-sm"
                   aria-label="Imagen siguiente"
                 >
                   {">"}
