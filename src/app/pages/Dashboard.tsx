@@ -2092,19 +2092,19 @@ export default function Dashboard() {
     <div className="focus-shell focus-rings min-h-screen">
       <div className="relative z-10">
         <header className="border-b border-[#5b30d9]/20 bg-[#dcd2f7]/80 backdrop-blur">
-          <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-5 py-4 md:flex-nowrap md:px-8 md:py-5">
+          <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 md:px-8 md:py-5">
             <div className="flex items-center gap-3">
               <div className="grid size-10 place-items-center rounded-none bg-[#f47c0f] text-white md:size-11">
                 <Target className="size-5 md:size-6" />
               </div>
               <div>
-                <p className="display-font text-[2.1rem] leading-none text-[#5b30d9] md:text-3xl">Focus Zone</p>
+                <p className="display-font text-[1.8rem] leading-none text-[#5b30d9] sm:text-[2.1rem] md:text-3xl">Focus Zone</p>
               </div>
             </div>
             <Button
               variant="outline"
               onClick={handleLogout}
-              className="w-full rounded-none border-2 border-[#5b30d9] bg-transparent font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white sm:w-auto"
+              className="shrink-0 rounded-none border-2 border-[#5b30d9] bg-transparent px-3 py-2 text-sm font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white sm:px-4 sm:text-base"
             >
               <LogOut className="mr-2 size-4" />
               Cerrar sesión
@@ -2420,22 +2420,22 @@ export default function Dashboard() {
             </TabsContent>
 
             <TabsContent value="resumen" className="focus-reveal space-y-5">
-              <section className="grid gap-4 md:grid-cols-4">
-                <Card className="focus-card rounded-none border-2 border-[#f47c0f]/40 bg-[#f47c0f] p-6 text-white">
-                  <p className="font-bold uppercase tracking-wider">Puntos</p>
-                  <p className="display-font mt-2 text-7xl">{points}</p>
+              <section className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
+                <Card className="focus-card rounded-none gap-3 border-2 border-[#f47c0f]/40 bg-[#f47c0f] p-4 text-white sm:p-6">
+                  <p className="text-xs font-bold uppercase tracking-wider sm:text-sm">Puntos</p>
+                  <p className="display-font mt-1 text-5xl sm:mt-2 sm:text-7xl">{points}</p>
                 </Card>
-                <Card className="focus-card rounded-none p-6">
-                  <p className="font-bold text-[#5b30d9]">Disponibles</p>
-                  <p className="display-font mt-2 text-7xl text-[#5b30d9]">{availablePoints}</p>
+                <Card className="focus-card rounded-none gap-3 p-4 sm:p-6">
+                  <p className="text-xs font-bold text-[#5b30d9] sm:text-sm">Disponibles</p>
+                  <p className="display-font mt-1 text-5xl text-[#5b30d9] sm:mt-2 sm:text-7xl">{availablePoints}</p>
                 </Card>
-                <Card className="focus-card rounded-none p-6">
-                  <p className="font-bold text-[#5b30d9]">Sesiones</p>
-                  <p className="display-font mt-2 text-7xl text-[#5b30d9]">{sessions.length}</p>
+                <Card className="focus-card rounded-none gap-3 p-4 sm:p-6">
+                  <p className="text-xs font-bold text-[#5b30d9] sm:text-sm">Sesiones</p>
+                  <p className="display-font mt-1 text-5xl text-[#5b30d9] sm:mt-2 sm:text-7xl">{sessions.length}</p>
                 </Card>
-                <Card className="focus-card rounded-none bg-[#b8ee73]/45 p-6">
-                  <p className="font-bold text-[#325f0b]">Retos</p>
-                  <p className="display-font mt-2 text-7xl text-[#325f0b]">{completedCount}</p>
+                <Card className="focus-card rounded-none gap-3 bg-[#b8ee73]/45 p-4 sm:p-6">
+                  <p className="text-xs font-bold text-[#325f0b] sm:text-sm">Retos</p>
+                  <p className="display-font mt-1 text-5xl text-[#325f0b] sm:mt-2 sm:text-7xl">{completedCount}</p>
                 </Card>
               </section>
 
