@@ -1801,7 +1801,7 @@ export default function Dashboard() {
     setIsCreatingRoom(false);
 
     if (memberError) {
-      setError("La sala se creo, pero no pudiste entrar automaticamente.");
+      setError("La sala se creó, pero no pudiste entrar automáticamente.");
       return;
     }
 

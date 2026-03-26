@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
-import { BookOpen, Clock3, Target, TrendingUp, Trophy, X } from "lucide-react";
+import { Database, GraduationCap, Monitor, Sparkles, Target, Trophy, X } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "../components/ui/carousel";
@@ -32,6 +32,44 @@ const artGallery: ArtItem[] = [
   { src: "/assets/focuszone/campaign-12.jpg", title: "Diseño 12", orientation: "portrait" },
   { src: "/assets/focuszone/campaign-13.jpg", title: "Diseño 13", orientation: "portrait" },
   { src: "/assets/focuszone/campaign-14.jpg", title: "Diseño 14", orientation: "portrait" },
+];
+
+const howFocusZoneWorks = [
+  "Inicia un pomodoro",
+  "Entra a una sala de enfoque",
+  "Completa retos semanales",
+  "Suma puntos por constancia",
+  "Mira tu posición en el ranking",
+  "Descubre recursos de la biblioteca",
+];
+
+const researchStats = [
+  { value: "89%", label: "dedica más de 3 horas al día a redes sociales" },
+  { value: "64%", label: "nota afiches físicos en la biblioteca" },
+  { value: "74%", label: "ve pantallas digitales de biblioteca y universidad" },
+  { value: "52", label: "personas participaron en la muestra del formulario" },
+];
+
+const manifestoLines = [
+  "El problema no es lo digital, es como lo usamos.",
+  "La biblioteca es una alternativa real para recuperar foco.",
+  "Puedes recuperar el control de tu atención.",
+  "Tu atención es un recurso valioso.",
+];
+
+const libraryPillars = ["Recursos", "Espacios", "Tecnologías", "Cursos", "Bases de datos", "Experiencias"];
+
+const libraryResourceHighlights = [
+  { value: "+50", label: "Softwares especializados", Icon: Monitor },
+  { value: "", label: "Cursos formativos", Icon: GraduationCap },
+  { value: "", label: "Realidad aumentada", Icon: Sparkles },
+  { value: "", label: "Bases de datos académicos", Icon: Database },
+];
+
+const collectiveReflections = [
+  "Instagram me quitó una hora",
+  "Los chats me sacan del foco",
+  "Entré a estudiar y terminé viendo reels",
 ];
 
 export default function Home() {
@@ -207,71 +245,159 @@ export default function Home() {
           </section>
 
           <section className="grid gap-4 lg:grid-cols-[1fr_0.9fr]">
-            <div className="focus-reveal focus-reveal-delay-2 grid gap-4 sm:grid-cols-3">
-              <Card className="focus-card focus-glow-orange rounded-none p-4">
-                <Clock3 className="mb-2 size-5 text-[#f47c0f]" />
-                <p className="display-font text-4xl text-[#f47c0f]">50h</p>
-                <p className="font-bold text-[#5b30d9]">semanales sin control</p>
-              </Card>
-              <Card className="focus-card focus-glow-purple rounded-none p-4">
-                <TrendingUp className="mb-2 size-5 text-[#5b30d9]" />
-                <p className="display-font text-4xl text-[#5b30d9]">2do</p>
-                <p className="font-bold text-[#5b30d9]">lugar global en uso</p>
-              </Card>
-              <Card className="focus-card focus-glow-green rounded-none p-4">
-                <BookOpen className="mb-2 size-5 text-[#4f7c0f]" />
-                <p className="display-font text-4xl text-[#4f7c0f]">+50</p>
-                <p className="font-bold text-[#5b30d9]">recursos de estudio</p>
-              </Card>
+            <div className="focus-card focus-reveal focus-reveal-delay-2 rounded-none border-2 border-[#5b30d9]/20 bg-[linear-gradient(165deg,#fcfbff_0%,#f3ecff_100%)] p-4 md:p-5">
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <h3 className="display-font text-4xl text-[#5b30d9] md:text-5xl">Recursos de la biblioteca</h3>
+                <span className="focus-pill hidden md:inline-flex">Disponibles hoy</span>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {libraryResourceHighlights.map((item) => (
+                  <div key={item.label} className="border border-[#5b30d9]/20 bg-white p-4 shadow-[0_10px_20px_-18px_rgba(69,36,179,0.45)]">
+                    <div className="flex items-start justify-between gap-2">
+                      {item.value ? (
+                        <p className="display-font text-5xl leading-none text-[#f47c0f]">{item.value}</p>
+                      ) : (
+                        <span className="inline-flex size-8 items-center justify-center border border-[#f47c0f]/35 bg-[#fff7ef] text-[#f47c0f]">
+                          <item.Icon className="size-4" />
+                        </span>
+                      )}
+                      {item.value ? <item.Icon className="size-5 text-[#5b30d9]/65" /> : null}
+                    </div>
+                    <p className={`font-bold text-[#5b30d9] ${item.value ? "mt-2" : "mt-3"}`}>{item.label}</p>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <Card className="focus-card focus-heavy focus-reveal focus-reveal-delay-2 rounded-none border-2 border-[#f47c0f]/35 bg-[#fff8f0] p-5 md:p-7">
+            <Card className="focus-card focus-heavy focus-reveal focus-reveal-delay-2 flex h-full flex-col rounded-none border-2 border-[#f47c0f]/35 bg-[#fff8f0] p-5 md:p-7">
               <div className="mb-4 flex items-center gap-2 text-[#5b30d9]">
                 <Trophy className="size-5 text-[#f47c0f]" />
                 <h3 className="display-font text-4xl">Ranking en vivo</h3>
               </div>
 
-              {ranking.length === 0 ? (
-                <p className="font-bold text-[#5b30d9]/75">Aún no hay datos de ranking.</p>
-              ) : (
-                <>
-                  <div className="grid grid-cols-3 items-end gap-2">
-                    {podium.map((entry, index) => {
-                      const isCenter = index === 1;
-                      return (
-                        <div
-                          key={entry?.userId ?? `empty-${index}`}
-                          className={`rounded-none border p-3 text-center ${
-                            isCenter ? "border-[#f47c0f]/45 bg-[#ffe8cf]" : "border-[#5b30d9]/20 bg-white"
-                          }`}
-                        >
-                          {entry ? (
-                            <>
-                              <p className="mb-1 text-xs font-bold uppercase tracking-wide text-[#5b30d9]/70">
-                                {isCenter ? "#1" : index === 0 ? "#2" : "#3"}
-                              </p>
-                              <p className="line-clamp-2 font-bold text-[#5b30d9]">{entry.displayName}</p>
-                              <p className="mt-1 text-sm font-bold text-[#f47c0f]">{entry.totalPoints} pts</p>
-                            </>
-                          ) : (
-                            <p className="text-sm font-bold text-[#5b30d9]/50">-</p>
-                          )}
+              <div className="grid min-h-[220px] flex-1 grid-cols-3 items-end gap-2 md:min-h-[250px] md:gap-3">
+                {podium.map((entry, index) => {
+                  const isCenter = index === 1;
+                  const podiumHeight = isCenter ? "h-full" : "h-[74%]";
+                  return (
+                    <div
+                      key={entry?.userId ?? `empty-${index}`}
+                      className={`${podiumHeight} rounded-none border px-2 py-3 text-center md:px-3 ${
+                        isCenter
+                          ? "border-[#f47c0f]/55 bg-[#ffe8cf] shadow-[0_12px_20px_-18px_rgba(244,124,15,0.75)]"
+                          : "border-[#5b30d9]/20 bg-white"
+                      }`}
+                    >
+                      {entry ? (
+                        <>
+                          <p className={`mb-1 text-xs font-bold uppercase tracking-wide ${isCenter ? "text-[#5b30d9]" : "text-[#5b30d9]/70"}`}>
+                            {isCenter ? "#1" : index === 0 ? "#2" : "#3"}
+                          </p>
+                          <p className="line-clamp-2 font-bold text-[#5b30d9]">{entry.displayName}</p>
+                          <p className="mt-1 text-sm font-bold text-[#f47c0f]">{entry.totalPoints} pts</p>
+                        </>
+                      ) : (
+                        <div className="flex h-full min-h-[64px] items-center justify-center md:min-h-[76px]">
+                          <p className="text-lg font-bold text-[#5b30d9]/45">-</p>
                         </div>
-                      );
-                    })}
-                  </div>
-                  {ranking.length > 3 && (
-                    <div className="mt-3 space-y-2">
-                      {ranking.slice(3).map((entry, index) => (
-                        <div key={entry.userId} className="flex items-center justify-between border border-[#5b30d9]/15 bg-white p-2 text-sm">
-                          <span className="font-bold text-[#5b30d9]">#{index + 4} {entry.displayName}</span>
-                          <span className="font-bold text-[#f47c0f]">{entry.totalPoints} pts</span>
-                        </div>
-                      ))}
+                      )}
                     </div>
-                  )}
-                </>
+                  );
+                })}
+              </div>
+              {ranking.length === 0 ? <p className="mt-3 text-sm font-bold text-[#5b30d9]/70">Aún no hay datos de ranking.</p> : null}
+              {ranking.length > 3 && (
+                <div className="mt-3 space-y-2">
+                  {ranking.slice(3).map((entry, index) => (
+                    <div key={entry.userId} className="flex items-center justify-between border border-[#5b30d9]/15 bg-white p-2 text-sm">
+                      <span className="font-bold text-[#5b30d9]">#{index + 4} {entry.displayName}</span>
+                      <span className="font-bold text-[#f47c0f]">{entry.totalPoints} pts</span>
+                    </div>
+                  ))}
+                </div>
               )}
+            </Card>
+          </section>
+
+          <section className="grid gap-4">
+            <Card className="focus-card focus-reveal focus-reveal-delay-2 rounded-none border-2 border-[#5b30d9]/25 p-5 md:p-7">
+              <h2 className="display-font text-4xl text-[#5b30d9] md:text-5xl">Cómo funciona Focus Zone</h2>
+              <div className="focus-divider mt-4" />
+              <div className="mt-5 grid gap-2 md:grid-cols-2">
+                {howFocusZoneWorks.map((item, index) => (
+                  <div key={item} className="flex items-center gap-3 border border-[#5b30d9]/15 bg-white p-3">
+                    <span className="grid size-8 place-items-center border border-[#f47c0f]/45 bg-[#ffe8cf] text-sm font-black text-[#f47c0f]">
+                      {index + 1}
+                    </span>
+                    <p className="text-sm font-bold text-[#5b30d9] md:text-base">{item}</p>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </section>
+
+          <section className="focus-reveal focus-reveal-delay-1 space-y-4">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="display-font text-4xl text-[#5b30d9] md:text-5xl">Lo que descubrimos</h2>
+              <span className="focus-pill hidden md:inline-flex">Datos de investigación</span>
+            </div>
+            <div className="grid gap-4 md:grid-cols-4">
+              {researchStats.map((stat) => (
+                <Card key={stat.label} className="focus-card rounded-none border-2 border-[#5b30d9]/25 p-4">
+                  <p className="display-font text-5xl text-[#f47c0f]">{stat.value}</p>
+                  <p className="mt-2 text-sm font-bold text-[#5b30d9]">{stat.label}</p>
+                </Card>
+              ))}
+            </div>
+          </section>
+
+          <section className="grid gap-4">
+            <Card className="focus-card focus-reveal rounded-none border-2 border-[#5b30d9]/25 p-5 md:p-7">
+              <h3 className="display-font text-4xl text-[#5b30d9] md:text-5xl">Reflexión colectiva</h3>
+              <p className="mt-3 text-sm font-semibold text-[#5b30d9]/80 md:text-base">Distractores más repetidos en respuestas anónimas de estudiantes.</p>
+              <div className="mt-4 grid gap-2">
+                {collectiveReflections.map((quote) => (
+                  <blockquote key={quote} className="border-l-4 border-[#f47c0f] bg-white p-3 text-sm font-semibold text-[#5b30d9]">
+                    "{quote}"
+                  </blockquote>
+                ))}
+              </div>
+            </Card>
+          </section>
+
+          <section className="grid gap-4">
+            <Card className="focus-card focus-reveal rounded-none border-2 border-[#5b30d9]/25 p-5 md:p-7">
+              <h3 className="display-font text-4xl text-[#5b30d9] md:text-5xl">Biblioteca como alternativa</h3>
+              <p className="mt-3 text-base text-[#5b30d9] md:text-lg">
+                Focus Zone no es solo una app de pomodoro: conecta hábitos saludables con recursos reales de la biblioteca como espacio de exploración tecnológica y bienestar académico.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-2">
+                {libraryPillars.map((pillar) => (
+                  <span key={pillar} className="focus-pill">
+                    {pillar}
+                  </span>
+                ))}
+              </div>
+            </Card>
+          </section>
+
+          <section className="focus-reveal focus-reveal-delay-1">
+            <Card className="focus-card focus-heavy focus-noise focus-grid rounded-none border-2 border-[#5b30d9]/35 bg-[#5b30d9] p-5 text-white md:p-7">
+              <h3 className="display-font text-5xl text-[#b8ee73] md:text-6xl">El problema no es lo digital</h3>
+              <div className="mt-3 inline-block border border-[#8f74ef]/60 bg-[#4b24d6] px-3 py-2">
+                <p className="display-font text-5xl leading-[0.84] text-[#f47c0f] [text-shadow:2px_2px_0_#5b30d9] md:text-6xl">
+                  FLIP THE
+                  <br />
+                  ATTENTION
+                </p>
+              </div>
+              <div className="mt-5 grid gap-3 md:grid-cols-2">
+                {manifestoLines.map((line) => (
+                  <p key={line} className="border border-white/25 bg-white/10 p-3 text-sm font-bold md:text-base">
+                    {line}
+                  </p>
+                ))}
+              </div>
             </Card>
           </section>
 
@@ -342,6 +468,15 @@ export default function Home() {
               </div>
             )}
           </Card>
+
+          <section className="focus-reveal focus-reveal-delay-2">
+            <Card className="focus-card rounded-none border-2 border-[#5b30d9]/25 p-5 md:p-7">
+              <h3 className="display-font text-4xl text-[#5b30d9] md:text-5xl">Sobre el proyecto</h3>
+              <p className="mt-3 text-base text-[#5b30d9] md:text-lg">
+                Proyecto de grado de la Universidad El Bosque. Focus Zone es una campaña transmedia orientada a hábitos digitales saludables y a la biblioteca como espacio de pausa digital, concentración y aprendizaje activo.
+              </p>
+            </Card>
+          </section>
         </main>
 
         {viewerItem && (
@@ -399,3 +534,5 @@ export default function Home() {
     </div>
   );
 }
+
+
