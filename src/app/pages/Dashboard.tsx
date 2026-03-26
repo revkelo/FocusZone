@@ -15,6 +15,7 @@ import {
   PlayCircle,
   Plus,
   RotateCcw,
+  SendHorizontal,
   Target,
   Trophy,
   User,
@@ -282,6 +283,8 @@ export default function Dashboard() {
   const [hydratedPomodoroKey, setHydratedPomodoroKey] = useState<string | null>(null);
   const lastToastRef = useRef<{ signature: string; at: number } | null>(null);
   const lastPomodoroReminderAtRef = useRef<number>(0);
+  const chatScrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const chatScrollAnchorRef = useRef<HTMLDivElement | null>(null);
   const ownPresenceRef = useRef({
     timeLeft: 40 * 60,
     isActive: false,
@@ -346,7 +349,7 @@ export default function Dashboard() {
       .filter(Boolean);
 
     return (
-      <div className="space-y-2 leading-relaxed">
+      <div className="space-y-2 leading-relaxed break-words [overflow-wrap:anywhere]">
         {blocks.map((block, blockIndex) => {
           const lines = block.split("\n").map((line) => line.trimEnd());
           const nonEmptyLines = lines.filter((line) => line.trim().length > 0);
@@ -2060,6 +2063,12 @@ export default function Dashboard() {
       setIsSendingChat(false);
     }
   };
+  useEffect(() => {
+    if (activeTab !== "chatbot") {
+      return;
+    }
+    chatScrollAnchorRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [chatMessages, activeTab]);
   const handleLogout = async () => {
     await pausePomodoroAndSync();
     await supabase.auth.signOut();
@@ -2153,9 +2162,9 @@ export default function Dashboard() {
           })}
         </div>
 
-        <main className="mx-auto w-full max-w-6xl px-5 py-7 pb-24 md:px-8 md:py-10 md:pb-10">
+        <main className="mx-auto flex min-h-[calc(100dvh-84px)] w-full max-w-6xl flex-col px-5 py-2 pb-24 md:min-h-0 md:px-8 md:py-10 md:pb-10">
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex w-full flex-1 flex-col">
             <TabsList className="mb-6 hidden h-auto w-full flex-wrap rounded-none bg-[#5b30d9] p-1 md:flex">
               <TabsTrigger value="pomodoro" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Pomodoro</TabsTrigger>
               <TabsTrigger value="resumen" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Resumen</TabsTrigger>
@@ -2459,18 +2468,18 @@ export default function Dashboard() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="chatbot" className="focus-reveal">
-              <Card className="focus-card rounded-none p-6 md:p-8">
-                <div className="mb-5 flex items-center gap-2">
+            <TabsContent value="chatbot" className="focus-reveal flex flex-1 flex-col">
+              <Card className="focus-card flex h-full flex-1 flex-col rounded-none gap-3 px-3 pb-3 pt-3 sm:p-6 md:p-8">
+                <div className="flex items-center gap-2">
                   <MessageCircle className="size-5 text-[#f47c0f]" />
-                  <h2 className="display-font text-5xl text-[#5b30d9]">Chatbot Lumi</h2>
+                  <h2 className="display-font text-4xl text-[#5b30d9] sm:text-5xl">Chatbot Lumi</h2>
                 </div>
 
-                <div className="mb-4 max-h-[52vh] space-y-3 overflow-y-auto border border-[#5b30d9]/20 bg-white/70 p-4">
+                <div ref={chatScrollContainerRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto border border-[#5b30d9]/20 bg-white/70 p-3 sm:p-4">
                   {chatMessages.map((message) => (
                     <div
                       key={message.id}
-                      className={`w-fit max-w-[90%] rounded-2xl border px-3 py-2 text-sm shadow-[0_10px_24px_-18px_rgba(17,24,39,0.65)] ${
+                      className={`w-fit max-w-[95%] break-words [overflow-wrap:anywhere] rounded-2xl border px-3 py-2 text-sm shadow-[0_10px_24px_-18px_rgba(17,24,39,0.65)] ${
                         message.role === "user"
                           ? "ml-auto border-[#f47c0f]/35 bg-[#fff4ea] text-[#6a3a00]"
                           : "border-[#5b30d9]/20 bg-[linear-gradient(180deg,#f6f2ff_0%,#f0e9ff_100%)] text-[#4a22be]"
@@ -2482,28 +2491,36 @@ export default function Dashboard() {
                       <div className={`${message.pending ? "animate-pulse" : ""}`}>{renderChatMessageText(message.text)}</div>
                     </div>
                   ))}
+                  <div ref={chatScrollAnchorRef} />
                 </div>
 
-                <div className="space-y-3">
-                  <textarea
-                    value={chatInput}
-                    onChange={(event) => setChatInput(event.target.value)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" && !event.shiftKey) {
-                        event.preventDefault();
-                        void handleSendChat();
-                      }
-                    }}
-                    placeholder="Preguntale a Lumi sobre Zone Focus..."
-                    className="min-h-24 w-full border border-[#5b30d9]/25 bg-white p-3 text-sm text-[#2a2a2a] outline-none transition focus:border-[#5b30d9]"
-                  />
-                  <Button
-                    disabled={isSendingChat || !normalizeInputText(chatInput)}
-                    onClick={() => void handleSendChat()}
-                    className="rounded-none bg-[#5b30d9] text-white hover:bg-[#4a22be]"
-                  >
-                    {isSendingChat ? "Enviando..." : "Enviar a Lumi"}
-                  </Button>
+                <div className="border border-[#5b30d9]/25 bg-white px-3 py-2">
+                  <div className="flex items-center gap-2 border-b border-[#5b30d9]/20 pb-1">
+                    <Circle className="size-4 text-[#5b30d9]/45" />
+                    <input
+                      value={chatInput}
+                      onChange={(event) => setChatInput(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") {
+                          event.preventDefault();
+                          void handleSendChat();
+                        }
+                      }}
+                      placeholder="Type your message"
+                      className="h-8 flex-1 bg-transparent text-sm text-[#2a2a2a] outline-none placeholder:text-[#5b30d9]/35"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label={isSendingChat ? "Enviando mensaje" : "Enviar mensaje"}
+                      disabled={isSendingChat || !normalizeInputText(chatInput)}
+                      onClick={() => void handleSendChat()}
+                      className="size-8 rounded-none text-[#5b30d9] hover:bg-[#5b30d9]/10 hover:text-[#4a22be]"
+                    >
+                      <SendHorizontal className={`${isSendingChat ? "animate-pulse" : ""} size-4`} />
+                    </Button>
+                  </div>
                 </div>
               </Card>
             </TabsContent>
