@@ -883,6 +883,10 @@ export default function Dashboard() {
 
     void refreshRooms();
 
+    const roomsPollInterval = window.setInterval(() => {
+      void refreshRooms();
+    }, 3000);
+
     const channel = supabase
       .channel(`rooms-live-${userId}`)
       .on(
@@ -911,6 +915,7 @@ export default function Dashboard() {
       .subscribe();
 
     return () => {
+      clearInterval(roomsPollInterval);
       void supabase.removeChannel(channel);
     };
   }, [userId]);
