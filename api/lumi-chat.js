@@ -72,6 +72,18 @@ export default async function handler(req, res) {
 
     if (!upstream.ok) {
       const errText = await upstream.text();
+      const retryAfterRaw = upstream.headers.get("retry-after");
+      const retryAfterSeconds = Number.parseInt(retryAfterRaw || "", 10);
+      const retryAfter = Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0 ? retryAfterSeconds : 20;
+
+      if (upstream.status === 429) {
+        res.setHeader("Retry-After", String(retryAfter));
+        return json(res, 429, {
+          error: "Lumi esta temporalmente saturada. Intenta de nuevo en unos segundos.",
+          retryAfter,
+        });
+      }
+
       return json(res, upstream.status, {
         error: "Upstream model request failed",
         details: errText.slice(0, 500),

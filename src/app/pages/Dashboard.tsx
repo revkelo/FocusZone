@@ -238,6 +238,7 @@ export default function Dashboard() {
   const [leaderboardTotalUsers, setLeaderboardTotalUsers] = useState(0);
   const [myLeaderboardRank, setMyLeaderboardRank] = useState<number | null>(null);
   const [rooms, setRooms] = useState<PomodoroRoom[]>([]);
+  const [roomMemberCounts, setRoomMemberCounts] = useState<Record<number, number>>({});
   const [joinedRoomIds, setJoinedRoomIds] = useState<Set<number>>(new Set());
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
   const [roomMembers, setRoomMembers] = useState<RoomMember[]>([]);
@@ -280,6 +281,7 @@ export default function Dashboard() {
   ]);
   const [chatInput, setChatInput] = useState("");
   const [isSendingChat, setIsSendingChat] = useState(false);
+  const [chatRetryAt, setChatRetryAt] = useState<number>(0);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [toasts, setToasts] = useState<AppToast[]>([]);
@@ -403,7 +405,7 @@ export default function Dashboard() {
       setEmail(user.email ?? "");
       setName((user.user_metadata?.full_name as string) || (user.email ?? "Usuario"));
 
-      const [sessionsResult, challengesResult, catalogChallengesResult, customChallengesResult, roomsResult, membershipsResult] = await Promise.all([
+      const [sessionsResult, challengesResult, catalogChallengesResult, customChallengesResult, roomsResult, membershipsResult, membersByRoomResult] = await Promise.all([
         supabase
           .from("pomodoro_sessions")
           .select("id, duration_seconds, completed_at")
@@ -424,6 +426,7 @@ export default function Dashboard() {
           .from("pomodoro_room_members")
           .select("room_id")
           .eq("user_id", user.id),
+        supabase.from("pomodoro_room_members").select("room_id"),
       ]);
 
       if (
@@ -432,7 +435,8 @@ export default function Dashboard() {
         catalogChallengesResult.error ||
         customChallengesResult.error ||
         roomsResult.error ||
-        membershipsResult.error
+        membershipsResult.error ||
+        membersByRoomResult.error
       ) {
         setError("No se pudieron cargar todos los datos del dashboard.");
       }
@@ -492,6 +496,16 @@ export default function Dashboard() {
             ownerId: item.owner_id,
           })),
         );
+      }
+
+      if (membersByRoomResult.data) {
+        const nextCounts: Record<number, number> = {};
+        for (const item of membersByRoomResult.data) {
+          if (typeof item.room_id === "number") {
+            nextCounts[item.room_id] = (nextCounts[item.room_id] ?? 0) + 1;
+          }
+        }
+        setRoomMemberCounts(nextCounts);
       }
 
       if (membershipsResult.data) {
@@ -960,18 +974,30 @@ export default function Dashboard() {
   }, [userId, notificationPermission, hasCompletedBaseToday, dailyReminderEnabled, dailyReminderHour, todayKey, name]);
 
   useEffect(() => {
-    const syncLeaderboard = async () => {
-      if (!userId || !name) {
-        return;
-      }
+    if (!userId || !name) {
+      return;
+    }
 
+    const upsertOwnLeaderboard = async () => {
       await supabase.from("user_leaderboard").upsert({
         user_id: userId,
         display_name: name,
         total_points: points,
         updated_at: new Date().toISOString(),
       });
+    };
 
+    void upsertOwnLeaderboard();
+  }, [userId, name, points]);
+
+  useEffect(() => {
+    if (!userId) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const refreshLeaderboard = async () => {
       const [leaderboardResult, leaderboardCountResult, leaderboardRankResult] = await Promise.all([
         supabase
           .from("user_leaderboard")
@@ -986,6 +1012,10 @@ export default function Dashboard() {
           .order("total_points", { ascending: false })
           .order("updated_at", { ascending: true }),
       ]);
+
+      if (cancelled) {
+        return;
+      }
 
       if (leaderboardResult.data) {
         setLeaderboard(
@@ -1005,22 +1035,36 @@ export default function Dashboard() {
       }
     };
 
-    const runSync = () => {
-      void syncLeaderboard();
-    };
-    if ("requestIdleCallback" in window) {
-      const idleId = (window as Window & { requestIdleCallback: (cb: () => void) => number }).requestIdleCallback(runSync);
-      return () => {
-        if ("cancelIdleCallback" in window) {
-          (window as Window & { cancelIdleCallback: (id: number) => void }).cancelIdleCallback(idleId);
-        }
-      };
-    }
-    const timeoutId = window.setTimeout(runSync, 120);
+    void refreshLeaderboard();
+
+    const intervalId = window.setInterval(() => {
+      if (document.visibilityState === "hidden") {
+        return;
+      }
+      void refreshLeaderboard();
+    }, 5000);
+
+    const channel = supabase
+      .channel(`leaderboard-live-${userId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "user_leaderboard",
+        },
+        () => {
+          void refreshLeaderboard();
+        },
+      )
+      .subscribe();
+
     return () => {
-      clearTimeout(timeoutId);
+      cancelled = true;
+      clearInterval(intervalId);
+      void supabase.removeChannel(channel);
     };
-  }, [userId, name, points]);
+  }, [userId]);
 
   useEffect(() => {
     ownPresenceRef.current = {
@@ -1167,9 +1211,10 @@ export default function Dashboard() {
     }
 
     const refreshRooms = async () => {
-      const [roomsResult, membershipsResult] = await Promise.all([
+      const [roomsResult, membershipsResult, membersByRoomResult] = await Promise.all([
         supabase.from("pomodoro_rooms").select("id, name, owner_id").order("created_at", { ascending: false }),
         supabase.from("pomodoro_room_members").select("room_id").eq("user_id", userId),
+        supabase.from("pomodoro_room_members").select("room_id"),
       ]);
 
       if (roomsResult.data) {
@@ -1180,6 +1225,16 @@ export default function Dashboard() {
             ownerId: item.owner_id,
           })),
         );
+      }
+
+      if (membersByRoomResult.data) {
+        const nextCounts: Record<number, number> = {};
+        for (const item of membersByRoomResult.data) {
+          if (typeof item.room_id === "number") {
+            nextCounts[item.room_id] = (nextCounts[item.room_id] ?? 0) + 1;
+          }
+        }
+        setRoomMemberCounts(nextCounts);
       }
 
       if (membershipsResult.data) {
@@ -1231,7 +1286,6 @@ export default function Dashboard() {
           event: "*",
           schema: "public",
           table: "pomodoro_room_members",
-          filter: `user_id=eq.${userId}`,
         },
         () => {
           void refreshRooms();
@@ -2048,6 +2102,13 @@ export default function Dashboard() {
     }
   };
   const handleSendChat = async () => {
+    const now = Date.now();
+    if (chatRetryAt > now) {
+      const waitSeconds = Math.max(1, Math.ceil((chatRetryAt - now) / 1000));
+      setError(`Lumi esta ocupada. Espera ${waitSeconds}s e intenta de nuevo.`);
+      return;
+    }
+
     const message = normalizeInputText(chatInput);
     if (!message) {
       return;
@@ -2077,9 +2138,14 @@ export default function Dashboard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message }),
       });
-      const payload = (await response.json().catch(() => ({}))) as { reply?: string; error?: string };
+      const payload = (await response.json().catch(() => ({}))) as { reply?: string; error?: string; retryAfter?: number };
 
       if (!response.ok || !payload.reply) {
+        if (response.status === 429) {
+          const retryAfterSeconds = Number(payload.retryAfter) > 0 ? Number(payload.retryAfter) : 20;
+          setChatRetryAt(Date.now() + retryAfterSeconds * 1000);
+          throw new Error(`Lumi esta saturada. Intenta de nuevo en ${retryAfterSeconds}s.`);
+        }
         throw new Error(payload.error ?? "No se pudo obtener respuesta.");
       }
       const cleanedReply = payload.reply.replace(/^lumi\s*[:\n-]?\s*/i, "").trim();
@@ -2096,19 +2162,19 @@ export default function Dashboard() {
         ),
       );
       playEventSound("notification");
-    } catch {
+    } catch (chatError) {
       setChatMessages((previous) =>
         previous.map((item) =>
           item.id === pendingAssistantId
             ? {
                 ...item,
-                text: "No pude responder ahora. Intenta de nuevo en unos segundos.",
+                text: chatError instanceof Error ? chatError.message : "No pude responder ahora. Intenta de nuevo en unos segundos.",
                 pending: false,
               }
             : item,
         ),
       );
-      setError("No se pudo consultar a Lumi en este momento.");
+      setError(chatError instanceof Error ? chatError.message : "No se pudo consultar a Lumi en este momento.");
     } finally {
       setIsSendingChat(false);
     }
@@ -2380,11 +2446,15 @@ export default function Dashboard() {
                         const isJoined = joinedRoomIds.has(room.id);
                         const isSelected = selectedRoomId === room.id;
                         const isOwner = room.ownerId === userId;
+                        const memberCount = roomMemberCounts[room.id] ?? 0;
                         return (
                           <div key={room.id} className={`border p-3 sm:p-4 ${isSelected ? "border-[#f47c0f] bg-[#fff4ea]" : "border-[#5b30d9]/20 bg-white/70"}`}>
                             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                               <div>
                                 <p className="break-words font-bold text-[#5b30d9]">{room.name}</p>
+                                <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/70">
+                                  {memberCount} persona{memberCount === 1 ? "" : "s"}
+                                </p>
                                 {isOwner && <p className="text-xs font-bold uppercase tracking-wide text-[#f47c0f]">Eres dueño</p>}
                               </div>
                               <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap">
