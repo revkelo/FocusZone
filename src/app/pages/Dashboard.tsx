@@ -17,8 +17,8 @@ import {
   Trophy,
   User,
   Users,
+  X,
 } from "lucide-react";
-import { Alert, AlertDescription } from "../components/ui/alert";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Input } from "../components/ui/input";
@@ -82,34 +82,55 @@ interface RoomMember {
   isPaused: boolean;
 }
 
+type ToastType = "success" | "error" | "info";
+
+interface AppToast {
+  id: number;
+  type: ToastType;
+  title: string;
+  description?: string;
+}
+
 const POMODORO_SECONDS = 10;
 const SESSION_POINTS = 10;
 
-const playEventSound = (event: "pomodoro" | "reward" | "notification") => {
+const playEventSound = (event: "pomodoro" | "reward" | "notification" | "error") => {
   try {
     const audioContext = new window.AudioContext();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
+    const patterns: Record<"pomodoro" | "reward" | "notification" | "error", { freq: number; duration: number; delay: number }[]> = {
+      pomodoro: [
+        { freq: 880, duration: 0.16, delay: 0 },
+        { freq: 1175, duration: 0.18, delay: 0.18 },
+      ],
+      reward: [
+        { freq: 660, duration: 0.14, delay: 0 },
+        { freq: 880, duration: 0.14, delay: 0.16 },
+        { freq: 1320, duration: 0.2, delay: 0.32 },
+      ],
+      notification: [{ freq: 740, duration: 0.2, delay: 0 }],
+      error: [
+        { freq: 420, duration: 0.18, delay: 0 },
+        { freq: 320, duration: 0.22, delay: 0.2 },
+      ],
+    };
 
-    oscillator.type = "sine";
-    if (event === "pomodoro") {
-      oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
-      oscillator.frequency.exponentialRampToValueAtTime(660, audioContext.currentTime + 0.25);
-    } else if (event === "reward") {
-      oscillator.frequency.setValueAtTime(660, audioContext.currentTime);
-      oscillator.frequency.exponentialRampToValueAtTime(990, audioContext.currentTime + 0.25);
-    } else {
-      oscillator.frequency.setValueAtTime(740, audioContext.currentTime);
-      oscillator.frequency.exponentialRampToValueAtTime(740, audioContext.currentTime + 0.2);
+    for (const note of patterns[event]) {
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      const startAt = audioContext.currentTime + note.delay;
+      const endAt = startAt + note.duration;
+
+      oscillator.type = event === "error" ? "square" : "triangle";
+      oscillator.frequency.setValueAtTime(note.freq, startAt);
+      gainNode.gain.setValueAtTime(0.0001, startAt);
+      gainNode.gain.exponentialRampToValueAtTime(0.16, startAt + 0.02);
+      gainNode.gain.exponentialRampToValueAtTime(0.0001, endAt);
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      oscillator.start(startAt);
+      oscillator.stop(endAt);
     }
-    gainNode.gain.setValueAtTime(0.0001, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.2, audioContext.currentTime + 0.01);
-    gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.32);
-
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    oscillator.start();
-    oscillator.stop(audioContext.currentTime + 0.35);
   } catch {
     // Ignore audio playback errors on restricted browsers/devices.
   }
@@ -150,6 +171,7 @@ export default function Dashboard() {
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | "unsupported">("unsupported");
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [toasts, setToasts] = useState<AppToast[]>([]);
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -314,6 +336,38 @@ export default function Dashboard() {
 
     setNotificationPermission(window.Notification.permission);
   }, []);
+
+  const removeToast = (toastId: number) => {
+    setToasts((previous) => previous.filter((toast) => toast.id !== toastId));
+  };
+
+  const pushToast = (type: ToastType, title: string, description?: string) => {
+    const toastId = Date.now() + Math.floor(Math.random() * 1000);
+    setToasts((previous) => [...previous.slice(-3), { id: toastId, type, title, description }]);
+    window.setTimeout(() => {
+      removeToast(toastId);
+    }, 4200);
+  };
+
+  useEffect(() => {
+    if (!successMessage) {
+      return;
+    }
+
+    pushToast("success", "Listo", successMessage);
+    playEventSound("notification");
+    setSuccessMessage("");
+  }, [successMessage]);
+
+  useEffect(() => {
+    if (!error) {
+      return;
+    }
+
+    pushToast("error", "Ups", error);
+    playEventSound("error");
+    setError("");
+  }, [error]);
 
   useEffect(() => {
     let interval: number | undefined;
@@ -602,11 +656,15 @@ export default function Dashboard() {
       ...previous,
     ]);
 
-    playEventSound("pomodoro");
     setSuccessMessage("Pomodoro completado. Se sumaron tus puntos.");
 
     if (typeof window !== "undefined" && "Notification" in window && window.Notification.permission === "granted") {
-      new window.Notification("Pomodoro completado", { body: "Ganaste puntos por tu sesion. Sigue asi." });
+      new window.Notification("FocusZone | Pomodoro completado", {
+        body: "Sumaste +10 puntos. Mantén el ritmo.",
+        icon: "/favicon.svg",
+        badge: "/favicon.svg",
+        tag: "focuszone-pomodoro-complete",
+      });
     }
   };
 
@@ -835,12 +893,14 @@ export default function Dashboard() {
       ...previous,
     ]);
 
-    playEventSound("reward");
     setSuccessMessage(`Canje realizado: ${reward.title}.`);
 
     if (typeof window !== "undefined" && "Notification" in window && window.Notification.permission === "granted") {
-      new window.Notification("Canje exitoso", {
+      new window.Notification("FocusZone | Canje exitoso", {
         body: `Redimiste ${reward.title} por ${reward.costPoints} puntos.`,
+        icon: "/favicon.svg",
+        badge: "/favicon.svg",
+        tag: "focuszone-reward-redeem",
       });
     }
   };
@@ -987,25 +1047,29 @@ export default function Dashboard() {
     }
 
     try {
-      playEventSound("notification");
-
       if ("serviceWorker" in navigator) {
         const registration = await navigator.serviceWorker.getRegistration();
         if (registration) {
-          await registration.showNotification("Prueba de notificacion", {
-            body: "Tu app esta enviando notificaciones correctamente.",
+          await registration.showNotification("FocusZone | Prueba", {
+            body: "Notificaciones activas. También escucharás sonido en los avisos.",
             icon: "/favicon.svg",
+            badge: "/favicon.svg",
+            tag: "focuszone-test-notification",
           });
         } else {
-          new window.Notification("Prueba de notificacion", {
-            body: "Tu app esta enviando notificaciones correctamente.",
+          new window.Notification("FocusZone | Prueba", {
+            body: "Notificaciones activas. También escucharás sonido en los avisos.",
             icon: "/favicon.svg",
+            badge: "/favicon.svg",
+            tag: "focuszone-test-notification",
           });
         }
       } else {
-        new window.Notification("Prueba de notificacion", {
-          body: "Tu app esta enviando notificaciones correctamente.",
+        new window.Notification("FocusZone | Prueba", {
+          body: "Notificaciones activas. También escucharás sonido en los avisos.",
           icon: "/favicon.svg",
+          badge: "/favicon.svg",
+          tag: "focuszone-test-notification",
         });
       }
 
@@ -1056,21 +1120,53 @@ export default function Dashboard() {
           </div>
         </header>
 
+        <div className="pointer-events-none fixed right-4 top-4 z-50 flex w-[min(92vw,380px)] flex-col gap-3">
+          {toasts.map((toast) => {
+            const isError = toast.type === "error";
+            const isSuccess = toast.type === "success";
+
+            return (
+              <div
+                key={toast.id}
+                className={`pointer-events-auto border p-4 shadow-[0_12px_30px_-16px_rgba(17,24,39,0.45)] backdrop-blur ${
+                  isError
+                    ? "border-[#d4183d]/35 bg-[#fff1f5]"
+                    : isSuccess
+                      ? "border-[#3f7f11]/30 bg-[#eefed8]"
+                      : "border-[#5b30d9]/30 bg-white"
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <span
+                    className={`mt-0.5 grid size-6 shrink-0 place-items-center rounded-full ${
+                      isError ? "bg-[#d4183d]/12 text-[#b31233]" : isSuccess ? "bg-[#4f7c0f]/15 text-[#356109]" : "bg-[#5b30d9]/12 text-[#5b30d9]"
+                    }`}
+                  >
+                    {isError ? <X className="size-4" /> : isSuccess ? <CheckCircle className="size-4" /> : <Bell className="size-4" />}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className={`text-sm font-extrabold ${isError ? "text-[#8e0f2a]" : isSuccess ? "text-[#2f5708]" : "text-[#4a22be]"}`}>{toast.title}</p>
+                    {toast.description && <p className="mt-1 text-sm text-[#2a2a2a]/85">{toast.description}</p>}
+                  </div>
+                  <button
+                    onClick={() => removeToast(toast.id)}
+                    className="rounded p-1 text-[#2a2a2a]/60 transition hover:bg-black/5 hover:text-[#2a2a2a]"
+                    aria-label="Cerrar notificacion"
+                  >
+                    <X className="size-4" />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
         <main className="mx-auto w-full max-w-6xl px-5 py-7 pb-24 md:px-8 md:py-10 md:pb-10">
-          {error && (
-            <Alert variant="destructive" className="mb-4 rounded-none border-[#d4183d]">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-          {successMessage && (
-            <Alert className="mb-4 rounded-none border border-[#5b30d9]/30 bg-white/90 text-[#5b30d9]">
-              <AlertDescription>{successMessage}</AlertDescription>
-            </Alert>
-          )}
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="mb-6 hidden h-auto w-full flex-wrap rounded-none bg-[#5b30d9] p-1 md:flex">
               <TabsTrigger value="pomodoro" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Pomodoro</TabsTrigger>
+              <TabsTrigger value="resumen" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Resumen</TabsTrigger>
               <TabsTrigger value="historial" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Historial</TabsTrigger>
               <TabsTrigger value="tareas" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Tareas</TabsTrigger>
               <TabsTrigger value="recompensas" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Recompensas</TabsTrigger>
@@ -1078,25 +1174,6 @@ export default function Dashboard() {
             </TabsList>
 
             <TabsContent value="pomodoro" className="space-y-5">
-              <section className="grid gap-4 md:grid-cols-4">
-                <Card className="focus-card rounded-none border-2 border-[#f47c0f]/40 bg-[#f47c0f] p-6 text-white">
-                  <p className="font-bold uppercase tracking-wider">Puntos</p>
-                  <p className="display-font mt-2 text-7xl">{points}</p>
-                </Card>
-                <Card className="focus-card rounded-none p-6">
-                  <p className="font-bold text-[#5b30d9]">Disponibles</p>
-                  <p className="display-font mt-2 text-7xl text-[#5b30d9]">{availablePoints}</p>
-                </Card>
-                <Card className="focus-card rounded-none p-6">
-                  <p className="font-bold text-[#5b30d9]">Sesiones</p>
-                  <p className="display-font mt-2 text-7xl text-[#5b30d9]">{sessions.length}</p>
-                </Card>
-                <Card className="focus-card rounded-none bg-[#b8ee73]/45 p-6">
-                  <p className="font-bold text-[#325f0b]">Retos</p>
-                  <p className="display-font mt-2 text-7xl text-[#325f0b]">{completedCount}</p>
-                </Card>
-              </section>
-
               <Card className="focus-card rounded-none p-7 md:p-8">
                 <div className="flex items-center gap-2">
                   <Clock className="size-5 text-[#f47c0f]" />
@@ -1145,26 +1222,7 @@ export default function Dashboard() {
                 </div>
               </Card>
 
-              <section className="grid gap-4 lg:grid-cols-2">
-                <Card className="focus-card rounded-none p-6">
-                  <div className="mb-3 flex items-center gap-2 text-[#5b30d9]">
-                    <Trophy className="size-5" />
-                    <h3 className="display-font text-4xl">Ranking</h3>
-                  </div>
-                  {leaderboard.length === 0 ? (
-                    <p className="text-sm text-[#5b30d9]/75">Aun no hay participantes.</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {leaderboard.map((entry, index) => (
-                        <div key={entry.userId} className="flex items-center justify-between border border-[#5b30d9]/15 bg-white/70 p-3 text-sm">
-                          <span className="font-bold text-[#5b30d9]">{index + 1}. {entry.displayName}</span>
-                          <span className="text-[#f47c0f]">{entry.totalPoints} pts</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </Card>
-
+              <section className="grid gap-4">
                 <Card className="focus-card rounded-none p-6">
                   <div className="mb-3 flex items-center gap-2 text-[#5b30d9]">
                     <Users className="size-5" />
@@ -1264,6 +1322,46 @@ export default function Dashboard() {
                   )}
                 </Card>
               </section>
+            </TabsContent>
+
+            <TabsContent value="resumen" className="space-y-5">
+              <section className="grid gap-4 md:grid-cols-4">
+                <Card className="focus-card rounded-none border-2 border-[#f47c0f]/40 bg-[#f47c0f] p-6 text-white">
+                  <p className="font-bold uppercase tracking-wider">Puntos</p>
+                  <p className="display-font mt-2 text-7xl">{points}</p>
+                </Card>
+                <Card className="focus-card rounded-none p-6">
+                  <p className="font-bold text-[#5b30d9]">Disponibles</p>
+                  <p className="display-font mt-2 text-7xl text-[#5b30d9]">{availablePoints}</p>
+                </Card>
+                <Card className="focus-card rounded-none p-6">
+                  <p className="font-bold text-[#5b30d9]">Sesiones</p>
+                  <p className="display-font mt-2 text-7xl text-[#5b30d9]">{sessions.length}</p>
+                </Card>
+                <Card className="focus-card rounded-none bg-[#b8ee73]/45 p-6">
+                  <p className="font-bold text-[#325f0b]">Retos</p>
+                  <p className="display-font mt-2 text-7xl text-[#325f0b]">{completedCount}</p>
+                </Card>
+              </section>
+
+              <Card className="focus-card rounded-none p-6">
+                <div className="mb-3 flex items-center gap-2 text-[#5b30d9]">
+                  <Trophy className="size-5" />
+                  <h3 className="display-font text-4xl">Ranking</h3>
+                </div>
+                {leaderboard.length === 0 ? (
+                  <p className="text-sm text-[#5b30d9]/75">Aun no hay participantes.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {leaderboard.map((entry, index) => (
+                      <div key={entry.userId} className="flex items-center justify-between border border-[#5b30d9]/15 bg-white/70 p-3 text-sm">
+                        <span className="font-bold text-[#5b30d9]">{index + 1}. {entry.displayName}</span>
+                        <span className="text-[#f47c0f]">{entry.totalPoints} pts</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </Card>
             </TabsContent>
 
             <TabsContent value="historial">
@@ -1521,7 +1619,7 @@ export default function Dashboard() {
         </main>
 
         <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-[#5b30d9]/30 bg-[#f2f0f3]/95 px-4 py-2 backdrop-blur md:hidden">
-          <div className="mx-auto grid w-full max-w-md grid-cols-5 gap-1 rounded-2xl border border-[#7d4cd8]/30 bg-white p-1">
+          <div className="mx-auto grid w-full max-w-md grid-cols-6 gap-1 rounded-2xl border border-[#7d4cd8]/30 bg-white p-1">
             <button
               onClick={() => setActiveTab("pomodoro")}
               className={`flex flex-col items-center gap-1 rounded-xl py-2 text-[11px] font-bold ${
@@ -1530,6 +1628,15 @@ export default function Dashboard() {
             >
               <Clock className="size-4" />
               <span>Pomodoro</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("resumen")}
+              className={`flex flex-col items-center gap-1 rounded-xl py-2 text-[11px] font-bold ${
+                activeTab === "resumen" ? "bg-[#5b30d9] text-white" : "text-[#5b30d9]"
+              }`}
+            >
+              <Trophy className="size-4" />
+              <span>Resumen</span>
             </button>
             <button
               onClick={() => setActiveTab("historial")}
@@ -1550,15 +1657,6 @@ export default function Dashboard() {
               <span>Tareas</span>
             </button>
             <button
-              onClick={() => setActiveTab("cuenta")}
-              className={`flex flex-col items-center gap-1 rounded-xl py-2 text-[11px] font-bold ${
-                activeTab === "cuenta" ? "bg-[#5b30d9] text-white" : "text-[#5b30d9]"
-              }`}
-            >
-              <User className="size-4" />
-              <span>Cuenta</span>
-            </button>
-            <button
               onClick={() => setActiveTab("recompensas")}
               className={`flex flex-col items-center gap-1 rounded-xl py-2 text-[11px] font-bold ${
                 activeTab === "recompensas" ? "bg-[#5b30d9] text-white" : "text-[#5b30d9]"
@@ -1566,6 +1664,15 @@ export default function Dashboard() {
             >
               <Gift className="size-4" />
               <span>Canjear</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("cuenta")}
+              className={`flex flex-col items-center gap-1 rounded-xl py-2 text-[11px] font-bold ${
+                activeTab === "cuenta" ? "bg-[#5b30d9] text-white" : "text-[#5b30d9]"
+              }`}
+            >
+              <User className="size-4" />
+              <span>Cuenta</span>
             </button>
           </div>
         </nav>
