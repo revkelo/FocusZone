@@ -248,6 +248,7 @@ export default function Dashboard() {
   const [isActive, setIsActive] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [activeTab, setActiveTab] = useState("pomodoro");
+  const [tasksSubTab, setTasksSubTab] = useState("retosGenerales");
   const [isLoading, setIsLoading] = useState(true);
   const [isSavingChallenge, setIsSavingChallenge] = useState(false);
   const [redeemingRewardId, setRedeemingRewardId] = useState<number | null>(null);
@@ -819,6 +820,10 @@ export default function Dashboard() {
   );
 
   const allChallenges: ChallengeItem[] = useMemo(() => [...baseChallenges, ...customChallengeItems], [baseChallenges, customChallengeItems]);
+  const orderedBaseChallenges = useMemo(
+    () => [...baseChallenges].sort((a, b) => (a.week ?? 1) - (b.week ?? 1) || (a.day ?? 0) - (b.day ?? 0)),
+    [baseChallenges],
+  );
   const weeklyBaseChallenges = useMemo(() => {
     const grouped = new Map<number, ChallengeItem[]>();
     for (const challenge of baseChallenges) {
@@ -847,6 +852,7 @@ export default function Dashboard() {
 
   const completedCount = allChallenges.filter((challenge) => completedChallenges.has(challenge.id)).length;
   const completedBaseCount = baseChallenges.filter((challenge) => completedChallenges.has(challenge.id)).length;
+  const nextBaseChallengeId = orderedBaseChallenges.find((challenge) => !completedChallenges.has(challenge.id))?.id ?? null;
   const allBaseCompleted = baseChallenges.length > 0 && completedBaseCount === baseChallenges.length;
   const todayKey = getLocalDateKey(new Date());
   const hasCompletedBaseToday = baseChallenges.some(
@@ -2169,7 +2175,7 @@ export default function Dashboard() {
               <TabsTrigger value="pomodoro" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Pomodoro</TabsTrigger>
               <TabsTrigger value="resumen" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Resumen</TabsTrigger>
               <TabsTrigger value="chatbot" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Chatbot</TabsTrigger>
-              <TabsTrigger value="tareas" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Tareas</TabsTrigger>
+              <TabsTrigger value="tareas" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Retos</TabsTrigger>
               <TabsTrigger value="cuenta" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Cuenta</TabsTrigger>
             </TabsList>
 
@@ -2523,153 +2529,169 @@ export default function Dashboard() {
                   </div>
                 </div>
               </Card>
-            </TabsContent>
-
-            <TabsContent value="tareas" className="focus-reveal">
+            </TabsContent>            <TabsContent value="tareas" className="focus-reveal">
               <Card className="focus-card rounded-none p-7 md:p-8">
                 <div className="mb-5 flex items-center justify-between">
                   <h2 className="display-font text-5xl text-[#5b30d9]">Retos</h2>
                   <div className="focus-tag">{completedCount}/{allChallenges.length || 1}</div>
                 </div>
 
-                <Progress value={progressPercentage} className="mb-6 h-3 rounded-none bg-[#5b30d9]/20 [&>div]:rounded-none [&>div]:bg-[#f47c0f]" />
-                <div className="mb-6 grid gap-3 sm:grid-cols-3">
-                  <div className="border border-[#5b30d9]/25 bg-white/70 p-3">
-                    <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/70">Racha actual</p>
-                    <p className="display-font mt-1 text-4xl text-[#5b30d9]">{currentChallengeStreak} días</p>
-                  </div>
-                  <div className="border border-[#f47c0f]/30 bg-[#fff4ea] p-3">
-                    <p className="text-xs font-bold uppercase tracking-wide text-[#f47c0f]/80">Bono por racha</p>
-                    <p className="display-font mt-1 text-4xl text-[#f47c0f]">+{streakBonusPoints}</p>
-                  </div>
-                  <div className="border border-[#4f7c0f]/25 bg-[#eff9db] p-3">
-                    <p className="text-xs font-bold uppercase tracking-wide text-[#4f7c0f]/80">Estado</p>
-                    <p className="mt-2 font-bold text-[#325f0b]">{currentChallengeStreak > 0 ? "Vas en racha" : "Inicia tu racha"}</p>
-                  </div>
-                </div>
+                <Tabs value={tasksSubTab} onValueChange={setTasksSubTab} className="w-full">
+                  <TabsList className="mb-6 grid h-auto w-full grid-cols-2 rounded-none bg-[#5b30d9] p-1">
+                    <TabsTrigger value="retosGenerales" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">
+                      Retos generales
+                    </TabsTrigger>
+                    <TabsTrigger value="misRetos" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">
+                      Mis retos
+                    </TabsTrigger>
+                  </TabsList>
 
-                <p className="mb-2 text-sm font-bold uppercase tracking-wide text-[#5b30d9]/80">
-                  Crea un reto propio para tu semana
-                </p>
-                <div className="mb-6 space-y-3 border border-[#5b30d9]/20 bg-white/70 p-4">
-                  <p className="font-bold text-[#5b30d9]">Crear reto personalizado</p>
-                  <p className="text-xs font-bold text-[#5b30d9]/75">
-                    Máximo {MAX_CUSTOM_CHALLENGES_PER_DAY} por día. Hoy puedes crear {remainingCustomCreationsToday}.
-                  </p>
-                  <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Nombre del reto</p>
-                  <Input
-                    value={newChallengeTitle}
-                    maxLength={MAX_CHALLENGE_TITLE_LENGTH}
-                    onChange={(event) => setNewChallengeTitle(event.target.value.slice(0, MAX_CHALLENGE_TITLE_LENGTH))}
-                    placeholder="Ej: Completa 5 sesiones de bocetos"
-                  />
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Meta de sesiones</p>
+                  <TabsContent value="misRetos" className="space-y-6">
+                    <div className="space-y-3 border border-[#5b30d9]/20 bg-white/70 p-4">
+                      <p className="font-bold text-[#5b30d9]">Crear reto personalizado</p>
+                      <p className="text-xs font-bold text-[#5b30d9]/75">
+                        Maximo {MAX_CUSTOM_CHALLENGES_PER_DAY} por dia. Hoy puedes crear {remainingCustomCreationsToday}.
+                      </p>
+                      <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Nombre del reto</p>
                       <Input
-                        type="number"
-                        min={1}
-                        max={MAX_CHALLENGE_TARGET}
-                        inputMode="numeric"
-                        value={newChallengeTarget}
-                        onChange={(event) => setNewChallengeTarget(sanitizeDigitsInput(event.target.value, 2))}
-                        placeholder="5"
+                        value={newChallengeTitle}
+                        maxLength={MAX_CHALLENGE_TITLE_LENGTH}
+                        onChange={(event) => setNewChallengeTitle(event.target.value.slice(0, MAX_CHALLENGE_TITLE_LENGTH))}
+                        placeholder="Ej: Completa 5 sesiones de bocetos"
                       />
-                    </div>
-                    <div className="space-y-2">
-                      <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Puntos</p>
-                      <Input
-                        type="number"
-                        min={1}
-                        max={MAX_CHALLENGE_POINTS}
-                        inputMode="numeric"
-                        value={newChallengePoints}
-                        onChange={(event) => setNewChallengePoints(sanitizeDigitsInput(event.target.value, 3))}
-                        placeholder="10"
-                      />
-                      <p className="text-[11px] font-bold text-[#5b30d9]/70">Máximo {MAX_CHALLENGE_POINTS} puntos.</p>
-                    </div>
-                  </div>
-                  <Button disabled={isSavingChallenge || remainingCustomCreationsToday === 0} onClick={() => void handleCreateChallenge()} className="rounded-none bg-[#5b30d9] text-white hover:bg-[#4a22be]">
-                    {isSavingChallenge ? "Guardando..." : "Crear reto"}
-                  </Button>
-                </div>
-
-                <div className="space-y-6">
-                  {allBaseCompleted && (
-                    <div className="border border-[#f47c0f]/35 bg-[#fff4ea] p-4">
-                      <p className="font-bold text-[#b05a00]">Completaste los 21 retos del ciclo.</p>
-                      <p className="mt-1 text-sm text-[#b05a00]/85">Puedes reiniciar para empezar un nuevo ciclo de 21 días.</p>
-                      <Button onClick={() => void handleResetChallengeCycle()} className="mt-3 rounded-none bg-[#f47c0f] text-white hover:bg-[#dd6900]">
-                        Reiniciar ciclo de 21 días
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="space-y-2">
+                          <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Meta de sesiones</p>
+                          <Input
+                            type="number"
+                            min={1}
+                            max={MAX_CHALLENGE_TARGET}
+                            inputMode="numeric"
+                            value={newChallengeTarget}
+                            onChange={(event) => setNewChallengeTarget(sanitizeDigitsInput(event.target.value, 2))}
+                            placeholder="5"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Puntos</p>
+                          <Input
+                            type="number"
+                            min={1}
+                            max={MAX_CHALLENGE_POINTS}
+                            inputMode="numeric"
+                            value={newChallengePoints}
+                            onChange={(event) => setNewChallengePoints(sanitizeDigitsInput(event.target.value, 3))}
+                            placeholder="10"
+                          />
+                          <p className="text-[11px] font-bold text-[#5b30d9]/70">Maximo {MAX_CHALLENGE_POINTS} puntos.</p>
+                        </div>
+                      </div>
+                      <Button
+                        disabled={isSavingChallenge || remainingCustomCreationsToday === 0}
+                        onClick={() => void handleCreateChallenge()}
+                        className="rounded-none bg-[#5b30d9] text-white hover:bg-[#4a22be]"
+                      >
+                        {isSavingChallenge ? "Guardando..." : "Crear reto"}
                       </Button>
                     </div>
-                  )}
 
-                  {weeklyBaseChallenges.map((weekGroup) => (
-                    <div key={weekGroup.week} className="space-y-3">
-                      <div className="flex items-center justify-between border-b border-[#5b30d9]/20 pb-2">
-                        <h3 className="font-bold uppercase tracking-wide text-[#5b30d9]">Semana {weekGroup.week}</h3>
-                        <span className="text-xs font-bold text-[#5b30d9]/70">
-                          +{STREAK_WEEK_BONUS[weekGroup.week] ?? 0} por reto en racha
-                        </span>
+                    {customChallengeItems.length > 0 && (
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between border-b border-[#5b30d9]/20 pb-2">
+                          <h3 className="font-bold uppercase tracking-wide text-[#5b30d9]">Mis retos personalizados</h3>
+                        </div>
+                        {customChallengeItems.map((challenge) => {
+                          const done = completedChallenges.has(challenge.id);
+                          return (
+                            <button
+                              key={challenge.id}
+                              onClick={() => void toggleChallenge(challenge.id)}
+                              className={`flex w-full items-center gap-3 rounded-none border p-4 text-left transition ${
+                                done ? "border-[#4f7c0f]/40 bg-[#b8ee73]/35" : "border-[#5b30d9]/20 bg-white/70 hover:bg-white"
+                              }`}
+                            >
+                              {done ? <CheckCircle className="size-5 shrink-0 text-[#4f7c0f]" /> : <Circle className="size-5 shrink-0 text-[#7d4cd8]" />}
+                              <span className={`flex-1 font-bold ${done ? "text-[#325f0b]" : "text-[#5b30d9]"}`}>{challenge.title}</span>
+                              <span className="font-bold text-[#f47c0f]">+{challenge.points}</span>
+                            </button>
+                          );
+                        })}
                       </div>
-                      {weekGroup.items.map((challenge) => {
-                        const done = completedChallenges.has(challenge.id);
-                        const streakBonus = getChallengeStreakBonus(challenge);
-                        const bonusActive = Boolean(challenge.day && challenge.day <= currentChallengeStreak && streakBonus > 0);
+                    )}
+                  </TabsContent>
 
-                        return (
-                          <button
-                            key={challenge.id}
-                            onClick={() => void toggleChallenge(challenge.id)}
-                            className={`flex w-full items-center gap-3 rounded-none border p-4 text-left transition ${
-                              done ? "border-[#4f7c0f]/40 bg-[#b8ee73]/35" : "border-[#5b30d9]/20 bg-white/70 hover:bg-white"
-                            }`}
-                          >
-                            {done ? <CheckCircle className="size-5 shrink-0 text-[#4f7c0f]" /> : <Circle className="size-5 shrink-0 text-[#7d4cd8]" />}
-                            <span className={`flex-1 font-bold ${done ? "text-[#325f0b]" : "text-[#5b30d9]"}`}>
-                              Día {challenge.day}: {challenge.title}
-                            </span>
-                            <div className="text-right">
-                              <p className="font-bold text-[#f47c0f]">+{challenge.points}</p>
-                              {streakBonus > 0 && (
-                                <p className={`text-xs font-bold ${bonusActive ? "text-[#4f7c0f]" : "text-[#5b30d9]/60"}`}>
-                                  {bonusActive ? `+${streakBonus} racha` : `+${streakBonus} posible`}
-                                </p>
-                              )}
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  ))}
-
-                  {customChallengeItems.length > 0 && (
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between border-b border-[#5b30d9]/20 pb-2">
-                        <h3 className="font-bold uppercase tracking-wide text-[#5b30d9]">Retos personalizados</h3>
+                  <TabsContent value="retosGenerales" className="space-y-6">
+                    <div className="sticky top-0 z-10 space-y-3 bg-[#f2f0f3] pb-2">
+                      <Progress value={progressPercentage} className="h-3 rounded-none bg-[#5b30d9]/20 [&>div]:rounded-none [&>div]:bg-[#f47c0f]" />
+                      <div className="grid gap-3 sm:grid-cols-3">
+                        <div className="border border-[#5b30d9]/25 bg-white/70 p-3">
+                          <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/70">Racha actual</p>
+                          <p className="display-font mt-1 text-4xl text-[#5b30d9]">{currentChallengeStreak} dias</p>
+                        </div>
+                        <div className="border border-[#f47c0f]/30 bg-[#fff4ea] p-3">
+                          <p className="text-xs font-bold uppercase tracking-wide text-[#f47c0f]/80">Bono por racha</p>
+                          <p className="display-font mt-1 text-4xl text-[#f47c0f]">+{streakBonusPoints}</p>
+                        </div>
+                        <div className="border border-[#4f7c0f]/25 bg-[#eff9db] p-3">
+                          <p className="text-xs font-bold uppercase tracking-wide text-[#4f7c0f]/80">Estado</p>
+                          <p className="mt-2 font-bold text-[#325f0b]">{currentChallengeStreak > 0 ? "Vas en racha" : "Inicia tu racha"}</p>
+                        </div>
                       </div>
-                      {customChallengeItems.map((challenge) => {
-                        const done = completedChallenges.has(challenge.id);
-                        return (
-                          <button
-                            key={challenge.id}
-                            onClick={() => void toggleChallenge(challenge.id)}
-                            className={`flex w-full items-center gap-3 rounded-none border p-4 text-left transition ${
-                              done ? "border-[#4f7c0f]/40 bg-[#b8ee73]/35" : "border-[#5b30d9]/20 bg-white/70 hover:bg-white"
-                            }`}
-                          >
-                            {done ? <CheckCircle className="size-5 shrink-0 text-[#4f7c0f]" /> : <Circle className="size-5 shrink-0 text-[#7d4cd8]" />}
-                            <span className={`flex-1 font-bold ${done ? "text-[#325f0b]" : "text-[#5b30d9]"}`}>{challenge.title}</span>
-                            <span className="font-bold text-[#f47c0f]">+{challenge.points}</span>
-                          </button>
-                        );
-                      })}
                     </div>
-                  )}
-                </div>
 
+                    {weeklyBaseChallenges.map((weekGroup) => (
+                      <div key={weekGroup.week} className="space-y-3">
+                        <div className="flex items-center justify-between border-b border-[#5b30d9]/20 pb-2">
+                          <h3 className="font-bold uppercase tracking-wide text-[#5b30d9]">Semana {weekGroup.week}</h3>
+                          <span className="text-xs font-bold text-[#5b30d9]/70">
+                            +{STREAK_WEEK_BONUS[weekGroup.week] ?? 0} por reto en racha
+                          </span>
+                        </div>
+                        {weekGroup.items.map((challenge) => {
+                          const done = completedChallenges.has(challenge.id);
+                          const streakBonus = getChallengeStreakBonus(challenge);
+                          const bonusActive = Boolean(challenge.day && challenge.day <= currentChallengeStreak && streakBonus > 0);
+
+                          return (
+                            <button
+                              key={challenge.id}
+                              onClick={() => void toggleChallenge(challenge.id)}
+                              className={`flex w-full items-center gap-3 rounded-none border p-4 text-left transition ${
+                                done
+                                  ? "border-[#4f7c0f]/40 bg-[#b8ee73]/35"
+                                  : challenge.id === nextBaseChallengeId
+                                    ? "border-[#5b30d9]/25 bg-white"
+                                    : "border-[#c8c2d8] bg-[#efedf4]"
+                              }`}
+                            >
+                              {done ? <CheckCircle className="size-5 shrink-0 text-[#4f7c0f]" /> : <Circle className="size-5 shrink-0 text-[#7d4cd8]" />}
+                              <span className={`flex-1 font-bold ${done ? "text-[#325f0b]" : "text-[#5b30d9]"}`}>
+                                Dia {challenge.day}: {challenge.title}
+                              </span>
+                              <div className="text-right">
+                                <p className="font-bold text-[#f47c0f]">+{challenge.points}</p>
+                                {streakBonus > 0 && (
+                                  <p className={`text-xs font-bold ${bonusActive ? "text-[#4f7c0f]" : "text-[#5b30d9]/60"}`}>
+                                    {bonusActive ? `+${streakBonus} racha` : `+${streakBonus} posible`}
+                                  </p>
+                                )}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ))}
+                    {allBaseCompleted && (
+                      <div className="border border-[#f47c0f]/35 bg-[#fff4ea] p-4">
+                        <p className="font-bold text-[#b05a00]">Completaste los 21 retos del ciclo.</p>
+                        <p className="mt-1 text-sm text-[#b05a00]/85">Puedes reiniciar para empezar un nuevo ciclo de 21 dias.</p>
+                        <Button onClick={() => void handleResetChallengeCycle()} className="mt-3 rounded-none bg-[#f47c0f] text-white hover:bg-[#dd6900]">
+                          Reiniciar ciclo de 21 dias
+                        </Button>
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
               </Card>
             </TabsContent>
 
@@ -2852,7 +2874,7 @@ export default function Dashboard() {
               }`}
             >
               <ListTodo className="size-4" />
-              <span>Tareas</span>
+              <span>Retos</span>
             </button>
             <button
               onClick={() => setActiveTab("cuenta")}
@@ -2869,4 +2891,6 @@ export default function Dashboard() {
     </div>
   );
 }
+
+
 
