@@ -284,6 +284,7 @@ export default function Dashboard() {
   const [hydratedPomodoroKey, setHydratedPomodoroKey] = useState<string | null>(null);
   const lastToastRef = useRef<{ signature: string; at: number } | null>(null);
   const lastPomodoroReminderAtRef = useRef<number>(0);
+  const lastTimerTickAtRef = useRef<number | null>(null);
   const chatScrollContainerRef = useRef<HTMLDivElement | null>(null);
   const chatScrollAnchorRef = useRef<HTMLDivElement | null>(null);
   const ownPresenceRef = useRef({
@@ -777,11 +778,47 @@ export default function Dashboard() {
   useEffect(() => {
     let interval: number | undefined;
 
+    const applyElapsedTime = () => {
+      const now = Date.now();
+      const previousTick = lastTimerTickAtRef.current ?? now;
+      const elapsedSeconds = Math.floor((now - previousTick) / 1000);
+
+      if (elapsedSeconds <= 0) {
+        return;
+      }
+
+      lastTimerTickAtRef.current = previousTick + elapsedSeconds * 1000;
+      setTimeLeft((current) => Math.max(0, current - elapsedSeconds));
+    };
+
     if (isActive && !isPaused && timeLeft > 0) {
-      interval = window.setInterval(() => {
-        setTimeLeft((time) => time - 1);
-      }, 1000);
+      if (lastTimerTickAtRef.current === null) {
+        lastTimerTickAtRef.current = Date.now();
+      }
+
+      interval = window.setInterval(applyElapsedTime, 500);
+      const handleVisibilityChange = () => {
+        if (typeof document !== "undefined" && !document.hidden) {
+          applyElapsedTime();
+        }
+      };
+      const handleWindowFocus = () => {
+        applyElapsedTime();
+      };
+
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+      window.addEventListener("focus", handleWindowFocus);
+
+      return () => {
+        if (interval) {
+          clearInterval(interval);
+        }
+        document.removeEventListener("visibilitychange", handleVisibilityChange);
+        window.removeEventListener("focus", handleWindowFocus);
+      };
     }
+
+    lastTimerTickAtRef.current = null;
 
     if (isActive && timeLeft === 0) {
       void handleTimerComplete();
@@ -1273,23 +1310,6 @@ export default function Dashboard() {
       clearInterval(interval);
     };
   }, [selectedRoomId, userId]);
-
-  useEffect(() => {
-    const handleVisibilityOrUnload = () => {
-      if (typeof document !== "undefined" && !document.hidden) {
-        return;
-      }
-      void pausePomodoroAndSync();
-    };
-
-    window.addEventListener("pagehide", handleVisibilityOrUnload);
-    document.addEventListener("visibilitychange", handleVisibilityOrUnload);
-
-    return () => {
-      window.removeEventListener("pagehide", handleVisibilityOrUnload);
-      document.removeEventListener("visibilitychange", handleVisibilityOrUnload);
-    };
-  }, [selectedRoomId, userId, isActive, isPaused]);
 
   const handleTimerComplete = async () => {
     if (!userId) {
