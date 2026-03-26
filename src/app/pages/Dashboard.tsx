@@ -40,6 +40,7 @@ interface CustomChallenge {
   targetSessions: number;
   points: number;
   isGroup: boolean;
+  createdAt: string;
 }
 
 interface Reward {
@@ -117,9 +118,10 @@ interface PomodoroSnapshot {
 
 const SESSION_POINTS = 10;
 const MAX_CUSTOM_CHALLENGES = 10;
+const MAX_CUSTOM_CHALLENGES_PER_DAY = 5;
 const MAX_CHALLENGE_TITLE_LENGTH = 80;
 const MAX_CHALLENGE_TARGET = 10;
-const MAX_CHALLENGE_POINTS = 500;
+const MAX_CHALLENGE_POINTS = 10;
 const MAX_REWARD_TITLE_LENGTH = 80;
 const MAX_REWARD_DESCRIPTION_LENGTH = 180;
 const MAX_REWARD_COST = 5000;
@@ -150,6 +152,14 @@ const getCurrentStreak = (completedIds: Set<string>, baseChallenges: ChallengeIt
     streak += 1;
   }
   return streak;
+};
+
+const getLocalDateKey = (value: Date | string) => {
+  const date = typeof value === "string" ? new Date(value) : value;
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 };
 
 const playEventSound = (event: "pomodoro" | "reward" | "notification" | "error") => {
@@ -201,6 +211,7 @@ export default function Dashboard() {
   const [userId, setUserId] = useState("");
   const [sessions, setSessions] = useState<Session[]>([]);
   const [completedChallenges, setCompletedChallenges] = useState<Set<string>>(new Set());
+  const [challengeCompletionDateKeys, setChallengeCompletionDateKeys] = useState<Map<string, string>>(new Map());
   const [catalogChallenges, setCatalogChallenges] = useState<ChallengeCatalogEntry[]>([]);
   const [customChallenges, setCustomChallenges] = useState<CustomChallenge[]>([]);
   const [rewards, setRewards] = useState<Reward[]>([]);
@@ -225,7 +236,7 @@ export default function Dashboard() {
   const [isSavingReward, setIsSavingReward] = useState(false);
   const [newChallengeTitle, setNewChallengeTitle] = useState("");
   const [newChallengeTarget, setNewChallengeTarget] = useState("5");
-  const [newChallengePoints, setNewChallengePoints] = useState("50");
+  const [newChallengePoints, setNewChallengePoints] = useState("10");
   const [newRewardTitle, setNewRewardTitle] = useState("");
   const [newRewardDescription, setNewRewardDescription] = useState("");
   const [newRewardCost, setNewRewardCost] = useState("60");
@@ -297,27 +308,17 @@ export default function Dashboard() {
       setEmail(user.email ?? "");
       setName((user.user_metadata?.full_name as string) || (user.email ?? "Usuario"));
 
-      const [sessionsResult, challengesResult, catalogChallengesResult, customChallengesResult, rewardsResult, redemptionsResult, roomsResult, membershipsResult] = await Promise.all([
+      const [sessionsResult, challengesResult, catalogChallengesResult, customChallengesResult, roomsResult, membershipsResult] = await Promise.all([
         supabase
           .from("pomodoro_sessions")
           .select("id, duration_seconds, completed_at")
           .eq("user_id", user.id)
           .order("completed_at", { ascending: false }),
-        supabase.from("user_challenge_progress").select("challenge_id").eq("user_id", user.id),
+        supabase.from("user_challenge_progress").select("challenge_id, created_at").eq("user_id", user.id),
         supabase.from("challenge_catalog").select("code, title, points, week, day").eq("is_active", true).order("week", { ascending: true }).order("day", { ascending: true }),
         supabase
           .from("custom_challenges")
-          .select("id, title, target_sessions, points, is_group")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false }),
-        supabase
-          .from("user_rewards")
-          .select("id, title, description, cost_points")
-          .eq("user_id", user.id)
-          .order("cost_points", { ascending: true }),
-        supabase
-          .from("reward_redemptions")
-          .select("id, reward_id, points_spent, created_at")
+          .select("id, title, target_sessions, points, is_group, created_at")
           .eq("user_id", user.id)
           .order("created_at", { ascending: false }),
         supabase
@@ -335,8 +336,6 @@ export default function Dashboard() {
         challengesResult.error ||
         catalogChallengesResult.error ||
         customChallengesResult.error ||
-        rewardsResult.error ||
-        redemptionsResult.error ||
         roomsResult.error ||
         membershipsResult.error
       ) {
@@ -355,6 +354,14 @@ export default function Dashboard() {
 
       if (challengesResult.data) {
         setCompletedChallenges(new Set(challengesResult.data.map((item) => item.challenge_id)));
+        setChallengeCompletionDateKeys(
+          new Map(
+            challengesResult.data.map((item) => [
+              item.challenge_id,
+              item.created_at ? getLocalDateKey(item.created_at) : "",
+            ]),
+          ),
+        );
       }
 
       if (catalogChallengesResult.data) {
@@ -377,27 +384,6 @@ export default function Dashboard() {
             targetSessions: item.target_sessions,
             points: item.points,
             isGroup: item.is_group,
-          })),
-        );
-      }
-
-      if (rewardsResult.data) {
-        setRewards(
-          rewardsResult.data.map((item) => ({
-            id: item.id,
-            title: item.title,
-            description: item.description,
-            costPoints: item.cost_points,
-          })),
-        );
-      }
-
-      if (redemptionsResult.data) {
-        setRedemptions(
-          redemptionsResult.data.map((item) => ({
-            id: item.id,
-            rewardId: item.reward_id,
-            pointsSpent: item.points_spent,
             createdAt: item.created_at,
           })),
         );
@@ -660,6 +646,11 @@ export default function Dashboard() {
   }, [rooms, roomSearchQuery]);
 
   const completedCount = allChallenges.filter((challenge) => completedChallenges.has(challenge.id)).length;
+  const completedBaseCount = baseChallenges.filter((challenge) => completedChallenges.has(challenge.id)).length;
+  const allBaseCompleted = baseChallenges.length > 0 && completedBaseCount === baseChallenges.length;
+  const todayKey = getLocalDateKey(new Date());
+  const customCreatedToday = customChallenges.filter((challenge) => getLocalDateKey(challenge.createdAt) === todayKey).length;
+  const remainingCustomCreationsToday = Math.max(0, MAX_CUSTOM_CHALLENGES_PER_DAY - customCreatedToday);
   const progressPercentage = allChallenges.length === 0 ? 0 : (completedCount / allChallenges.length) * 100;
   const challengePoints = allChallenges
     .filter((challenge) => completedChallenges.has(challenge.id))
@@ -720,6 +711,31 @@ export default function Dashboard() {
       displayName: name || email || "Usuario",
     };
   }, [timeLeft, isActive, isPaused, name, email]);
+
+  const pausePomodoroAndSync = async () => {
+    if (!ownPresenceRef.current.isActive || ownPresenceRef.current.isPaused) {
+      return;
+    }
+
+    ownPresenceRef.current = {
+      ...ownPresenceRef.current,
+      isPaused: true,
+    };
+    setIsPaused(true);
+
+    if (!selectedRoomId || !userId) {
+      return;
+    }
+
+    await supabase.from("pomodoro_room_presence").upsert({
+      room_id: selectedRoomId,
+      user_id: userId,
+      time_left: ownPresenceRef.current.timeLeft,
+      is_active: ownPresenceRef.current.isActive,
+      is_paused: true,
+      updated_at: new Date().toISOString(),
+    });
+  };
 
   useEffect(() => {
     const loadRoomMembers = async () => {
@@ -982,6 +998,23 @@ export default function Dashboard() {
     };
   }, [selectedRoomId, userId]);
 
+  useEffect(() => {
+    const handleVisibilityOrUnload = () => {
+      if (typeof document !== "undefined" && !document.hidden) {
+        return;
+      }
+      void pausePomodoroAndSync();
+    };
+
+    window.addEventListener("pagehide", handleVisibilityOrUnload);
+    document.addEventListener("visibilitychange", handleVisibilityOrUnload);
+
+    return () => {
+      window.removeEventListener("pagehide", handleVisibilityOrUnload);
+      document.removeEventListener("visibilitychange", handleVisibilityOrUnload);
+    };
+  }, [selectedRoomId, userId, isActive, isPaused]);
+
   const handleTimerComplete = async () => {
     if (!userId) {
       return;
@@ -1102,6 +1135,7 @@ export default function Dashboard() {
     setError("");
     setSuccessMessage("");
     const isCompleted = completedChallenges.has(challengeId);
+    const challenge = allChallenges.find((item) => item.id === challengeId);
 
     if (isCompleted) {
       const { error: deleteError } = await supabase
@@ -1120,8 +1154,28 @@ export default function Dashboard() {
         next.delete(challengeId);
         return next;
       });
+      setChallengeCompletionDateKeys((previous) => {
+        const next = new Map(previous);
+        next.delete(challengeId);
+        return next;
+      });
       setSuccessMessage("Reto desmarcado.");
       return;
+    }
+
+    if (challenge?.kind === "base") {
+      const todayKey = getLocalDateKey(new Date());
+      const completedBaseToday = baseChallenges.some(
+        (baseChallenge) =>
+          baseChallenge.id !== challengeId &&
+          completedChallenges.has(baseChallenge.id) &&
+          challengeCompletionDateKeys.get(baseChallenge.id) === todayKey,
+      );
+
+      if (completedBaseToday) {
+        setError("Solo puedes completar 1 reto definido por día.");
+        return;
+      }
     }
 
     const { error: insertError } = await supabase.from("user_challenge_progress").insert({
@@ -1136,12 +1190,18 @@ export default function Dashboard() {
     }
 
     const completedNext = new Set(completedChallenges).add(challengeId);
+    const todayKey = getLocalDateKey(new Date());
     const previousStreak = getCurrentStreak(completedChallenges, baseChallenges);
     const nextStreak = getCurrentStreak(completedNext, baseChallenges);
     const completedBaseChallenge = baseChallenges.find((challenge) => challenge.id === challengeId);
     const streakBonus = completedBaseChallenge && nextStreak > previousStreak ? getChallengeStreakBonus(completedBaseChallenge) : 0;
 
     setCompletedChallenges(completedNext);
+    setChallengeCompletionDateKeys((previous) => {
+      const next = new Map(previous);
+      next.set(challengeId, todayKey);
+      return next;
+    });
     if (streakBonus > 0) {
       setSuccessMessage(`Reto completado. +${completedBaseChallenge?.points ?? 0} base y +${streakBonus} por racha.`);
       return;
@@ -1155,15 +1215,23 @@ export default function Dashboard() {
       return;
     }
 
+    const todayKey = getLocalDateKey(new Date());
     const title = normalizeInputText(newChallengeTitle);
     const targetSessions = Number(newChallengeTarget);
     const rewardPoints = Number(newChallengePoints);
+    const createdTodayCount = customChallenges.filter((challenge) => getLocalDateKey(challenge.createdAt) === todayKey).length;
     const duplicatedChallenge = customChallenges.some(
       (challenge) => challenge.title.trim().toLowerCase() === title.toLowerCase(),
     );
 
     if (customChallenges.length >= MAX_CUSTOM_CHALLENGES) {
       setError(`Solo puedes crear ${MAX_CUSTOM_CHALLENGES} retos personalizados.`);
+      setSuccessMessage("");
+      return;
+    }
+
+    if (createdTodayCount >= MAX_CUSTOM_CHALLENGES_PER_DAY) {
+      setError(`Solo puedes crear ${MAX_CUSTOM_CHALLENGES_PER_DAY} retos personalizados por día.`);
       setSuccessMessage("");
       return;
     }
@@ -1203,7 +1271,7 @@ export default function Dashboard() {
         points: rewardPoints,
         is_group: false,
       })
-      .select("id, title, target_sessions, points, is_group")
+      .select("id, title, target_sessions, points, is_group, created_at")
       .single();
 
     setIsSavingChallenge(false);
@@ -1221,14 +1289,56 @@ export default function Dashboard() {
         targetSessions: data.target_sessions,
         points: data.points,
         isGroup: data.is_group,
+        createdAt: data.created_at,
       },
       ...previous,
     ]);
 
     setNewChallengeTitle("");
     setNewChallengeTarget("5");
-    setNewChallengePoints("50");
+    setNewChallengePoints("10");
     setSuccessMessage("Reto personalizado creado correctamente.");
+  };
+
+  const handleResetChallengeCycle = async () => {
+    if (!userId) {
+      return;
+    }
+
+    const baseChallengeIds = baseChallenges.map((challenge) => challenge.id);
+    if (baseChallengeIds.length === 0) {
+      return;
+    }
+
+    setError("");
+    setSuccessMessage("");
+
+    const { error: deleteError } = await supabase
+      .from("user_challenge_progress")
+      .delete()
+      .eq("user_id", userId)
+      .in("challenge_id", baseChallengeIds);
+
+    if (deleteError) {
+      setError("No se pudo reiniciar el ciclo de retos.");
+      return;
+    }
+
+    setCompletedChallenges((previous) => {
+      const next = new Set(previous);
+      for (const challengeId of baseChallengeIds) {
+        next.delete(challengeId);
+      }
+      return next;
+    });
+    setChallengeCompletionDateKeys((previous) => {
+      const next = new Map(previous);
+      for (const challengeId of baseChallengeIds) {
+        next.delete(challengeId);
+      }
+      return next;
+    });
+    setSuccessMessage("Ciclo de 21 días reiniciado.");
   };
 
   const handleCreateReward = async () => {
@@ -1398,9 +1508,9 @@ export default function Dashboard() {
     await supabase.from("pomodoro_room_presence").upsert({
       room_id: data.id,
       user_id: userId,
-      time_left: timeLeft,
-      is_active: isActive,
-      is_paused: isPaused,
+      time_left: ownPresenceRef.current.timeLeft,
+      is_active: ownPresenceRef.current.isActive,
+      is_paused: ownPresenceRef.current.isPaused,
       updated_at: new Date().toISOString(),
     });
 
@@ -1439,9 +1549,9 @@ export default function Dashboard() {
     await supabase.from("pomodoro_room_presence").upsert({
       room_id: room.id,
       user_id: userId,
-      time_left: timeLeft,
-      is_active: isActive,
-      is_paused: isPaused,
+      time_left: ownPresenceRef.current.timeLeft,
+      is_active: ownPresenceRef.current.isActive,
+      is_paused: ownPresenceRef.current.isPaused,
       updated_at: new Date().toISOString(),
     });
 
@@ -1455,6 +1565,7 @@ export default function Dashboard() {
       return;
     }
 
+    await pausePomodoroAndSync();
     await supabase.from("pomodoro_room_presence").delete().eq("room_id", roomId).eq("user_id", userId);
     const { error: leaveError } = await supabase.from("pomodoro_room_members").delete().eq("room_id", roomId).eq("user_id", userId);
 
@@ -1466,7 +1577,7 @@ export default function Dashboard() {
     setJoinedRoomIds(new Set());
 
     setSelectedRoomId((current) => (current === roomId ? null : current));
-    setSuccessMessage("Saliste de la sala.");
+    setSuccessMessage("Saliste de la sala. Tu pomodoro quedó en pausa.");
   };
 
   const handleDeleteRoom = async (room: PomodoroRoom) => {
@@ -1563,6 +1674,7 @@ export default function Dashboard() {
   };
 
   const handleLogout = async () => {
+    await pausePomodoroAndSync();
     await supabase.auth.signOut();
     navigate("/");
   };
@@ -1982,6 +2094,9 @@ export default function Dashboard() {
                 </p>
                 <div className="mb-6 space-y-3 border border-[#5b30d9]/20 bg-white/70 p-4">
                   <p className="font-bold text-[#5b30d9]">Crear reto personalizado</p>
+                  <p className="text-xs font-bold text-[#5b30d9]/75">
+                    Máximo {MAX_CUSTOM_CHALLENGES_PER_DAY} por día. Hoy puedes crear {remainingCustomCreationsToday}.
+                  </p>
                   <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Nombre del reto</p>
                   <Input
                     value={newChallengeTitle}
@@ -2011,16 +2126,27 @@ export default function Dashboard() {
                         inputMode="numeric"
                         value={newChallengePoints}
                         onChange={(event) => setNewChallengePoints(sanitizeDigitsInput(event.target.value, 3))}
-                        placeholder="50"
+                        placeholder="10"
                       />
+                      <p className="text-[11px] font-bold text-[#5b30d9]/70">Máximo {MAX_CHALLENGE_POINTS} puntos.</p>
                     </div>
                   </div>
-                  <Button disabled={isSavingChallenge} onClick={() => void handleCreateChallenge()} className="rounded-none bg-[#5b30d9] text-white hover:bg-[#4a22be]">
+                  <Button disabled={isSavingChallenge || remainingCustomCreationsToday === 0} onClick={() => void handleCreateChallenge()} className="rounded-none bg-[#5b30d9] text-white hover:bg-[#4a22be]">
                     {isSavingChallenge ? "Guardando..." : "Crear reto"}
                   </Button>
                 </div>
 
                 <div className="space-y-6">
+                  {allBaseCompleted && (
+                    <div className="border border-[#f47c0f]/35 bg-[#fff4ea] p-4">
+                      <p className="font-bold text-[#b05a00]">Completaste los 21 retos del ciclo.</p>
+                      <p className="mt-1 text-sm text-[#b05a00]/85">Puedes reiniciar para empezar un nuevo ciclo de 21 días.</p>
+                      <Button onClick={() => void handleResetChallengeCycle()} className="mt-3 rounded-none bg-[#f47c0f] text-white hover:bg-[#dd6900]">
+                        Reiniciar ciclo de 21 días
+                      </Button>
+                    </div>
+                  )}
+
                   {weeklyBaseChallenges.map((weekGroup) => (
                     <div key={weekGroup.week} className="space-y-3">
                       <div className="flex items-center justify-between border-b border-[#5b30d9]/20 pb-2">

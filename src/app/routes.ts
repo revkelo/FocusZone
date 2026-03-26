@@ -1,19 +1,25 @@
 import { createBrowserRouter } from "react-router";
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    Component: Home,
+    lazy: async () => {
+      const module = await import("./pages/Home");
+      return { Component: module.default };
+    },
   },
   {
     path: "/login",
-    Component: Login,
+    lazy: async () => {
+      const module = await import("./pages/Login");
+      return { Component: module.default };
+    },
   },
   {
     path: "/dashboard",
-    Component: Dashboard,
+    lazy: async () => {
+      const module = await import("./pages/Dashboard");
+      return { Component: module.default };
+    },
   },
 ]);

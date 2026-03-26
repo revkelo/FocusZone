@@ -539,3 +539,21 @@ $$;
 
 revoke all on function public.get_email_by_nickname(text) from public;
 grant execute on function public.get_email_by_nickname(text) to anon, authenticated;
+
+-- Seed de ranking con usuarios existentes en auth.users
+-- Nota: requiere que existan usuarios autenticados para insertar por FK.
+insert into public.user_leaderboard (user_id, display_name, total_points, updated_at)
+select
+  u.id,
+  coalesce(nullif(u.raw_user_meta_data->>'nickname', ''), nullif(u.raw_user_meta_data->>'full_name', ''), split_part(u.email, '@', 1), 'Usuario') as display_name,
+  greatest(0, 260 - ((row_number() over (order by u.created_at asc) - 1) * 35))::integer as total_points,
+  now()
+from auth.users u
+where u.email is not null
+order by u.created_at asc
+limit 12
+on conflict (user_id) do update
+set
+  display_name = excluded.display_name,
+  total_points = greatest(public.user_leaderboard.total_points, excluded.total_points),
+  updated_at = now();
