@@ -440,23 +440,6 @@ export default function Dashboard() {
         });
       }
 
-      const leaderboardResult = await supabase
-        .from("user_leaderboard")
-        .select("user_id, display_name, total_points")
-        .order("total_points", { ascending: false })
-        .order("updated_at", { ascending: true })
-        .limit(10);
-
-      if (leaderboardResult.data) {
-        setLeaderboard(
-          leaderboardResult.data.map((item) => ({
-            userId: item.user_id,
-            displayName: item.display_name,
-            totalPoints: item.total_points,
-          })),
-        );
-      }
-
       setIsLoading(false);
     };
 
@@ -885,7 +868,21 @@ export default function Dashboard() {
       }
     };
 
-    void syncLeaderboard();
+    const runSync = () => {
+      void syncLeaderboard();
+    };
+    if ("requestIdleCallback" in window) {
+      const idleId = (window as Window & { requestIdleCallback: (cb: () => void) => number }).requestIdleCallback(runSync);
+      return () => {
+        if ("cancelIdleCallback" in window) {
+          (window as Window & { cancelIdleCallback: (id: number) => void }).cancelIdleCallback(idleId);
+        }
+      };
+    }
+    const timeoutId = window.setTimeout(runSync, 120);
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, [userId, name, points]);
 
   useEffect(() => {
@@ -987,6 +984,9 @@ export default function Dashboard() {
     }
 
     const pollInterval = window.setInterval(() => {
+      if (document.visibilityState === "hidden") {
+        return;
+      }
       void loadRoomMembers();
     }, 1000);
 
@@ -1069,6 +1069,9 @@ export default function Dashboard() {
     void refreshRooms();
 
     const roomsPollInterval = window.setInterval(() => {
+      if (document.visibilityState === "hidden") {
+        return;
+      }
       void refreshRooms();
     }, 3000);
 
@@ -2029,7 +2032,7 @@ export default function Dashboard() {
               <TabsTrigger value="cuenta" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Cuenta</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="pomodoro" className="space-y-5">
+            <TabsContent value="pomodoro" className="focus-reveal space-y-5">
               <Card className="focus-card rounded-none p-5 md:p-7">
                 <div className="flex items-center gap-2">
                   <Clock className="size-5 text-[#f47c0f]" />
@@ -2284,7 +2287,7 @@ export default function Dashboard() {
               </section>
             </TabsContent>
 
-            <TabsContent value="resumen" className="space-y-5">
+            <TabsContent value="resumen" className="focus-reveal space-y-5">
               <section className="grid gap-4 md:grid-cols-4">
                 <Card className="focus-card rounded-none border-2 border-[#f47c0f]/40 bg-[#f47c0f] p-6 text-white">
                   <p className="font-bold uppercase tracking-wider">Puntos</p>
@@ -2324,7 +2327,7 @@ export default function Dashboard() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="tareas">
+            <TabsContent value="tareas" className="focus-reveal">
               <Card className="focus-card rounded-none p-7 md:p-8">
                 <div className="mb-5 flex items-center justify-between">
                   <h2 className="display-font text-5xl text-[#5b30d9]">Retos</h2>
@@ -2472,7 +2475,7 @@ export default function Dashboard() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="cuenta">
+            <TabsContent value="cuenta" className="focus-reveal">
               <div className="grid gap-4 md:grid-cols-2">
                 <Card className="focus-card rounded-none p-6">
                   <h2 className="display-font text-5xl text-[#5b30d9]">Cuenta</h2>

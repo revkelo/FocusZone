@@ -109,7 +109,7 @@ export default function Home() {
         </header>
 
         <main className="mx-auto grid w-full max-w-6xl gap-10 px-5 pb-16 pt-6 md:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
-          <section className="min-w-0 space-y-6 md:space-y-8">
+          <section className="focus-reveal min-w-0 space-y-6 md:space-y-8">
             <p className="text-base italic text-[#7d4cd8] md:text-lg">La biblioteca como espacio de pausa digital.</p>
             <h1 className="display-font text-[3.9rem] leading-[0.84] text-[#f47c0f] sm:text-[4.8rem] lg:text-[5.6rem]">
               Focus
@@ -134,7 +134,7 @@ export default function Home() {
               </Link>
             </div>
 
-            <Card className="focus-card rounded-none border-2 border-[#5b30d9]/25 bg-white/80 p-4 md:p-5">
+            <Card className="focus-card focus-heavy focus-reveal focus-reveal-delay-1 rounded-none border-2 border-[#5b30d9]/25 bg-white/80 p-4 md:p-5">
               <div className="mb-3 flex items-center gap-2">
                 <h3 className="display-font text-4xl text-[#5b30d9] md:text-5xl">Mockups de diseño</h3>
               </div>
@@ -172,7 +172,7 @@ export default function Home() {
               </div>
             </Card>
 
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="focus-reveal focus-reveal-delay-2 grid gap-4 sm:grid-cols-3">
               <Card className="focus-card focus-glow-orange rounded-none p-4">
                 <Clock3 className="mb-2 size-5 text-[#f47c0f]" />
                 <p className="display-font text-4xl text-[#f47c0f]">50h</p>
@@ -191,8 +191,8 @@ export default function Home() {
             </div>
           </section>
 
-          <section className="min-w-0 space-y-5">
-            <Card className="focus-card focus-noise focus-grid rounded-none border-2 border-[#5b30d9]/40 bg-[#5b30d9] p-5 text-white md:p-7">
+          <section className="focus-reveal focus-reveal-delay-1 min-w-0 space-y-5">
+            <Card className="focus-card focus-heavy focus-noise focus-grid rounded-none border-2 border-[#5b30d9]/40 bg-[#5b30d9] p-5 text-white md:p-7">
               <h2 className="display-font text-5xl text-[#b8ee73] md:text-6xl">Stop Doomscrolling</h2>
               <p className="mt-4 text-base text-[#f2f0f3] md:text-lg">
                 Algunas cosas te distraen. Otras te ayudan a enfocarte. Focus Zone convierte lo digital en aliado de tu estudio.
@@ -205,7 +205,7 @@ export default function Home() {
               </div>
             </Card>
 
-            <Card className="focus-card rounded-none border-2 border-[#f47c0f]/35 bg-[#fff8f0] p-5 md:p-7">
+            <Card className="focus-card focus-heavy focus-reveal focus-reveal-delay-2 rounded-none border-2 border-[#f47c0f]/35 bg-[#fff8f0] p-5 md:p-7">
               <div className="mb-4 flex items-center gap-2 text-[#5b30d9]">
                 <Trophy className="size-5 text-[#f47c0f]" />
                 <h3 className="display-font text-4xl">Ranking en vivo</h3>
