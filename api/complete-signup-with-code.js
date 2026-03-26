@@ -1,4 +1,4 @@
-import { createAdminClient, json, listUserByEmail, normalizeEmail, verifyCodeRecord } from "./_auth-code-utils.js";
+import { createAdminClient, json, listUserByEmail, listUserByNickname, normalizeEmail, normalizeNickname, verifyCodeRecord } from "./_auth-code-utils.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   }
 
   const email = normalizeEmail(req.body?.email);
-  const nickname = String(req.body?.nickname || "").trim();
+  const nickname = normalizeNickname(req.body?.nickname);
   const password = String(req.body?.password || "");
   const code = String(req.body?.code || "").trim();
 
@@ -15,6 +15,9 @@ export default async function handler(req, res) {
   }
   if (nickname.length < 3) {
     return json(res, 400, { error: "Nickname inválido." });
+  }
+  if (/\s/.test(nickname)) {
+    return json(res, 400, { error: "El nickname no puede tener espacios." });
   }
   if (password.length < 6) {
     return json(res, 400, { error: "La contraseña debe tener mínimo 6 caracteres." });
@@ -41,7 +44,15 @@ export default async function handler(req, res) {
       return json(res, 409, { error: "Este correo ya está registrado." });
     }
 
-    const finalNickname = String(verification.metadata?.nickname || nickname).trim();
+    const finalNickname = normalizeNickname(verification.metadata?.nickname || nickname);
+    if (finalNickname.length < 3 || /\s/.test(finalNickname)) {
+      return json(res, 400, { error: "Nickname invalido." });
+    }
+
+    const existingNickname = await listUserByNickname(admin, finalNickname);
+    if (existingNickname) {
+      return json(res, 409, { error: "Ese nickname ya esta en uso." });
+    }
     const { data, error } = await admin.auth.admin.createUser({
       email,
       password,
