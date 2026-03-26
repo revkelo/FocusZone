@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { BookOpen, Clock3, Target, TrendingUp, Trophy } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "../components/ui/carousel";
 import { supabase } from "../lib/supabase";
 
 interface RankItem {
@@ -13,6 +14,35 @@ interface RankItem {
 
 export default function Home() {
   const [ranking, setRanking] = useState<RankItem[]>([]);
+  const [carouselApi, setCarouselApi] = useState<CarouselApi | null>(null);
+  const [activeSlide, setActiveSlide] = useState(0);
+
+  const designMockups = [
+    {
+      title: "Afiche Semana de Pausa Digital",
+      kind: "Afiche",
+      description: "Campana visual para biblioteca y pasillos.",
+      gradient: "from-[#5b30d9] via-[#7d4cd8] to-[#00b6d9]",
+    },
+    {
+      title: "Banner Redes Sociales",
+      kind: "Banner",
+      description: "Version para Instagram y Facebook institucional.",
+      gradient: "from-[#f47c0f] via-[#f7943a] to-[#ffd47a]",
+    },
+    {
+      title: "Afiche Jornadas de Enfoque",
+      kind: "Afiche",
+      description: "Material para promocion de sesiones pomodoro.",
+      gradient: "from-[#4f7c0f] via-[#79ad2a] to-[#b8ee73]",
+    },
+    {
+      title: "Banner Landing del Proyecto",
+      kind: "Banner",
+      description: "Pieza principal de comunicacion del programa.",
+      gradient: "from-[#2a1a70] via-[#5b30d9] to-[#f47c0f]",
+    },
+  ];
 
   useEffect(() => {
     const loadRanking = async () => {
@@ -38,6 +68,24 @@ export default function Home() {
 
     void loadRanking();
   }, []);
+
+  useEffect(() => {
+    if (!carouselApi) {
+      return;
+    }
+
+    const onSelect = () => {
+      setActiveSlide(carouselApi.selectedScrollSnap());
+    };
+
+    onSelect();
+    carouselApi.on("select", onSelect);
+    carouselApi.on("reInit", onSelect);
+
+    return () => {
+      carouselApi.off("select", onSelect);
+    };
+  }, [carouselApi]);
 
   const podium = [ranking[1], ranking[0], ranking[2]];
 
@@ -86,6 +134,47 @@ export default function Home() {
                 </Button>
               </Link>
             </div>
+
+            <Card className="focus-card rounded-none border-2 border-[#5b30d9]/25 bg-white/80 p-4 md:p-5">
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <h3 className="display-font text-4xl text-[#5b30d9] md:text-5xl">Mockups de diseno</h3>
+                <span className="rounded-full bg-[#5b30d9]/10 px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-[#5b30d9]">
+                  Afiche + Banner
+                </span>
+              </div>
+
+              <div className="relative px-1 sm:px-8">
+                <Carousel setApi={setCarouselApi} opts={{ align: "start", loop: true }} className="w-full">
+                  <CarouselContent>
+                    {designMockups.map((item, index) => (
+                      <CarouselItem key={item.title + index}>
+                        <div className={`rounded-none border border-white/20 bg-gradient-to-br p-5 text-white ${item.gradient}`}>
+                          <p className="mb-2 inline-flex rounded-full bg-black/20 px-2 py-1 text-[11px] font-bold uppercase tracking-wide">{item.kind}</p>
+                          <p className="display-font text-[2.2rem] leading-none md:text-5xl">{item.title}</p>
+                          <p className="mt-3 max-w-xs text-sm font-medium text-white/90 md:text-base">{item.description}</p>
+                          <div className="mt-4 h-1.5 w-full bg-white/35">
+                            <div className="h-full w-2/3 bg-white" />
+                          </div>
+                        </div>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  <CarouselPrevious className="left-0 border-[#5b30d9] text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white sm:-left-5" />
+                  <CarouselNext className="right-0 border-[#5b30d9] text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white sm:-right-5" />
+                </Carousel>
+              </div>
+
+              <div className="mt-3 flex justify-center gap-1.5">
+                {designMockups.map((item, index) => (
+                  <button
+                    key={`dot-${item.title}`}
+                    onClick={() => carouselApi?.scrollTo(index)}
+                    className={`h-2.5 w-6 rounded-full transition ${activeSlide === index ? "bg-[#f47c0f]" : "bg-[#5b30d9]/20"}`}
+                    aria-label={`Ir al mockup ${index + 1}`}
+                  />
+                ))}
+              </div>
+            </Card>
 
             <div className="grid gap-4 sm:grid-cols-3">
               <Card className="focus-card focus-glow-orange rounded-none p-4">

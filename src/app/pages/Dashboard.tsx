@@ -1543,12 +1543,12 @@ export default function Dashboard() {
               </Card>
 
               <section className="grid gap-4">
-                <Card className="focus-card rounded-none p-6">
+                <Card className="focus-card rounded-none p-4 sm:p-6">
                   <div className="mb-3 flex items-center gap-2 text-[#5b30d9]">
                     <Users className="size-5" />
-                    <h3 className="display-font text-4xl">Salas Pomodoro</h3>
+                    <h3 className="display-font text-3xl sm:text-4xl">Salas Pomodoro</h3>
                   </div>
-                  <div className="mb-4 space-y-2 border border-[#5b30d9]/20 bg-white/70 p-3">
+                  <div className="mb-4 space-y-3 border border-[#5b30d9]/20 bg-white/70 p-3 sm:p-4">
                     <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Crear sala</p>
                     <Input value={newRoomName} onChange={(event) => setNewRoomName(event.target.value)} placeholder="Ej: Diseno nocturno" />
                     <Button disabled={isCreatingRoom} onClick={() => void handleCreateRoom()} className="w-full rounded-none bg-[#5b30d9] text-white hover:bg-[#4a22be] sm:w-auto">
@@ -1564,10 +1564,10 @@ export default function Dashboard() {
                         const isJoined = joinedRoomIds.has(room.id);
                         const isSelected = selectedRoomId === room.id;
                         return (
-                          <div key={room.id} className={`border p-3 ${isSelected ? "border-[#f47c0f] bg-[#fff4ea]" : "border-[#5b30d9]/20 bg-white/70"}`}>
+                          <div key={room.id} className={`border p-3 sm:p-4 ${isSelected ? "border-[#f47c0f] bg-[#fff4ea]" : "border-[#5b30d9]/20 bg-white/70"}`}>
                             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                               <p className="break-words font-bold text-[#5b30d9]">{room.name}</p>
-                              <div className="flex flex-wrap gap-2">
+                              <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap">
                                 {isJoined ? (
                                   <>
                                     <Button size="sm" variant="outline" onClick={() => setSelectedRoomId(room.id)} className="rounded-none border-[#5b30d9] text-[#5b30d9]">
@@ -1591,7 +1591,7 @@ export default function Dashboard() {
                   </div>
 
                   {selectedRoomId && (
-                    <div className="mt-4 border border-[#5b30d9]/20 bg-white/70 p-3">
+                    <div className="mt-4 border border-[#5b30d9]/20 bg-white/70 p-3 sm:p-4">
                       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                         <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Miembros en sala</p>
                         <span className="rounded-full bg-[#5b30d9]/10 px-2 py-1 text-xs font-bold text-[#5b30d9]">Vista en tiempo real</span>
@@ -1599,7 +1599,7 @@ export default function Dashboard() {
                       {roomMembers.length === 0 ? (
                         <p className="text-sm text-[#5b30d9]/75">Cargando miembros...</p>
                       ) : (
-                        <div className="grid gap-2 sm:grid-cols-2">
+                        <div className="grid max-h-[46vh] gap-2 overflow-y-auto pr-1 sm:max-h-[52vh] sm:grid-cols-2">
                           {roomMembers.map((member) => {
                             const memberDuration = estimateMemberDuration(member.timeLeft);
                             const normalizedDuration = Math.max(memberDuration, member.timeLeft, 1);
@@ -1609,10 +1609,10 @@ export default function Dashboard() {
 
                             return (
                             <div key={member.userId} className="border border-[#5b30d9]/20 bg-white p-3">
-                              <div className="mb-2 flex items-center justify-between">
-                                <span className="font-bold text-[#5b30d9]">{member.displayName}</span>
+                              <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                <span className="break-all font-bold text-[#5b30d9]">{member.displayName}</span>
                                 <span
-                                  className={`rounded-full px-2 py-1 text-xs font-bold ${
+                                  className={`w-fit rounded-full px-2 py-1 text-xs font-bold ${
                                     member.isActive
                                       ? member.isPaused
                                         ? "bg-[#ffe8b3] text-[#7d5a00]"
