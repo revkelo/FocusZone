@@ -726,6 +726,13 @@ export default function Dashboard() {
       return;
     }
 
+    if (error.includes("Solo puedes completar 1 reto definido por d")) {
+      pushToast("info", "Reto diario completado", "Hoy ya completaste tu reto definido. Manana puedes continuar.");
+      playEventSound("notification");
+      setError("");
+      return;
+    }
+
     pushToast("error", "Ups", error);
     playEventSound("error");
     setError("");
@@ -2168,7 +2175,9 @@ export default function Dashboard() {
           })}
         </div>
 
-        <main className="mx-auto flex min-h-[calc(100dvh-84px)] w-full max-w-6xl flex-col px-5 py-2 pb-24 md:min-h-0 md:px-8 md:py-10 md:pb-10">
+        <main
+          className={`mx-auto flex min-h-[calc(100dvh-84px)] w-full max-w-[88rem] flex-col px-5 py-2 ${activeTab === "chatbot" ? "pb-[4.5rem]" : "pb-24"} md:min-h-0 md:px-8 md:py-10 md:pb-10`}
+        >
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex w-full flex-1 flex-col">
             <TabsList className="mb-6 hidden h-auto w-full flex-wrap rounded-none bg-[#5b30d9] p-1 md:flex">
@@ -2481,7 +2490,7 @@ export default function Dashboard() {
                   <h2 className="display-font text-4xl text-[#5b30d9] sm:text-5xl">Chatbot Lumi</h2>
                 </div>
 
-                <div ref={chatScrollContainerRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto border border-[#5b30d9]/20 bg-white/70 p-3 sm:p-4">
+                <div ref={chatScrollContainerRef} className="min-h-[320px] flex-1 space-y-3 overflow-y-auto border border-[#5b30d9]/20 bg-white/70 p-3 sm:min-h-[380px] sm:p-4 lg:min-h-[460px]">
                   {chatMessages.map((message) => (
                     <div
                       key={message.id}
