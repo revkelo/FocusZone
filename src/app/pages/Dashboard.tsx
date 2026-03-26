@@ -136,6 +136,7 @@ const MAX_REWARD_DESCRIPTION_LENGTH = 180;
 const MAX_REWARD_COST = 5000;
 const MAX_ROOM_NAME_LENGTH = 40;
 const MAX_NUMERIC_INPUT_LENGTH = 4;
+const ROOM_PRESENCE_STALE_MS = 3_000;
 const DEFAULT_DAILY_REMINDER_HOUR = 18;
 const DEFAULT_POMODORO_REMINDER_MINUTES = 10;
 const STREAK_WEEK_BONUS: Record<number, number> = {
@@ -1115,7 +1116,7 @@ export default function Dashboard() {
           .order("joined_at", { ascending: true }),
         supabase
           .from("pomodoro_room_presence")
-          .select("user_id, time_left, is_active, is_paused")
+          .select("user_id, time_left, is_active, is_paused, updated_at")
           .eq("room_id", selectedRoomId),
       ]);
 
@@ -1130,6 +1131,7 @@ export default function Dashboard() {
             timeLeft: entry.time_left,
             isActive: entry.is_active,
             isPaused: entry.is_paused,
+            updatedAt: entry.updated_at,
           },
         ]),
       );
@@ -1147,12 +1149,21 @@ export default function Dashboard() {
           }
 
           const current = presenceMap.get(member.user_id);
+          const stalePresence =
+            Boolean(current?.isActive) &&
+            typeof current?.updatedAt === "string" &&
+            Date.now() - new Date(current.updatedAt).getTime() > ROOM_PRESENCE_STALE_MS;
+
+          const safeTimeLeft = typeof current?.timeLeft === "number" ? Math.max(0, current.timeLeft) : getModeSeconds("focus");
+          const safeIsActive = Boolean(current?.isActive);
+          const safeIsPaused = stalePresence ? true : Boolean(current?.isPaused);
+
           return {
             userId: member.user_id,
             displayName: member.display_name,
-            timeLeft: current?.timeLeft ?? getModeSeconds("focus"),
-            isActive: current?.isActive ?? false,
-            isPaused: current?.isPaused ?? false,
+            timeLeft: safeTimeLeft,
+            isActive: safeIsActive,
+            isPaused: safeIsPaused,
           };
         }),
       );
