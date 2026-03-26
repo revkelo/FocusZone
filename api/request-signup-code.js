@@ -3,7 +3,9 @@ import {
   generate4DigitCode,
   json,
   listUserByEmail,
+  listUserByNickname,
   normalizeEmail,
+  normalizeNickname,
   sendCodeEmail,
   upsertCode,
 } from "./_auth-code-utils.js";
@@ -14,7 +16,7 @@ export default async function handler(req, res) {
   }
 
   const email = normalizeEmail(req.body?.email);
-  const nickname = String(req.body?.nickname || "").trim();
+  const nickname = normalizeNickname(req.body?.nickname);
 
   if (!email || !email.includes("@")) {
     return json(res, 400, { error: "Correo inválido." });
@@ -22,12 +24,20 @@ export default async function handler(req, res) {
   if (nickname.length < 3) {
     return json(res, 400, { error: "Nickname inválido." });
   }
+  if (/\s/.test(nickname)) {
+    return json(res, 400, { error: "El nickname no puede tener espacios." });
+  }
 
   try {
     const admin = createAdminClient();
     const existing = await listUserByEmail(admin, email);
     if (existing) {
       return json(res, 409, { error: "Este correo ya está registrado." });
+    }
+
+    const existingNickname = await listUserByNickname(admin, nickname);
+    if (existingNickname) {
+      return json(res, 409, { error: "Ese nickname ya esta en uso." });
     }
 
     const code = generate4DigitCode();
