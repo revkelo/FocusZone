@@ -49,6 +49,28 @@ OPENROUTER_SITE_NAME=FocusZone
    - `public.pomodoro_sessions`
 4. Prueba en `/app`: al marcar retos o completar pomodoro, los datos quedan guardados por usuario.
 
+### Verificacion de correo y recuperacion de clave (SMTP)
+
+El login ya incluye:
+- Envio de verificacion al crear cuenta.
+- Boton para reenviar verificacion.
+- Boton "Olvide mi contrasena".
+- Pantalla para establecer nueva contrasena al volver desde el enlace de recuperacion.
+
+Para que los correos salgan por tu cuenta `focuszoneueb@gmail.com`, configuralo en Supabase:
+1. Ve a `Authentication > Providers > Email`.
+2. Activa `Confirm email` (verificacion obligatoria).
+3. Ve a `Authentication > Settings > SMTP Settings`.
+4. SMTP Host: `smtp.gmail.com`
+5. SMTP Port: `587`
+6. SMTP User: `focuszoneueb@gmail.com`
+7. SMTP Pass: tu contrasena de aplicacion de Gmail.
+8. Sender email: `focuszoneueb@gmail.com`
+9. Sender name: `Focus Zone`
+10. Guarda y prueba plantillas de `Confirm signup` y `Reset password`.
+
+Importante: la contrasena de aplicacion es secreta. Si ya se compartio publicamente, revocala y genera una nueva.
+
 ## Deploy recomendado
 
 Vercel (ideal para mini proyecto):
