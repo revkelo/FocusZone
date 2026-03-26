@@ -799,6 +799,31 @@ export default function Dashboard() {
     });
   }, [userId, selectedRoomId, joinedRoomIds, timeLeft, isActive, isPaused, name, email]);
 
+  useEffect(() => {
+    if (!selectedRoomId) {
+      return;
+    }
+
+    const interval = window.setInterval(() => {
+      setRoomMembers((previous) =>
+        previous.map((member) => {
+          if (!member.isActive || member.isPaused || member.timeLeft <= 0) {
+            return member;
+          }
+
+          return {
+            ...member,
+            timeLeft: Math.max(0, member.timeLeft - 1),
+          };
+        }),
+      );
+    }, 1000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [selectedRoomId]);
+
   const handleTimerComplete = async () => {
     if (!userId) {
       return;
