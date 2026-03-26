@@ -12,85 +12,37 @@ interface RankItem {
   totalPoints: number;
 }
 
-interface GalleryItem {
-  title: string;
-  kind: string;
-  description: string;
+interface ArtItem {
   src: string;
-  orientation?: "portrait" | "landscape";
+  title: string;
+  orientation: "portrait" | "landscape";
 }
 
-const galleryItems: GalleryItem[] = [
-  {
-    title: "Afiche - Semana de Pausa Digital",
-    kind: "Afiche",
-    description: "Activacion visual para biblioteca y zonas de estudio.",
-    src: "/assets/focuszone/carousel-01.jpg",
-    orientation: "landscape",
-  },
-  {
-    title: "Pieza editorial de campana",
-    kind: "Banner",
-    description: "Formato adaptable para redes institucionales.",
-    src: "/assets/focuszone/carousel-02.jpg",
-    orientation: "portrait",
-  },
-  {
-    title: "Composicion visual Zone Focus",
-    kind: "Afiche",
-    description: "Linea grafica aplicada a piezas impresas.",
-    src: "/assets/focuszone/campaign-11.jpg",
-    orientation: "landscape",
-  },
-  {
-    title: "Narrativa para pausa digital",
-    kind: "Banner",
-    description: "Mensajes para conciencia y concentracion.",
-    src: "/assets/focuszone/campaign-14.jpg",
-    orientation: "portrait",
-  },
+const artGallery: ArtItem[] = [
+  { src: "/assets/focuszone/carousel-01.jpg", title: "Afiche principal", orientation: "portrait" },
+  { src: "/assets/focuszone/carousel-02.jpg", title: "Pieza editorial", orientation: "portrait" },
+  { src: "/assets/focuszone/campaign-01.jpg", title: "Diseño 01", orientation: "landscape" },
+  { src: "/assets/focuszone/campaign-02.jpg", title: "Diseño 02", orientation: "landscape" },
+  { src: "/assets/focuszone/campaign-03.jpg", title: "Diseño 03", orientation: "landscape" },
+  { src: "/assets/focuszone/campaign-04.jpg", title: "Diseño 04", orientation: "landscape" },
+  { src: "/assets/focuszone/campaign-08.jpg", title: "Diseño 08", orientation: "portrait" },
+  { src: "/assets/focuszone/campaign-09.jpg", title: "Diseño 09", orientation: "portrait" },
+  { src: "/assets/focuszone/campaign-10.jpg", title: "Diseño 10", orientation: "portrait" },
+  { src: "/assets/focuszone/campaign-11.jpg", title: "Diseño 11", orientation: "portrait" },
+  { src: "/assets/focuszone/campaign-12.jpg", title: "Diseño 12", orientation: "portrait" },
+  { src: "/assets/focuszone/campaign-13.jpg", title: "Diseño 13", orientation: "portrait" },
+  { src: "/assets/focuszone/campaign-14.jpg", title: "Diseño 14", orientation: "portrait" },
 ];
-
-const quickGallery = [
-  "/assets/focuszone/campaign-01.jpg",
-  "/assets/focuszone/campaign-02.jpg",
-  "/assets/focuszone/campaign-03.jpg",
-  "/assets/focuszone/campaign-04.jpg",
-  "/assets/focuszone/campaign-08.jpg",
-  "/assets/focuszone/campaign-10.jpg",
-];
-
-const portraitSources = new Set([
-  "/assets/focuszone/carousel-02.jpg",
-  "/assets/focuszone/campaign-14.jpg",
-  "/assets/focuszone/campaign-10.jpg",
-  "/assets/focuszone/campaign-12.jpg",
-  "/assets/focuszone/campaign-13.jpg",
-]);
 
 export default function Home() {
   const [ranking, setRanking] = useState<RankItem[]>([]);
-  const [carouselApi, setCarouselApi] = useState<CarouselApi | null>(null);
-  const [activeSlide, setActiveSlide] = useState(0);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
+  const [horizontalCarouselApi, setHorizontalCarouselApi] = useState<CarouselApi | null>(null);
+  const [activeHorizontalSlide, setActiveHorizontalSlide] = useState(0);
 
-  const allDesigns = useMemo(() => {
-    const fromCarousel = galleryItems.map((item) => ({
-      src: item.src,
-      title: item.title,
-      kind: item.kind,
-      orientation: item.orientation ?? (portraitSources.has(item.src) ? "portrait" : "landscape"),
-    }));
-    const fromQuick = quickGallery.map((src, index) => ({
-      src,
-      title: `Diseno ${index + 1}`,
-      kind: "Pieza",
-      orientation: portraitSources.has(src) ? "portrait" : "landscape",
-    }));
-    const merged = [...fromCarousel, ...fromQuick];
-    const deduped = merged.filter((item, index, array) => array.findIndex((entry) => entry.src === item.src) === index);
-    return deduped;
-  }, []);
+  const viewerItem = useMemo(() => (viewerIndex !== null ? artGallery[viewerIndex] : null), [viewerIndex]);
+  const horizontalDesigns = useMemo(() => artGallery.filter((item) => item.orientation === "landscape"), []);
+  const collectionDesigns = useMemo(() => artGallery.filter((item) => item.orientation === "portrait"), []);
 
   useEffect(() => {
     const loadRanking = async () => {
@@ -118,24 +70,6 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (!carouselApi) {
-      return;
-    }
-
-    const onSelect = () => {
-      setActiveSlide(carouselApi.selectedScrollSnap());
-    };
-
-    onSelect();
-    carouselApi.on("select", onSelect);
-    carouselApi.on("reInit", onSelect);
-
-    return () => {
-      carouselApi.off("select", onSelect);
-    };
-  }, [carouselApi]);
-
-  useEffect(() => {
     if (viewerIndex === null) {
       return;
     }
@@ -152,29 +86,53 @@ export default function Home() {
     };
   }, [viewerIndex]);
 
-  const podium = [ranking[1], ranking[0], ranking[2]];
-  const viewerItem = viewerIndex !== null ? allDesigns[viewerIndex] : null;
-
-  const openViewerBySrc = (src: string) => {
-    const index = allDesigns.findIndex((item) => item.src === src);
-    if (index >= 0) {
-      setViewerIndex(index);
+  useEffect(() => {
+    if (!horizontalCarouselApi) {
+      return;
     }
-  };
+
+    const onSelect = () => {
+      setActiveHorizontalSlide(horizontalCarouselApi.selectedScrollSnap());
+    };
+
+    onSelect();
+    horizontalCarouselApi.on("select", onSelect);
+    horizontalCarouselApi.on("reInit", onSelect);
+
+    return () => {
+      horizontalCarouselApi.off("select", onSelect);
+    };
+  }, [horizontalCarouselApi]);
+
+  useEffect(() => {
+    if (!horizontalCarouselApi) {
+      return;
+    }
+
+    const autoplay = window.setInterval(() => {
+      horizontalCarouselApi.scrollNext();
+    }, 3200);
+
+    return () => {
+      window.clearInterval(autoplay);
+    };
+  }, [horizontalCarouselApi]);
 
   const goPrevDesign = () => {
     if (viewerIndex === null) {
       return;
     }
-    setViewerIndex((viewerIndex - 1 + allDesigns.length) % allDesigns.length);
+    setViewerIndex((viewerIndex - 1 + artGallery.length) % artGallery.length);
   };
 
   const goNextDesign = () => {
     if (viewerIndex === null) {
       return;
     }
-    setViewerIndex((viewerIndex + 1) % allDesigns.length);
+    setViewerIndex((viewerIndex + 1) % artGallery.length);
   };
+
+  const podium = [ranking[1], ranking[0], ranking[2]];
 
   return (
     <div className="focus-shell focus-rings focus-no-stars min-h-screen overflow-x-hidden">
@@ -184,13 +142,11 @@ export default function Home() {
             <div className="grid size-10 place-items-center rounded-none bg-[#f47c0f] text-white md:size-11">
               <Target className="size-5 md:size-6" />
             </div>
-            <div>
-              <p className="display-font text-[2.1rem] leading-none text-[#5b30d9] md:text-3xl">Focus Zone</p>
-            </div>
+            <p className="display-font text-[2.1rem] leading-none text-[#5b30d9] md:text-3xl">Focus Zone</p>
           </div>
           <Link to="/login" className="w-full sm:w-auto">
             <Button className="w-full rounded-none border-2 border-[#5b30d9] bg-transparent font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white sm:w-auto">
-              Iniciar sesion
+              Iniciar sesión
             </Button>
           </Link>
         </header>
@@ -206,7 +162,7 @@ export default function Home() {
               </h1>
               <div className="focus-divider mt-4 max-w-xl" />
               <p className="mt-4 max-w-xl text-[1.05rem] text-[#4a2dba] md:text-lg">
-                Un nuevo mundo en la biblioteca: menos ruido digital, mas sesiones de concentracion, progreso real y retos semanales.
+                Un nuevo mundo en la biblioteca: menos ruido digital, más sesiones de concentración, progreso real y retos semanales.
               </p>
               <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
                 <Link to="/login" className="w-full">
@@ -229,83 +185,79 @@ export default function Home() {
               </p>
               <div className="my-5 h-px w-full bg-gradient-to-r from-[#f47c0f] via-[#f2f0f3] to-[#b8ee73]/80" />
               <div className="mt-6 space-y-3 text-base font-bold md:text-lg">
-                <p>Educacion</p>
-                <p>Concientizacion</p>
+                <p>Educación</p>
+                <p>Concientización</p>
                 <p>Estrategias preventivas</p>
               </div>
             </Card>
           </section>
 
-          <Card className="focus-card focus-reveal focus-reveal-delay-1 rounded-none border-2 border-[#5b30d9]/25 bg-white/85 p-4 md:p-6">
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <h3 className="display-font text-4xl text-[#5b30d9] md:text-5xl">Galeria del proyecto</h3>
-              <span className="hidden text-xs font-bold uppercase tracking-[0.14em] text-[#5b30d9]/70 md:block">Disenos oficiales</span>
+          <Card className="focus-card focus-reveal focus-reveal-delay-1 rounded-none border-2 border-[#5b30d9]/25 bg-[linear-gradient(180deg,#ffffff_0%,#f8f5ff_100%)] p-4 md:p-6">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h3 className="display-font text-4xl text-[#5b30d9] md:text-5xl">Galería de arte</h3>
+                <p className="mt-1 text-sm font-semibold text-[#5b30d9]/75">Colección visual Focus Zone. Haz clic para ampliar.</p>
+              </div>
             </div>
 
-            <div className="relative overflow-hidden">
-              <Carousel setApi={setCarouselApi} opts={{ align: "start", loop: true }} className="w-full">
+            <div className="mb-5">
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-xs font-black uppercase tracking-[0.12em] text-[#5b30d9]/70">Carrusel horizontal</p>
+                <p className="text-xs text-[#5b30d9]/70">Piezas panoramicas</p>
+              </div>
+              <Carousel setApi={setHorizontalCarouselApi} opts={{ align: "start", loop: true }} className="w-full">
                 <CarouselContent>
-                  {galleryItems.map((item, index) => (
-                    <CarouselItem key={item.title + index}>
-                      <div className="relative overflow-hidden rounded-none border border-[#5b30d9]/25 bg-[#2d1973]">
+                  {horizontalDesigns.map((item) => {
+                    const originalIndex = artGallery.findIndex((entry) => entry.src === item.src);
+                    return (
+                      <CarouselItem key={item.src} className="basis-full">
                         <button
                           type="button"
-                          onClick={() => openViewerBySrc(item.src)}
-                          className="block w-full bg-[#2d1973]"
-                          aria-label={`Ver ${item.title} en grande`}
+                          onClick={() => setViewerIndex(originalIndex)}
+                          className="group w-full overflow-hidden border border-[#5b30d9]/20 bg-white text-left transition hover:border-[#5b30d9]/45"
                         >
-                          <img
-                            src={item.src}
-                            alt={item.title}
-                            className={`mx-auto object-contain ${
-                              item.orientation === "portrait"
-                                ? "h-[380px] w-auto max-w-full md:h-[620px]"
-                                : "h-[300px] w-full md:h-[460px]"
-                            }`}
-                            loading="lazy"
-                          />
+                          <div className="relative bg-[#f7f5ff] p-2">
+                            <img src={item.src} alt={item.title} className="h-[220px] w-full object-contain md:h-[320px]" loading="lazy" />
+                          </div>
                         </button>
-                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#1b0f47]/95 via-[#1b0f47]/55 to-transparent p-4 text-white md:p-6">
-                          <p className="mb-2 inline-flex rounded-none bg-[#f47c0f] px-2 py-1 text-[11px] font-black uppercase tracking-wide text-white">{item.kind}</p>
-                          <p className="display-font text-[2rem] leading-[0.92] md:text-6xl">{item.title}</p>
-                          <p className="mt-2 max-w-2xl text-sm font-medium text-white/90 md:text-base">{item.description}</p>
-                        </div>
-                      </div>
-                    </CarouselItem>
-                  ))}
+                      </CarouselItem>
+                    );
+                  })}
                 </CarouselContent>
-                <CarouselPrevious className="border-[#5b30d9] text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white -left-3 sm:-left-5" />
-                <CarouselNext className="border-[#5b30d9] text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white -right-3 sm:-right-5" />
+                <CarouselPrevious className="size-8 border-[#5b30d9] text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white -left-2 sm:-left-3 md:size-9" />
+                <CarouselNext className="size-8 border-[#5b30d9] text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white -right-2 sm:-right-3 md:size-9" />
               </Carousel>
+              <div className="mt-3 flex justify-center gap-1.5">
+                {horizontalDesigns.map((item, index) => (
+                  <button
+                    key={`horizontal-dot-${item.src}`}
+                    onClick={() => horizontalCarouselApi?.scrollTo(index)}
+                    className={`h-2.5 w-6 rounded-full transition ${activeHorizontalSlide === index ? "bg-[#f47c0f]" : "bg-[#5b30d9]/20"}`}
+                    aria-label={`Ir al horizontal ${index + 1}`}
+                  />
+                ))}
+              </div>
             </div>
 
-            <div className="mt-3 flex justify-center gap-1.5">
-              {galleryItems.map((item, index) => (
-                <button
-                  key={`dot-${item.title}`}
-                  onClick={() => carouselApi?.scrollTo(index)}
-                  className={`h-2.5 w-6 rounded-full transition ${activeSlide === index ? "bg-[#f47c0f]" : "bg-[#5b30d9]/20"}`}
-                  aria-label={`Ir al diseno ${index + 1}`}
-                />
-              ))}
-            </div>
-
-            <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-6">
-              {quickGallery.map((image, index) => (
-                <button
-                  type="button"
-                  key={image + index}
-                  onClick={() => openViewerBySrc(image)}
-                  className={`overflow-hidden border bg-white transition ${
-                    activeSlide === index % galleryItems.length
-                      ? "border-[#f47c0f] ring-2 ring-[#f47c0f]/35"
-                      : "border-[#5b30d9]/20 hover:border-[#5b30d9]/45"
-                  }`}
-                >
-                  <img src={image} alt={`Zona Focus pieza ${index + 1}`} className="h-24 w-full object-cover" loading="lazy" />
-                </button>
-              ))}
-            </div>
+            {collectionDesigns.length > 0 && (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {collectionDesigns.map((item) => {
+                  const originalIndex = artGallery.findIndex((entry) => entry.src === item.src);
+                  return (
+                    <button
+                      key={item.src}
+                      type="button"
+                      onClick={() => setViewerIndex(originalIndex)}
+                      className="group block w-full overflow-hidden border border-[#5b30d9]/20 bg-white text-left shadow-[0_10px_24px_-18px_rgba(37,10,110,0.5)] transition hover:-translate-y-0.5 hover:border-[#5b30d9]/45"
+                    >
+                      <div className="relative bg-[#f7f5ff] p-2">
+                        <img src={item.src} alt={item.title} className="aspect-[3/4] w-full object-contain" loading="lazy" />
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </Card>
 
           <section className="grid gap-4 lg:grid-cols-[1fr_0.9fr]">
@@ -330,12 +282,12 @@ export default function Home() {
             <Card className="focus-card focus-heavy focus-reveal focus-reveal-delay-2 rounded-none border-2 border-[#f47c0f]/35 bg-[#fff8f0] p-5 md:p-7">
               <div className="mb-4 flex items-center gap-2 text-[#5b30d9]">
                 <Trophy className="size-5 text-[#f47c0f]" />
-                <h3 className="display-font text-4xl">Ranking en vivo</h3>
-              </div>
+              <h3 className="display-font text-4xl">Ranking en vivo</h3>
+            </div>
 
-              {ranking.length === 0 ? (
-                <p className="font-bold text-[#5b30d9]/75">Aun no hay datos de ranking.</p>
-              ) : (
+            {ranking.length === 0 ? (
+                <p className="font-bold text-[#5b30d9]/75">Aún no hay datos de ranking.</p>
+            ) : (
                 <>
                   <div className="grid grid-cols-3 items-end gap-2">
                     {podium.map((entry, index) => {
@@ -380,24 +332,24 @@ export default function Home() {
         </main>
 
         {viewerItem && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-3 md:p-8" onClick={() => setViewerIndex(null)}>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#f2f0f3]/95 p-3 md:p-8" onClick={() => setViewerIndex(null)}>
             <div className="relative w-full max-w-6xl" onClick={(event) => event.stopPropagation()}>
-              <div className="mb-3 flex items-center justify-between text-white">
+              <div className="mb-3 flex items-center justify-between text-[#2a2a2a]">
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.12em] text-white/70">{viewerItem.kind}</p>
+                  <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#5b30d9]/70">Obra</p>
                   <p className="display-font text-3xl">{viewerItem.title}</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setViewerIndex(null)}
-                  className="grid size-10 place-items-center border border-white/35 bg-black/30 text-white hover:bg-white/10"
+                  className="grid size-10 place-items-center border border-[#5b30d9]/35 bg-white text-[#5b30d9] hover:bg-[#ece8f9]"
                   aria-label="Cerrar visor"
                 >
                   <X className="size-5" />
                 </button>
               </div>
 
-              <div className="relative overflow-hidden border border-white/25 bg-black flex items-center justify-center">
+              <div className="relative flex items-center justify-center overflow-hidden border border-[#5b30d9]/25 bg-white">
                 <img
                   src={viewerItem.src}
                   alt={viewerItem.title}
@@ -410,7 +362,7 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={goPrevDesign}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 border border-white/40 bg-black/55 px-3 py-2 text-sm font-bold text-white hover:bg-white/20"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 border border-[#5b30d9]/40 bg-white/90 px-3 py-2 text-sm font-bold text-[#5b30d9] hover:bg-white"
                   aria-label="Imagen anterior"
                 >
                   {"<"}
@@ -418,7 +370,7 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={goNextDesign}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 border border-white/40 bg-black/55 px-3 py-2 text-sm font-bold text-white hover:bg-white/20"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 border border-[#5b30d9]/40 bg-white/90 px-3 py-2 text-sm font-bold text-[#5b30d9] hover:bg-white"
                   aria-label="Imagen siguiente"
                 >
                   {">"}

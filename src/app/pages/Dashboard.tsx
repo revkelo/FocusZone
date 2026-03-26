@@ -273,7 +273,7 @@ export default function Dashboard() {
     {
       id: 1,
       role: "assistant",
-      text: "Soy Lumi. Te ayudo con Zone Focus, biblioteca, pausa digital y concentracion.",
+      text: "Soy Lumi. Te ayudo con Zone Focus, biblioteca, pausa digital y concentración.",
     },
   ]);
   const [chatInput, setChatInput] = useState("");
@@ -728,7 +728,7 @@ export default function Dashboard() {
     }
 
     if (error.includes("Solo puedes completar 1 reto definido por d")) {
-      pushToast("info", "Reto diario completado", "Hoy ya completaste tu reto definido. Manana puedes continuar.");
+      pushToast("info", "Reto diario completado", "Hoy ya completaste tu reto definido. Mañana puedes continuar.");
       playEventSound("notification");
       setError("");
       return;
@@ -944,7 +944,7 @@ export default function Dashboard() {
       window.localStorage.setItem(reminderKey, "1");
       void notifyUser(
         "FocusZone | Reto diario pendiente",
-        `${name || "Usuario"}, aun tienes un reto diario por completar hoy.`,
+        `${name || "Usuario"}, aún tienes un reto diario por completar hoy.`,
         `focuszone-daily-challenge-${todayKey}`,
       );
     };
@@ -1915,7 +1915,7 @@ export default function Dashboard() {
 
   const sendTestNotification = async () => {
     if (!userId) {
-      setError("Inicia sesion para activar notificaciones push.");
+      setError("Inicia sesión para activar notificaciones push.");
       setSuccessMessage("");
       return;
     }
@@ -2335,7 +2335,7 @@ export default function Dashboard() {
                       value={newRoomName}
                       maxLength={MAX_ROOM_NAME_LENGTH}
                       onChange={(event) => setNewRoomName(event.target.value.slice(0, MAX_ROOM_NAME_LENGTH))}
-                      placeholder="Ej: Diseno nocturno"
+                      placeholder="Ej: Diseño nocturno"
                     />
                     <Button disabled={isCreatingRoom || Boolean(ownedRoom)} onClick={() => void handleCreateRoom()} className="w-full rounded-none bg-[#5b30d9] text-white hover:bg-[#4a22be] sm:w-auto">
                       {isCreatingRoom ? "Creando..." : "Crear sala"}
@@ -2579,7 +2579,7 @@ export default function Dashboard() {
                     <div className="space-y-3 border border-[#5b30d9]/20 bg-white/70 p-4">
                       <p className="font-bold text-[#5b30d9]">Crear reto personalizado</p>
                       <p className="text-xs font-bold text-[#5b30d9]/75">
-                        Maximo {MAX_CUSTOM_CHALLENGES_PER_DAY} por dia. Hoy puedes crear {remainingCustomCreationsToday}.
+                        Máximo {MAX_CUSTOM_CHALLENGES_PER_DAY} por día. Hoy puedes crear {remainingCustomCreationsToday}.
                       </p>
                       <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Nombre del reto</p>
                       <Input
@@ -2655,7 +2655,7 @@ export default function Dashboard() {
                       <div className="grid gap-3 sm:grid-cols-3">
                         <div className="border border-[#5b30d9]/25 bg-white/70 p-3">
                           <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/70">Racha actual</p>
-                          <p className="display-font mt-1 text-4xl text-[#5b30d9]">{currentChallengeStreak} dias</p>
+                          <p className="display-font mt-1 text-4xl text-[#5b30d9]">{currentChallengeStreak} días</p>
                         </div>
                         <div className="border border-[#f47c0f]/30 bg-[#fff4ea] p-3">
                           <p className="text-xs font-bold uppercase tracking-wide text-[#f47c0f]/80">Bono por racha</p>
@@ -2713,9 +2713,9 @@ export default function Dashboard() {
                     {allBaseCompleted && (
                       <div className="border border-[#f47c0f]/35 bg-[#fff4ea] p-4">
                         <p className="font-bold text-[#b05a00]">Completaste los 21 retos del ciclo.</p>
-                        <p className="mt-1 text-sm text-[#b05a00]/85">Puedes reiniciar para empezar un nuevo ciclo de 21 dias.</p>
+                        <p className="mt-1 text-sm text-[#b05a00]/85">Puedes reiniciar para empezar un nuevo ciclo de 21 días.</p>
                         <Button onClick={() => void handleResetChallengeCycle()} className="mt-3 rounded-none bg-[#f47c0f] text-white hover:bg-[#dd6900]">
-                          Reiniciar ciclo de 21 dias
+                          Reiniciar ciclo de 21 días
                         </Button>
                       </div>
                     )}
