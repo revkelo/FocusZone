@@ -16,6 +16,7 @@ type ApiResult = {
 };
 
 const normalizeInput = (value: string) => value.trim();
+const hasWhitespace = (value: string) => /\s/.test(value);
 
 export default function Login() {
   const navigate = useNavigate();
@@ -141,6 +142,10 @@ export default function Login() {
     }
     if (normalizedNickname.length < 3) {
       setError("El nickname debe tener mínimo 3 caracteres.");
+      return;
+    }
+    if (hasWhitespace(normalizedNickname)) {
+      setError("El nickname no puede tener espacios.");
       return;
     }
     if (password.length < 6) {
@@ -404,7 +409,7 @@ export default function Login() {
                     type="text"
                     placeholder="@tu_nickname"
                     value={nickname}
-                    onChange={(event) => setNickname(event.target.value)}
+                    onChange={(event) => setNickname(event.target.value.replace(/\s+/g, ""))}
                     className="h-11 rounded-none border-[#5b30d9]/25 pl-10"
                   />
                 </div>

@@ -14,6 +14,7 @@ export const json = (res, status, body) => {
 };
 
 export const normalizeEmail = (value) => String(value || "").trim().toLowerCase();
+export const normalizeNickname = (value) => String(value || "").trim();
 
 export const generate4DigitCode = () => String(Math.floor(1000 + Math.random() * 9000));
 
@@ -33,10 +34,11 @@ export const createAdminClient = () => {
 };
 
 export const getTransporter = () => {
-  const host = process.env.SMTP_HOST;
+  const host = String(process.env.SMTP_HOST || "").trim();
   const port = Number(process.env.SMTP_PORT || 587);
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
+  const user = String(process.env.SMTP_USER || "").trim();
+  const rawPass = String(process.env.SMTP_PASS || "");
+  const pass = /gmail\.com$/i.test(host) ? rawPass.replace(/\s+/g, "") : rawPass.trim();
 
   if (!host || !user || !pass) {
     throw new Error("Missing SMTP_HOST/SMTP_USER/SMTP_PASS");
@@ -56,13 +58,14 @@ export const sendCodeEmail = async ({ to, subject, heading, code, description })
   const transporter = getTransporter();
   const year = new Date().getFullYear();
 
-  await transporter.sendMail({
-    from: `${fromName} <${fromEmail}>`,
-    to,
-    replyTo: fromEmail,
-    subject,
-    text: `${heading}\n\nCodigo: ${code}\n\n${description}\n\nEste codigo vence en ${CODE_TTL_MINUTES} minutos.`,
-    html: `
+  try {
+    await transporter.sendMail({
+      from: `${fromName} <${fromEmail}>`,
+      to,
+      replyTo: fromEmail,
+      subject,
+      text: `${heading}\n\nCodigo: ${code}\n\n${description}\n\nEste codigo vence en ${CODE_TTL_MINUTES} minutos.`,
+      html: `
       <div style="margin:0;padding:24px;background:#f5f2ff">
         <div style="font-family:Segoe UI,Arial,sans-serif;max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #e6ddff">
           <div style="background:#5b30d9;padding:14px 18px;color:#ffffff;font-weight:700;letter-spacing:.4px">
@@ -86,11 +89,19 @@ export const sendCodeEmail = async ({ to, subject, heading, code, description })
         </div>
       </div>
     `,
-    headers: {
-      "X-Auto-Response-Suppress": "All",
-      "Auto-Submitted": "auto-generated",
-    },
-  });
+      headers: {
+        "X-Auto-Response-Suppress": "All",
+        "Auto-Submitted": "auto-generated",
+      },
+    });
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error && error.code === "EAUTH") {
+      throw new Error(
+        "No se pudo autenticar en Gmail SMTP. Verifica SMTP_USER y genera una nueva App Password (Google > Security > 2-Step Verification > App passwords)."
+      );
+    }
+    throw error;
+  }
 };
 
 export const listUserByEmail = async (admin, email) => {
@@ -105,6 +116,41 @@ export const listUserByEmail = async (admin, email) => {
 
     const users = data?.users || [];
     const found = users.find((user) => String(user.email || "").toLowerCase() === email);
+    if (found) {
+      return found;
+    }
+
+    if (users.length < perPage) {
+      return null;
+    }
+
+    page += 1;
+  }
+
+  return null;
+};
+
+export const listUserByNickname = async (admin, nickname) => {
+  const normalized = normalizeNickname(nickname).toLowerCase();
+  if (!normalized) {
+    return null;
+  }
+
+  let page = 1;
+  const perPage = 200;
+
+  while (page < 50) {
+    const { data, error } = await admin.auth.admin.listUsers({ page, perPage });
+    if (error) {
+      throw new Error(error.message || "Failed to list users");
+    }
+
+    const users = data?.users || [];
+    const found = users.find((user) => {
+      const meta = user.user_metadata || {};
+      const existing = String(meta.nickname || meta.full_name || "").trim().toLowerCase();
+      return existing === normalized;
+    });
     if (found) {
       return found;
     }
