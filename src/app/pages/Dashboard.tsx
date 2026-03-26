@@ -162,6 +162,13 @@ const getLocalDateKey = (value: Date | string) => {
   return `${year}-${month}-${day}`;
 };
 
+const urlBase64ToUint8Array = (base64String: string) => {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const normalizedBase64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = window.atob(normalizedBase64);
+  return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
+};
+
 const playEventSound = (event: "pomodoro" | "reward" | "notification" | "error") => {
   try {
     const audioContext = new window.AudioContext();
@@ -1634,6 +1641,12 @@ export default function Dashboard() {
   };
 
   const sendTestNotification = async () => {
+    if (!userId) {
+      setError("Inicia sesion para activar notificaciones push.");
+      setSuccessMessage("");
+      return;
+    }
+
     if (typeof window === "undefined" || !("Notification" in window)) {
       setError("Este navegador no soporta notificaciones.");
       setSuccessMessage("");
@@ -1656,6 +1669,19 @@ export default function Dashboard() {
       return;
     }
 
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+      setError("Tu navegador no soporta Push API en este modo.");
+      setSuccessMessage("");
+      return;
+    }
+
+    const vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undefined;
+    if (!vapidPublicKey) {
+      setError("Falta configurar VITE_VAPID_PUBLIC_KEY.");
+      setSuccessMessage("");
+      return;
+    }
+
     let permission = window.Notification.permission;
     if (permission === "default") {
       permission = await window.Notification.requestPermission();
@@ -1669,40 +1695,68 @@ export default function Dashboard() {
     }
 
     try {
-      if ("serviceWorker" in navigator) {
-        const registration = await navigator.serviceWorker.getRegistration();
-        if (registration) {
-          await registration.showNotification("FocusZone | Prueba", {
-            body: "Notificaciones activas. También escucharás sonido en los avisos.",
-            icon: "/favicon.svg",
-            badge: "/favicon.svg",
-            tag: "focuszone-test-notification",
-          });
-        } else {
-          new window.Notification("FocusZone | Prueba", {
-            body: "Notificaciones activas. También escucharás sonido en los avisos.",
-            icon: "/favicon.svg",
-            badge: "/favicon.svg",
-            tag: "focuszone-test-notification",
-          });
-        }
-      } else {
-        new window.Notification("FocusZone | Prueba", {
-          body: "Notificaciones activas. También escucharás sonido en los avisos.",
-          icon: "/favicon.svg",
-          badge: "/favicon.svg",
-          tag: "focuszone-test-notification",
+      const registration = await navigator.serviceWorker.register("/sw.js");
+      const readyRegistration = await navigator.serviceWorker.ready;
+
+      let subscription = await readyRegistration.pushManager.getSubscription();
+      if (!subscription) {
+        subscription = await readyRegistration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
         });
       }
 
+      const serialized = subscription.toJSON();
+      const p256dh = serialized.keys?.p256dh ?? "";
+      const auth = serialized.keys?.auth ?? "";
+      if (!subscription.endpoint || !p256dh || !auth) {
+        setError("No se pudo obtener una suscripcion push valida.");
+        setSuccessMessage("");
+        return;
+      }
+
+      const { error: subscriptionError } = await supabase.from("push_subscriptions").upsert(
+        {
+          user_id: userId,
+          endpoint: subscription.endpoint,
+          p256dh,
+          auth,
+          subscription: serialized,
+          user_agent: navigator.userAgent,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "endpoint" },
+      );
+
+      if (subscriptionError) {
+        setError("No se pudo guardar la suscripcion push.");
+        setSuccessMessage("");
+        return;
+      }
+
+      const response = await fetch("/api/push-test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          title: "FocusZone | Prueba Push",
+          body: "Push real enviada. Si ves esto, movil ya esta listo.",
+        }),
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => ({}))) as { error?: string };
+        throw new Error(payload.error ?? "No se pudo enviar el push de prueba");
+      }
+
+      void registration.update();
       setError("");
-      setSuccessMessage("Notificacion de prueba enviada.");
+      setSuccessMessage("Push de prueba enviada.");
     } catch {
-      setError("Este navegador móvil no permite notificaciones web en este modo. Prueba instalar la app o usar Chrome/Edge.");
+      setError("No se pudo enviar push en este dispositivo. Verifica permisos, PWA instalada (iOS) y configuracion VAPID.");
       setSuccessMessage("");
     }
   };
-
   const handleLogout = async () => {
     await pausePomodoroAndSync();
     await supabase.auth.signOut();
