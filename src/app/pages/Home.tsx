@@ -12,37 +12,53 @@ interface RankItem {
   totalPoints: number;
 }
 
+interface GalleryItem {
+  title: string;
+  kind: string;
+  description: string;
+  src: string;
+}
+
+const galleryItems: GalleryItem[] = [
+  {
+    title: "Afiche - Semana de Pausa Digital",
+    kind: "Afiche",
+    description: "Activacion visual para biblioteca y zonas de estudio.",
+    src: "/assets/focuszone/carousel-01.jpg",
+  },
+  {
+    title: "Pieza editorial de campana",
+    kind: "Banner",
+    description: "Formato adaptable para redes institucionales.",
+    src: "/assets/focuszone/carousel-02.jpg",
+  },
+  {
+    title: "Composicion visual Zone Focus",
+    kind: "Afiche",
+    description: "Linea grafica aplicada a piezas impresas.",
+    src: "/assets/focuszone/campaign-11.jpg",
+  },
+  {
+    title: "Narrativa para pausa digital",
+    kind: "Banner",
+    description: "Mensajes para conciencia y concentracion.",
+    src: "/assets/focuszone/campaign-14.jpg",
+  },
+];
+
+const quickGallery = [
+  "/assets/focuszone/campaign-01.jpg",
+  "/assets/focuszone/campaign-02.jpg",
+  "/assets/focuszone/campaign-03.jpg",
+  "/assets/focuszone/campaign-04.jpg",
+  "/assets/focuszone/campaign-08.jpg",
+  "/assets/focuszone/campaign-10.jpg",
+];
+
 export default function Home() {
   const [ranking, setRanking] = useState<RankItem[]>([]);
   const [carouselApi, setCarouselApi] = useState<CarouselApi | null>(null);
   const [activeSlide, setActiveSlide] = useState(0);
-
-  const designMockups = [
-    {
-      title: "Afiche Semana de Pausa Digital",
-      kind: "Afiche",
-      description: "Campaña visual para biblioteca y pasillos.",
-      gradient: "from-[#5b30d9] via-[#7d4cd8] to-[#00b6d9]",
-    },
-    {
-      title: "Banner Redes Sociales",
-      kind: "Banner",
-      description: "Versión para Instagram y Facebook institucional.",
-      gradient: "from-[#f47c0f] via-[#f7943a] to-[#ffd47a]",
-    },
-    {
-      title: "Afiche Jornadas de Enfoque",
-      kind: "Afiche",
-      description: "Material para promoción de sesiones pomodoro.",
-      gradient: "from-[#4f7c0f] via-[#79ad2a] to-[#b8ee73]",
-    },
-    {
-      title: "Banner Landing del Proyecto",
-      kind: "Banner",
-      description: "Pieza principal de comunicación del programa.",
-      gradient: "from-[#2a1a70] via-[#5b30d9] to-[#f47c0f]",
-    },
-  ];
 
   useEffect(() => {
     const loadRanking = async () => {
@@ -103,7 +119,7 @@ export default function Home() {
           </div>
           <Link to="/login" className="w-full sm:w-auto">
             <Button className="w-full rounded-none border-2 border-[#5b30d9] bg-transparent font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white sm:w-auto">
-              Iniciar sesión
+              Iniciar sesion
             </Button>
           </Link>
         </header>
@@ -118,7 +134,7 @@ export default function Home() {
             </h1>
             <div className="focus-divider max-w-xl" />
             <p className="max-w-xl text-[1.05rem] text-[#4a2dba] md:text-lg">
-              Un nuevo mundo en la biblioteca: menos ruido digital, más sesiones de concentración, progreso real y retos semanales.
+              Un nuevo mundo en la biblioteca: menos ruido digital, mas sesiones de concentracion, progreso real y retos semanales.
             </p>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
@@ -136,20 +152,20 @@ export default function Home() {
 
             <Card className="focus-card focus-heavy focus-reveal focus-reveal-delay-1 rounded-none border-2 border-[#5b30d9]/25 bg-white/80 p-4 md:p-5">
               <div className="mb-3 flex items-center gap-2">
-                <h3 className="display-font text-4xl text-[#5b30d9] md:text-5xl">Mockups de diseño</h3>
+                <h3 className="display-font text-4xl text-[#5b30d9] md:text-5xl">Galeria del proyecto</h3>
               </div>
 
               <div className="relative overflow-hidden px-0 sm:px-8">
                 <Carousel setApi={setCarouselApi} opts={{ align: "start", loop: true }} className="w-full">
                   <CarouselContent>
-                    {designMockups.map((item, index) => (
+                    {galleryItems.map((item, index) => (
                       <CarouselItem key={item.title + index}>
-                        <div className={`rounded-none border border-white/20 bg-gradient-to-br p-4 text-white md:p-5 ${item.gradient}`}>
-                          <p className="mb-2 inline-flex rounded-full bg-black/20 px-2 py-1 text-[11px] font-bold uppercase tracking-wide">{item.kind}</p>
-                          <p className="display-font text-[1.85rem] leading-[0.92] md:text-5xl">{item.title}</p>
-                          <p className="mt-3 max-w-xs text-sm font-medium text-white/90 md:text-base">{item.description}</p>
-                          <div className="mt-4 h-1.5 w-full bg-white/35">
-                            <div className="h-full w-2/3 bg-white" />
+                        <div className="relative overflow-hidden rounded-none border border-[#5b30d9]/25 bg-[#2d1973]">
+                          <img src={item.src} alt={item.title} className="h-[260px] w-full object-cover md:h-[320px]" loading="lazy" />
+                          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#1b0f47]/95 via-[#1b0f47]/55 to-transparent p-4 text-white md:p-5">
+                            <p className="mb-2 inline-flex rounded-none bg-[#f47c0f] px-2 py-1 text-[11px] font-black uppercase tracking-wide text-white">{item.kind}</p>
+                            <p className="display-font text-[1.8rem] leading-[0.92] md:text-5xl">{item.title}</p>
+                            <p className="mt-2 max-w-md text-sm font-medium text-white/90 md:text-base">{item.description}</p>
                           </div>
                         </div>
                       </CarouselItem>
@@ -161,13 +177,21 @@ export default function Home() {
               </div>
 
               <div className="mt-3 flex justify-center gap-1.5">
-                {designMockups.map((item, index) => (
+                {galleryItems.map((item, index) => (
                   <button
                     key={`dot-${item.title}`}
                     onClick={() => carouselApi?.scrollTo(index)}
                     className={`h-2.5 w-6 rounded-full transition ${activeSlide === index ? "bg-[#f47c0f]" : "bg-[#5b30d9]/20"}`}
                     aria-label={`Ir al mockup ${index + 1}`}
                   />
+                ))}
+              </div>
+
+              <div className="mt-4 grid grid-cols-3 gap-2">
+                {quickGallery.map((image, index) => (
+                  <div key={image + index} className="overflow-hidden border border-[#5b30d9]/20 bg-white">
+                    <img src={image} alt={`Zona Focus pieza ${index + 1}`} className="h-20 w-full object-cover sm:h-24" loading="lazy" />
+                  </div>
                 ))}
               </div>
             </Card>
@@ -199,8 +223,8 @@ export default function Home() {
               </p>
               <div className="my-5 h-px w-full bg-gradient-to-r from-[#f47c0f] via-[#f2f0f3] to-[#b8ee73]/80" />
               <div className="mt-6 space-y-3 text-base font-bold md:text-lg">
-                <p>Educación</p>
-                <p>Concientización</p>
+                <p>Educacion</p>
+                <p>Concientizacion</p>
                 <p>Estrategias preventivas</p>
               </div>
             </Card>
@@ -212,7 +236,7 @@ export default function Home() {
               </div>
 
               {ranking.length === 0 ? (
-                <p className="font-bold text-[#5b30d9]/75">Aún no hay datos de ranking.</p>
+                <p className="font-bold text-[#5b30d9]/75">Aun no hay datos de ranking.</p>
               ) : (
                 <>
                   <div className="grid grid-cols-3 items-end gap-2">
@@ -267,3 +291,4 @@ export default function Home() {
     </div>
   );
 }
+

@@ -8,7 +8,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { supabase } from "../lib/supabase";
 
-type AuthView = "login" | "register" | "registerCode" | "recoverRequest" | "recoverCode";
+type AuthView = "login" | "register" | "registerCode" | "recoverRequest" | "recoverCode" | "verifyLoginCode";
 
 type ApiResult = {
   ok?: boolean;
@@ -101,13 +101,30 @@ export default function Login() {
       email: loginEmail,
       password,
     });
-    setLoading(false);
 
     if (signInError) {
+      const lowerMessage = signInError.message.toLowerCase();
+      if (lowerMessage.includes("email not confirmed") || lowerMessage.includes("email not verified")) {
+        try {
+          await postAuth("/api/request-existing-verification-code", { email: loginEmail });
+          setView("verifyLoginCode");
+          setEmail(loginEmail);
+          setInfo("Tu correo no está verificado. Te enviamos un código de 4 dígitos.");
+          setLoading(false);
+          return;
+        } catch (requestError) {
+          setError(requestError instanceof Error ? requestError.message : "No se pudo enviar código de verificación.");
+          setLoading(false);
+          return;
+        }
+      }
+
       setError("Credenciales inválidas.");
+      setLoading(false);
       return;
     }
 
+    setLoading(false);
     navigate("/dashboard");
   };
 
@@ -238,22 +255,52 @@ export default function Login() {
     }
   };
 
+  const handleVerifyLoginEmailCode = async (event: React.FormEvent) => {
+    event.preventDefault();
+    resetMessages();
+
+    const normalizedCode = normalizeInput(code);
+    if (!/^\d{4}$/.test(normalizedCode)) {
+      setError("Ingresa un código de 4 dígitos.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await postAuth("/api/verify-existing-email-code", {
+        email: normalizeInput(email).toLowerCase(),
+        code: normalizedCode,
+      });
+      setView("login");
+      setCode("");
+      setInfo("Correo verificado. Ahora inicia sesión.");
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : "No se pudo verificar el correo.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const title =
     view === "register"
       ? "Crea cuenta"
       : view === "registerCode"
         ? "Verifica correo"
-        : view === "recoverRequest"
-          ? "Recuperar"
-          : view === "recoverCode"
-            ? "Nuevo acceso"
-            : "Entra";
+            : view === "recoverRequest"
+              ? "Recuperar"
+              : view === "recoverCode"
+                ? "Nuevo acceso"
+                : view === "verifyLoginCode"
+                  ? "Verifica correo"
+                : "Entra";
 
   const tag =
     view === "register" || view === "registerCode"
       ? "Registro"
       : view === "recoverRequest" || view === "recoverCode"
         ? "Recuperación"
+        : view === "verifyLoginCode"
+          ? "Verificación"
         : "Acceso";
 
   return (
@@ -278,6 +325,8 @@ export default function Login() {
                   ? "Te enviaremos un código de recuperación."
                   : view === "recoverCode"
                     ? "Ingresa código y define tu nueva contraseña."
+                    : view === "verifyLoginCode"
+                      ? "Ingresa el código para verificar tu correo."
                     : "Activa tu enfoque en segundos."}
           </p>
 
@@ -550,6 +599,33 @@ export default function Login() {
                 className="h-12 w-full rounded-none bg-[#f47c0f] text-base font-bold text-white hover:bg-[#dd6900] focus-glow-orange"
               >
                 {loading ? "Actualizando..." : "Cambiar contraseña"}
+              </Button>
+            </form>
+          )}
+
+          {view === "verifyLoginCode" && (
+            <form onSubmit={handleVerifyLoginEmailCode} className="mt-6 space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="verify-login-code" className="font-bold text-[#5b30d9]">Código de 4 dígitos</Label>
+                <div className="relative">
+                  <ShieldCheck className="absolute left-3 top-3 h-4 w-4 text-[#7d4cd8]/70" />
+                  <Input
+                    id="verify-login-code"
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="1234"
+                    value={code}
+                    onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 4))}
+                    className="h-11 rounded-none border-[#5b30d9]/25 pl-10 tracking-[0.3em]"
+                  />
+                </div>
+              </div>
+              <Button
+                type="submit"
+                disabled={loading}
+                className="h-12 w-full rounded-none bg-[#f47c0f] text-base font-bold text-white hover:bg-[#dd6900] focus-glow-orange"
+              >
+                {loading ? "Verificando..." : "Verificar correo"}
               </Button>
             </form>
           )}

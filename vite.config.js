@@ -4,12 +4,15 @@ import react from "@vitejs/plugin-react";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Buffer } from "node:buffer";
+import process from "node:process";
 import lumiChatHandler from "./api/lumi-chat.js";
 import pushTestHandler from "./api/push-test.js";
 import requestSignupCodeHandler from "./api/request-signup-code.js";
 import completeSignupWithCodeHandler from "./api/complete-signup-with-code.js";
 import requestPasswordResetCodeHandler from "./api/request-password-reset-code.js";
 import resetPasswordWithCodeHandler from "./api/reset-password-with-code.js";
+import requestExistingVerificationCodeHandler from "./api/request-existing-verification-code.js";
+import verifyExistingEmailCodeHandler from "./api/verify-existing-email-code.js";
 
 const rootDir = fileURLToPath(new URL(".", import.meta.url));
 const srcRoot = resolve(rootDir, "src");
@@ -48,6 +51,8 @@ export default defineConfig(({ mode }) => {
             ["/complete-signup-with-code", completeSignupWithCodeHandler],
             ["/request-password-reset-code", requestPasswordResetCodeHandler],
             ["/reset-password-with-code", resetPasswordWithCodeHandler],
+            ["/request-existing-verification-code", requestExistingVerificationCodeHandler],
+            ["/verify-existing-email-code", verifyExistingEmailCodeHandler],
           ]);
 
           server.middlewares.use("/api", async (req, res, next) => {
