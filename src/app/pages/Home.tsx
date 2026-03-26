@@ -90,7 +90,7 @@ export default function Home() {
   const podium = [ranking[1], ranking[0], ranking[2]];
 
   return (
-    <div className="focus-shell focus-rings focus-no-stars min-h-screen">
+    <div className="focus-shell focus-rings focus-no-stars min-h-screen overflow-x-hidden">
       <div className="relative z-10">
         <header className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-5 py-5 md:flex-nowrap md:px-8 md:py-6">
           <div className="flex items-center gap-3">
@@ -110,7 +110,7 @@ export default function Home() {
         </header>
 
         <main className="mx-auto grid w-full max-w-6xl gap-10 px-5 pb-16 pt-6 md:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
-          <section className="space-y-6 md:space-y-8">
+          <section className="min-w-0 space-y-6 md:space-y-8">
             <p className="text-base italic text-[#7d4cd8] md:text-lg">La biblioteca como espacio de pausa digital.</p>
             <h1 className="display-font text-[3.9rem] leading-[0.84] text-[#f47c0f] sm:text-[4.8rem] lg:text-[5.6rem]">
               Focus
@@ -124,33 +124,30 @@ export default function Home() {
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
               <Link to="/login" className="w-full">
-                <Button className="h-12 w-full rounded-none bg-[#f47c0f] px-6 text-lg font-bold text-white hover:bg-[#dd6900] md:h-14 md:px-8">
+                <Button className="h-12 w-full rounded-none bg-[#f47c0f] px-4 text-base font-bold text-white hover:bg-[#dd6900] md:h-14 md:px-8 md:text-lg">
                   Entrar ahora
                 </Button>
               </Link>
               <Link to="/login" className="w-full">
-                <Button className="h-12 w-full rounded-none border-2 border-[#5b30d9] bg-[#f2f0f3] px-6 text-lg font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white md:h-14 md:px-8">
+                <Button className="h-12 w-full rounded-none border-2 border-[#5b30d9] bg-[#f2f0f3] px-4 text-base font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white md:h-14 md:px-8 md:text-lg">
                   Crear cuenta
                 </Button>
               </Link>
             </div>
 
             <Card className="focus-card rounded-none border-2 border-[#5b30d9]/25 bg-white/80 p-4 md:p-5">
-              <div className="mb-3 flex items-center justify-between gap-2">
+              <div className="mb-3 flex items-center gap-2">
                 <h3 className="display-font text-4xl text-[#5b30d9] md:text-5xl">Mockups de diseno</h3>
-                <span className="rounded-full bg-[#5b30d9]/10 px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-[#5b30d9]">
-                  Afiche + Banner
-                </span>
               </div>
 
-              <div className="relative px-1 sm:px-8">
+              <div className="relative overflow-hidden px-0 sm:px-8">
                 <Carousel setApi={setCarouselApi} opts={{ align: "start", loop: true }} className="w-full">
                   <CarouselContent>
                     {designMockups.map((item, index) => (
                       <CarouselItem key={item.title + index}>
-                        <div className={`rounded-none border border-white/20 bg-gradient-to-br p-5 text-white ${item.gradient}`}>
+                        <div className={`rounded-none border border-white/20 bg-gradient-to-br p-4 text-white md:p-5 ${item.gradient}`}>
                           <p className="mb-2 inline-flex rounded-full bg-black/20 px-2 py-1 text-[11px] font-bold uppercase tracking-wide">{item.kind}</p>
-                          <p className="display-font text-[2.2rem] leading-none md:text-5xl">{item.title}</p>
+                          <p className="display-font text-[1.85rem] leading-[0.92] md:text-5xl">{item.title}</p>
                           <p className="mt-3 max-w-xs text-sm font-medium text-white/90 md:text-base">{item.description}</p>
                           <div className="mt-4 h-1.5 w-full bg-white/35">
                             <div className="h-full w-2/3 bg-white" />
@@ -159,8 +156,8 @@ export default function Home() {
                       </CarouselItem>
                     ))}
                   </CarouselContent>
-                  <CarouselPrevious className="left-0 border-[#5b30d9] text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white sm:-left-5" />
-                  <CarouselNext className="right-0 border-[#5b30d9] text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white sm:-right-5" />
+                  <CarouselPrevious className="hidden border-[#5b30d9] text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white sm:flex sm:-left-5" />
+                  <CarouselNext className="hidden border-[#5b30d9] text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white sm:flex sm:-right-5" />
                 </Carousel>
               </div>
 
@@ -195,7 +192,7 @@ export default function Home() {
             </div>
           </section>
 
-          <section className="space-y-5">
+          <section className="min-w-0 space-y-5">
             <Card className="focus-card focus-noise focus-grid rounded-none border-2 border-[#5b30d9]/40 bg-[#5b30d9] p-5 text-white md:p-7">
               <h2 className="display-font text-5xl text-[#b8ee73] md:text-6xl">Stop Doomscrolling</h2>
               <p className="mt-4 text-base text-[#f2f0f3] md:text-lg">
