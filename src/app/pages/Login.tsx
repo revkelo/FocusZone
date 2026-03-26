@@ -193,7 +193,7 @@ export default function Login() {
     try {
       await postAuth("/api/request-password-reset-code", { email: normalizedEmail });
       setView("recoverCode");
-      setInfo("Si el correo existe, enviamos un código de 4 dígitos.");
+      setInfo("Código enviado. Revisa tu correo para continuar.");
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "No se pudo enviar el código.");
     } finally {

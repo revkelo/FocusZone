@@ -24,7 +24,7 @@ export default async function handler(req, res) {
 
     // Respuesta genérica para no filtrar si el correo existe o no.
     if (!existing) {
-      return json(res, 200, { ok: true });
+      return json(res, 404, { error: "No hay ninguna cuenta registrada con ese correo." });
     }
 
     const code = generate4DigitCode();
