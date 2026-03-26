@@ -127,6 +127,8 @@ const MAX_REWARD_DESCRIPTION_LENGTH = 180;
 const MAX_REWARD_COST = 5000;
 const MAX_ROOM_NAME_LENGTH = 40;
 const MAX_NUMERIC_INPUT_LENGTH = 4;
+const DEFAULT_DAILY_REMINDER_HOUR = 18;
+const DEFAULT_POMODORO_REMINDER_MINUTES = 10;
 const STREAK_WEEK_BONUS: Record<number, number> = {
   1: 5,
   2: 10,
@@ -253,11 +255,16 @@ export default function Dashboard() {
   const [deletingRoomId, setDeletingRoomId] = useState<number | null>(null);
   const [roomSearchQuery, setRoomSearchQuery] = useState("");
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | "unsupported">("unsupported");
+  const [dailyReminderEnabled, setDailyReminderEnabled] = useState(true);
+  const [dailyReminderHour, setDailyReminderHour] = useState(String(DEFAULT_DAILY_REMINDER_HOUR));
+  const [pomodoroReminderEnabled, setPomodoroReminderEnabled] = useState(true);
+  const [pomodoroReminderMinutes, setPomodoroReminderMinutes] = useState(String(DEFAULT_POMODORO_REMINDER_MINUTES));
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [toasts, setToasts] = useState<AppToast[]>([]);
   const [hydratedPomodoroKey, setHydratedPomodoroKey] = useState<string | null>(null);
   const lastToastRef = useRef<{ signature: string; at: number } | null>(null);
+  const lastPomodoroReminderAtRef = useRef<number>(0);
   const ownPresenceRef = useRef({
     timeLeft: 40 * 60,
     isActive: false,
@@ -270,6 +277,12 @@ export default function Dashboard() {
       return null;
     }
     return `focuszone:pomodoro:${userId}`;
+  }, [userId]);
+  const notificationSettingsStorageKey = useMemo(() => {
+    if (!userId) {
+      return null;
+    }
+    return `focuszone:notification-settings:${userId}`;
   }, [userId]);
 
   const getModeSeconds = (mode: TimerMode) => {
@@ -460,6 +473,55 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
+    if (!notificationSettingsStorageKey || typeof window === "undefined") {
+      return;
+    }
+
+    const raw = window.localStorage.getItem(notificationSettingsStorageKey);
+    if (!raw) {
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(raw) as {
+        dailyReminderEnabled?: boolean;
+        dailyReminderHour?: number;
+        pomodoroReminderEnabled?: boolean;
+        pomodoroReminderMinutes?: number;
+      };
+
+      setDailyReminderEnabled(parsed.dailyReminderEnabled ?? true);
+      setDailyReminderHour(String(Math.max(0, Math.min(23, Number(parsed.dailyReminderHour) || DEFAULT_DAILY_REMINDER_HOUR))));
+      setPomodoroReminderEnabled(parsed.pomodoroReminderEnabled ?? true);
+      setPomodoroReminderMinutes(String(Math.max(1, Math.min(60, Number(parsed.pomodoroReminderMinutes) || DEFAULT_POMODORO_REMINDER_MINUTES))));
+    } catch {
+      // Ignore invalid local settings.
+    }
+  }, [notificationSettingsStorageKey]);
+
+  useEffect(() => {
+    if (!notificationSettingsStorageKey || typeof window === "undefined") {
+      return;
+    }
+
+    window.localStorage.setItem(
+      notificationSettingsStorageKey,
+      JSON.stringify({
+        dailyReminderEnabled,
+        dailyReminderHour: Math.max(0, Math.min(23, Number(dailyReminderHour) || DEFAULT_DAILY_REMINDER_HOUR)),
+        pomodoroReminderEnabled,
+        pomodoroReminderMinutes: Math.max(1, Math.min(60, Number(pomodoroReminderMinutes) || DEFAULT_POMODORO_REMINDER_MINUTES)),
+      }),
+    );
+  }, [
+    notificationSettingsStorageKey,
+    dailyReminderEnabled,
+    dailyReminderHour,
+    pomodoroReminderEnabled,
+    pomodoroReminderMinutes,
+  ]);
+
+  useEffect(() => {
     if (!pomodoroStorageKey || hydratedPomodoroKey === pomodoroStorageKey || typeof window === "undefined") {
       return;
     }
@@ -562,6 +624,39 @@ export default function Dashboard() {
     }, 4200);
   };
 
+  const notifyUser = async (title: string, body: string, tag: string) => {
+    if (typeof window === "undefined" || !("Notification" in window)) {
+      return;
+    }
+    if (window.Notification.permission !== "granted") {
+      return;
+    }
+
+    try {
+      if ("serviceWorker" in navigator) {
+        const registration = await navigator.serviceWorker.getRegistration();
+        if (registration) {
+          await registration.showNotification(title, {
+            body,
+            icon: "/favicon.svg",
+            badge: "/favicon.svg",
+            tag,
+          });
+          return;
+        }
+      }
+
+      new window.Notification(title, {
+        body,
+        icon: "/favicon.svg",
+        badge: "/favicon.svg",
+        tag,
+      });
+    } catch {
+      // Ignore notification transport errors.
+    }
+  };
+
   useEffect(() => {
     if (!successMessage) {
       return;
@@ -581,6 +676,42 @@ export default function Dashboard() {
     playEventSound("error");
     setError("");
   }, [error]);
+
+  useEffect(() => {
+    if (notificationPermission !== "granted") {
+      return;
+    }
+    if (!pomodoroReminderEnabled) {
+      return;
+    }
+    if (!isActive || isPaused || timeLeft <= 0) {
+      return;
+    }
+
+    const reminderEveryMs = Math.max(1, Math.min(60, Number(pomodoroReminderMinutes) || DEFAULT_POMODORO_REMINDER_MINUTES)) * 60 * 1000;
+
+    const interval = window.setInterval(() => {
+      if (document.visibilityState !== "hidden") {
+        return;
+      }
+
+      const now = Date.now();
+      if (now - lastPomodoroReminderAtRef.current < reminderEveryMs) {
+        return;
+      }
+      lastPomodoroReminderAtRef.current = now;
+
+      void notifyUser(
+        "FocusZone | Pomodoro en curso",
+        `${name || "Usuario"}, tu pomodoro sigue corriendo (${getModeLabel(timerMode)}).`,
+        "focuszone-pomodoro-running",
+      );
+    }, 60 * 1000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [notificationPermission, pomodoroReminderEnabled, pomodoroReminderMinutes, isActive, isPaused, timeLeft, name, timerMode]);
 
   useEffect(() => {
     let interval: number | undefined;
@@ -665,6 +796,9 @@ export default function Dashboard() {
   const completedBaseCount = baseChallenges.filter((challenge) => completedChallenges.has(challenge.id)).length;
   const allBaseCompleted = baseChallenges.length > 0 && completedBaseCount === baseChallenges.length;
   const todayKey = getLocalDateKey(new Date());
+  const hasCompletedBaseToday = baseChallenges.some(
+    (challenge) => completedChallenges.has(challenge.id) && challengeCompletionDateKeys.get(challenge.id) === todayKey,
+  );
   const customCreatedToday = customChallenges.filter((challenge) => getLocalDateKey(challenge.createdAt) === todayKey).length;
   const remainingCustomCreationsToday = Math.max(0, MAX_CUSTOM_CHALLENGES_PER_DAY - customCreatedToday);
   const progressPercentage = allChallenges.length === 0 ? 0 : (completedCount / allChallenges.length) * 100;
@@ -684,6 +818,41 @@ export default function Dashboard() {
 
   const points = sessions.length * SESSION_POINTS + challengePoints + streakBonusPoints;
   const availablePoints = points;
+
+  useEffect(() => {
+    if (!userId || notificationPermission !== "granted" || hasCompletedBaseToday || !dailyReminderEnabled) {
+      return;
+    }
+
+    const reminderHour = Math.max(0, Math.min(23, Number(dailyReminderHour) || DEFAULT_DAILY_REMINDER_HOUR));
+
+    const maybeNotifyDailyChallenge = () => {
+      const now = new Date();
+      const hour = now.getHours();
+      if (hour < reminderHour) {
+        return;
+      }
+
+      const reminderKey = `focuszone:daily-challenge-reminder:${userId}:${todayKey}`;
+      if (window.localStorage.getItem(reminderKey) === "1") {
+        return;
+      }
+
+      window.localStorage.setItem(reminderKey, "1");
+      void notifyUser(
+        "FocusZone | Reto diario pendiente",
+        `${name || "Usuario"}, aun tienes un reto diario por completar hoy.`,
+        `focuszone-daily-challenge-${todayKey}`,
+      );
+    };
+
+    maybeNotifyDailyChallenge();
+    const interval = window.setInterval(maybeNotifyDailyChallenge, 15 * 60 * 1000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [userId, notificationPermission, hasCompletedBaseToday, dailyReminderEnabled, dailyReminderHour, todayKey, name]);
 
   useEffect(() => {
     const syncLeaderboard = async () => {
@@ -2343,6 +2512,52 @@ export default function Dashboard() {
                         >
                           Probar notificacion
                         </Button>
+                      </div>
+                      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                        <div className="space-y-2">
+                          <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Recordatorio diario</p>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant={dailyReminderEnabled ? "default" : "outline"}
+                              onClick={() => setDailyReminderEnabled((value) => !value)}
+                              className={dailyReminderEnabled ? "rounded-none bg-[#5b30d9] text-white hover:bg-[#4a22be]" : "rounded-none border-[#5b30d9] text-[#5b30d9]"}
+                            >
+                              {dailyReminderEnabled ? "Activo" : "Inactivo"}
+                            </Button>
+                            <Input
+                              type="number"
+                              min={0}
+                              max={23}
+                              inputMode="numeric"
+                              value={dailyReminderHour}
+                              onChange={(event) => setDailyReminderHour(sanitizeDigitsInput(event.target.value, 2))}
+                              className="w-24"
+                            />
+                          </div>
+                          <p className="text-[11px] font-bold text-[#5b30d9]/70">Hora 24h (0-23)</p>
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Pomodoro en segundo plano</p>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant={pomodoroReminderEnabled ? "default" : "outline"}
+                              onClick={() => setPomodoroReminderEnabled((value) => !value)}
+                              className={pomodoroReminderEnabled ? "rounded-none bg-[#5b30d9] text-white hover:bg-[#4a22be]" : "rounded-none border-[#5b30d9] text-[#5b30d9]"}
+                            >
+                              {pomodoroReminderEnabled ? "Activo" : "Inactivo"}
+                            </Button>
+                            <Input
+                              type="number"
+                              min={1}
+                              max={60}
+                              inputMode="numeric"
+                              value={pomodoroReminderMinutes}
+                              onChange={(event) => setPomodoroReminderMinutes(sanitizeDigitsInput(event.target.value, 2))}
+                              className="w-24"
+                            />
+                          </div>
+                          <p className="text-[11px] font-bold text-[#5b30d9]/70">Cada N minutos (1-60)</p>
+                        </div>
                       </div>
                     </div>
                   </div>
