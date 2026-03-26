@@ -645,6 +645,10 @@ export default function Dashboard() {
       return;
     }
 
+    const pollInterval = window.setInterval(() => {
+      void loadRoomMembers();
+    }, 1000);
+
     const channel = supabase
       .channel(`room-live-${selectedRoomId}`)
       .on(
@@ -674,6 +678,7 @@ export default function Dashboard() {
       .subscribe();
 
     return () => {
+      clearInterval(pollInterval);
       void supabase.removeChannel(channel);
     };
   }, [selectedRoomId, focusMinutes]);
