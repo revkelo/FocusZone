@@ -21,25 +21,25 @@ export default function Home() {
     {
       title: "Afiche Semana de Pausa Digital",
       kind: "Afiche",
-      description: "Campana visual para biblioteca y pasillos.",
+      description: "Campaña visual para biblioteca y pasillos.",
       gradient: "from-[#5b30d9] via-[#7d4cd8] to-[#00b6d9]",
     },
     {
       title: "Banner Redes Sociales",
       kind: "Banner",
-      description: "Version para Instagram y Facebook institucional.",
+      description: "Versión para Instagram y Facebook institucional.",
       gradient: "from-[#f47c0f] via-[#f7943a] to-[#ffd47a]",
     },
     {
       title: "Afiche Jornadas de Enfoque",
       kind: "Afiche",
-      description: "Material para promocion de sesiones pomodoro.",
+      description: "Material para promoción de sesiones pomodoro.",
       gradient: "from-[#4f7c0f] via-[#79ad2a] to-[#b8ee73]",
     },
     {
       title: "Banner Landing del Proyecto",
       kind: "Banner",
-      description: "Pieza principal de comunicacion del programa.",
+      description: "Pieza principal de comunicación del programa.",
       gradient: "from-[#2a1a70] via-[#5b30d9] to-[#f47c0f]",
     },
   ];
@@ -92,19 +92,18 @@ export default function Home() {
   return (
     <div className="focus-shell focus-rings focus-no-stars min-h-screen overflow-x-hidden">
       <div className="relative z-10">
-        <header className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-5 py-5 md:flex-nowrap md:px-8 md:py-6">
+        <header className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 border-b border-[#5b30d9]/20 bg-[#ece8f9]/65 px-5 py-4 md:flex-nowrap md:px-8 md:py-5">
           <div className="flex items-center gap-3">
             <div className="grid size-10 place-items-center rounded-none bg-[#f47c0f] text-white md:size-11">
               <Target className="size-5 md:size-6" />
             </div>
             <div>
               <p className="display-font text-[2.1rem] leading-none text-[#5b30d9] md:text-3xl">Focus Zone</p>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-[#5b30d9]/70 md:text-xs">Biblioteca digital</p>
             </div>
           </div>
           <Link to="/login" className="w-full sm:w-auto">
             <Button className="w-full rounded-none border-2 border-[#5b30d9] bg-transparent font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white sm:w-auto">
-              Iniciar sesion
+              Iniciar sesión
             </Button>
           </Link>
         </header>
@@ -119,7 +118,7 @@ export default function Home() {
             </h1>
             <div className="focus-divider max-w-xl" />
             <p className="max-w-xl text-[1.05rem] text-[#4a2dba] md:text-lg">
-              Un nuevo mundo en la biblioteca: menos ruido digital, mas sesiones de concentracion, progreso real y retos semanales.
+              Un nuevo mundo en la biblioteca: menos ruido digital, más sesiones de concentración, progreso real y retos semanales.
             </p>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
@@ -137,7 +136,7 @@ export default function Home() {
 
             <Card className="focus-card rounded-none border-2 border-[#5b30d9]/25 bg-white/80 p-4 md:p-5">
               <div className="mb-3 flex items-center gap-2">
-                <h3 className="display-font text-4xl text-[#5b30d9] md:text-5xl">Mockups de diseno</h3>
+                <h3 className="display-font text-4xl text-[#5b30d9] md:text-5xl">Mockups de diseño</h3>
               </div>
 
               <div className="relative overflow-hidden px-0 sm:px-8">
@@ -200,8 +199,8 @@ export default function Home() {
               </p>
               <div className="my-5 h-px w-full bg-gradient-to-r from-[#f47c0f] via-[#f2f0f3] to-[#b8ee73]/80" />
               <div className="mt-6 space-y-3 text-base font-bold md:text-lg">
-                <p>Educacion</p>
-                <p>Concientizacion</p>
+                <p>Educación</p>
+                <p>Concientización</p>
                 <p>Estrategias preventivas</p>
               </div>
             </Card>
@@ -213,7 +212,7 @@ export default function Home() {
               </div>
 
               {ranking.length === 0 ? (
-                <p className="font-bold text-[#5b30d9]/75">Aun no hay datos de ranking.</p>
+                <p className="font-bold text-[#5b30d9]/75">Aún no hay datos de ranking.</p>
               ) : (
                 <>
                   <div className="grid grid-cols-3 items-end gap-2">

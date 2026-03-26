@@ -6,7 +6,6 @@ import {
   Circle,
   Clock,
   Coffee,
-  Gift,
   ListTodo,
   LogOut,
   Mail,
@@ -64,6 +63,12 @@ interface ChallengeItem {
   kind: "base" | "custom";
 }
 
+interface ChallengeCatalogEntry {
+  code: string;
+  title: string;
+  points: number;
+}
+
 interface LeaderboardEntry {
   userId: string;
   displayName: string;
@@ -107,6 +112,15 @@ interface PomodoroSnapshot {
 }
 
 const SESSION_POINTS = 10;
+const MAX_CUSTOM_CHALLENGES = 10;
+const MAX_CHALLENGE_TITLE_LENGTH = 80;
+const MAX_CHALLENGE_TARGET = 10;
+const MAX_CHALLENGE_POINTS = 500;
+const MAX_REWARD_TITLE_LENGTH = 80;
+const MAX_REWARD_DESCRIPTION_LENGTH = 180;
+const MAX_REWARD_COST = 5000;
+const MAX_ROOM_NAME_LENGTH = 40;
+const MAX_NUMERIC_INPUT_LENGTH = 4;
 
 const playEventSound = (event: "pomodoro" | "reward" | "notification" | "error") => {
   try {
@@ -157,6 +171,7 @@ export default function Dashboard() {
   const [userId, setUserId] = useState("");
   const [sessions, setSessions] = useState<Session[]>([]);
   const [completedChallenges, setCompletedChallenges] = useState<Set<string>>(new Set());
+  const [catalogChallenges, setCatalogChallenges] = useState<ChallengeCatalogEntry[]>([]);
   const [customChallenges, setCustomChallenges] = useState<CustomChallenge[]>([]);
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [redemptions, setRedemptions] = useState<Redemption[]>([]);
@@ -187,6 +202,8 @@ export default function Dashboard() {
   const [newRoomName, setNewRoomName] = useState("");
   const [isCreatingRoom, setIsCreatingRoom] = useState(false);
   const [joiningRoomId, setJoiningRoomId] = useState<number | null>(null);
+  const [deletingRoomId, setDeletingRoomId] = useState<number | null>(null);
+  const [roomSearchQuery, setRoomSearchQuery] = useState("");
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | "unsupported">("unsupported");
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -221,6 +238,9 @@ export default function Dashboard() {
   };
 
   const maxTimerSeconds = Math.max(getModeSeconds("focus"), getModeSeconds("shortBreak"), getModeSeconds("longBreak"));
+  const sanitizeDigitsInput = (value: string, maxLength = MAX_NUMERIC_INPUT_LENGTH) => value.replace(/\D/g, "").slice(0, maxLength);
+  const normalizeInputText = (value: string) => value.replace(/\s+/g, " ").trim();
+  const ALLOWED_TEXT_PATTERN = /^[\p{L}\p{N}\s.,:;!?'"()\-_/+#&]+$/u;
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -241,13 +261,14 @@ export default function Dashboard() {
       setEmail(user.email ?? "");
       setName((user.user_metadata?.full_name as string) || (user.email ?? "Usuario"));
 
-      const [sessionsResult, challengesResult, customChallengesResult, rewardsResult, redemptionsResult, roomsResult, membershipsResult] = await Promise.all([
+      const [sessionsResult, challengesResult, catalogChallengesResult, customChallengesResult, rewardsResult, redemptionsResult, roomsResult, membershipsResult] = await Promise.all([
         supabase
           .from("pomodoro_sessions")
           .select("id, duration_seconds, completed_at")
           .eq("user_id", user.id)
           .order("completed_at", { ascending: false }),
         supabase.from("user_challenge_progress").select("challenge_id").eq("user_id", user.id),
+        supabase.from("challenge_catalog").select("code, title, points").eq("is_active", true).order("week", { ascending: true }).order("day", { ascending: true }),
         supabase
           .from("custom_challenges")
           .select("id, title, target_sessions, points, is_group")
@@ -276,6 +297,7 @@ export default function Dashboard() {
       if (
         sessionsResult.error ||
         challengesResult.error ||
+        catalogChallengesResult.error ||
         customChallengesResult.error ||
         rewardsResult.error ||
         redemptionsResult.error ||
@@ -297,6 +319,16 @@ export default function Dashboard() {
 
       if (challengesResult.data) {
         setCompletedChallenges(new Set(challengesResult.data.map((item) => item.challenge_id)));
+      }
+
+      if (catalogChallengesResult.data) {
+        setCatalogChallenges(
+          catalogChallengesResult.data.map((item) => ({
+            code: item.code,
+            title: item.title,
+            points: item.points,
+          })),
+        );
       }
 
       if (customChallengesResult.data) {
@@ -344,13 +376,22 @@ export default function Dashboard() {
       }
 
       if (membershipsResult.data) {
-        const roomIds = new Set(membershipsResult.data.map((item) => item.room_id));
-        setJoinedRoomIds(roomIds);
+        if (membershipsResult.data.length > 1) {
+          const roomIdsToRemove = membershipsResult.data.slice(1).map((item) => item.room_id);
+          if (roomIdsToRemove.length > 0) {
+            await supabase.from("pomodoro_room_presence").delete().eq("user_id", user.id).in("room_id", roomIdsToRemove);
+            await supabase.from("pomodoro_room_members").delete().eq("user_id", user.id).in("room_id", roomIdsToRemove);
+          }
+        }
+
+        const roomId = membershipsResult.data[0]?.room_id ?? null;
+        const singleMembership = roomId ? new Set([roomId]) : new Set<number>();
+        setJoinedRoomIds(singleMembership);
         setSelectedRoomId((previous) => {
-          if (previous && roomIds.has(previous)) {
+          if (previous && roomId && previous === roomId) {
             return previous;
           }
-          return roomIds.values().next().value ?? null;
+          return roomId;
         });
       }
 
@@ -430,7 +471,7 @@ export default function Dashboard() {
       setIsPaused(recoveredIsPaused);
 
       if (didExpireWhileAway) {
-        setSuccessMessage("El pomodoro termino mientras estabas fuera. Estado recuperado.");
+        setSuccessMessage("El pomodoro terminó mientras estabas fuera. Estado recuperado.");
       }
     } catch {
       // Ignore invalid local snapshots.
@@ -531,8 +572,14 @@ export default function Dashboard() {
   }, [timerMode, focusMinutes, shortBreakMinutes, longBreakMinutes, isActive]);
 
   const baseChallenges: ChallengeItem[] = useMemo(
-    () => CHALLENGES.map((challenge) => ({ id: challenge.id, title: challenge.title, points: challenge.points, kind: "base" })),
-    [],
+    () =>
+      (catalogChallenges.length > 0 ? catalogChallenges : CHALLENGES).map((challenge) => ({
+        id: "code" in challenge ? challenge.code : challenge.id,
+        title: challenge.title,
+        points: challenge.points,
+        kind: "base",
+      })),
+    [catalogChallenges],
   );
 
   const customChallengeItems: ChallengeItem[] = useMemo(
@@ -547,6 +594,13 @@ export default function Dashboard() {
   );
 
   const allChallenges: ChallengeItem[] = useMemo(() => [...baseChallenges, ...customChallengeItems], [baseChallenges, customChallengeItems]);
+  const filteredRooms = useMemo(() => {
+    const query = roomSearchQuery.trim().toLowerCase();
+    if (!query) {
+      return rooms;
+    }
+    return rooms.filter((room) => room.name.toLowerCase().includes(query));
+  }, [rooms, roomSearchQuery]);
 
   const completedCount = allChallenges.filter((challenge) => completedChallenges.has(challenge.id)).length;
   const progressPercentage = allChallenges.length === 0 ? 0 : (completedCount / allChallenges.length) * 100;
@@ -554,8 +608,7 @@ export default function Dashboard() {
     .filter((challenge) => completedChallenges.has(challenge.id))
     .reduce((sum, challenge) => sum + challenge.points, 0);
   const points = sessions.length * SESSION_POINTS + challengePoints;
-  const spentPoints = redemptions.reduce((sum, redemption) => sum + redemption.pointsSpent, 0);
-  const availablePoints = Math.max(points - spentPoints, 0);
+  const availablePoints = points;
 
   useEffect(() => {
     const syncLeaderboard = async () => {
@@ -705,13 +758,22 @@ export default function Dashboard() {
       }
 
       if (membershipsResult.data) {
-        const roomIds = new Set(membershipsResult.data.map((item) => item.room_id));
-        setJoinedRoomIds(roomIds);
+        if (membershipsResult.data.length > 1) {
+          const roomIdsToRemove = membershipsResult.data.slice(1).map((item) => item.room_id);
+          if (roomIdsToRemove.length > 0) {
+            await supabase.from("pomodoro_room_presence").delete().eq("user_id", userId).in("room_id", roomIdsToRemove);
+            await supabase.from("pomodoro_room_members").delete().eq("user_id", userId).in("room_id", roomIdsToRemove);
+          }
+        }
+
+        const roomId = membershipsResult.data[0]?.room_id ?? null;
+        const singleMembership = roomId ? new Set([roomId]) : new Set<number>();
+        setJoinedRoomIds(singleMembership);
         setSelectedRoomId((previous) => {
-          if (previous && roomIds.has(previous)) {
+          if (previous && roomId && previous === roomId) {
             return previous;
           }
-          return roomIds.values().next().value ?? null;
+          return roomId;
         });
       }
     };
@@ -853,7 +915,7 @@ export default function Dashboard() {
         .single();
 
       if (insertError || !data) {
-        setError("No se pudo guardar la sesion.");
+        setError("No se pudo guardar la sesión.");
         return;
       }
 
@@ -872,11 +934,11 @@ export default function Dashboard() {
       setFocusStreak(nextFocusStreak);
       setTimerMode(nextMode);
       setTimeLeft(nextMode === "longBreak" ? longDurationSeconds : shortDurationSeconds);
-      setSuccessMessage(`Sesion completada. +${SESSION_POINTS} puntos.`);
+      setSuccessMessage(`Sesión completada. +${SESSION_POINTS} puntos.`);
 
       if (typeof window !== "undefined" && "Notification" in window && window.Notification.permission === "granted") {
         new window.Notification("FocusZone | Pomodoro completado", {
-          body: `Sumaste +${SESSION_POINTS} puntos. Sigue asi.`,
+          body: `Sumaste +${SESSION_POINTS} puntos. Sigue así.`,
           icon: "/favicon.svg",
           badge: "/favicon.svg",
           tag: "focuszone-pomodoro-complete",
@@ -991,14 +1053,30 @@ export default function Dashboard() {
       return;
     }
 
-    const title = newChallengeTitle.trim();
+    const title = normalizeInputText(newChallengeTitle);
     const targetSessions = Number(newChallengeTarget);
     const rewardPoints = Number(newChallengePoints);
     const duplicatedChallenge = customChallenges.some(
       (challenge) => challenge.title.trim().toLowerCase() === title.toLowerCase(),
     );
 
-    if (title.length < 3 || Number.isNaN(targetSessions) || targetSessions <= 0 || Number.isNaN(rewardPoints) || rewardPoints <= 0) {
+    if (customChallenges.length >= MAX_CUSTOM_CHALLENGES) {
+      setError(`Solo puedes crear ${MAX_CUSTOM_CHALLENGES} retos personalizados.`);
+      setSuccessMessage("");
+      return;
+    }
+
+    if (
+      title.length < 3 ||
+      title.length > MAX_CHALLENGE_TITLE_LENGTH ||
+      !ALLOWED_TEXT_PATTERN.test(title) ||
+      Number.isNaN(targetSessions) ||
+      targetSessions < 1 ||
+      targetSessions > MAX_CHALLENGE_TARGET ||
+      Number.isNaN(rewardPoints) ||
+      rewardPoints < 1 ||
+      rewardPoints > MAX_CHALLENGE_POINTS
+    ) {
       setError("Completa bien el formulario del reto personalizado.");
       setSuccessMessage("");
       return;
@@ -1056,12 +1134,21 @@ export default function Dashboard() {
       return;
     }
 
-    const title = newRewardTitle.trim();
-    const description = newRewardDescription.trim();
+    const title = normalizeInputText(newRewardTitle);
+    const description = normalizeInputText(newRewardDescription);
     const costPoints = Number(newRewardCost);
     const duplicatedReward = rewards.some((reward) => reward.title.trim().toLowerCase() === title.toLowerCase());
 
-    if (title.length < 3 || Number.isNaN(costPoints) || costPoints <= 0) {
+    if (
+      title.length < 3 ||
+      title.length > MAX_REWARD_TITLE_LENGTH ||
+      !ALLOWED_TEXT_PATTERN.test(title) ||
+      description.length > MAX_REWARD_DESCRIPTION_LENGTH ||
+      (description.length > 0 && !ALLOWED_TEXT_PATTERN.test(description)) ||
+      Number.isNaN(costPoints) ||
+      costPoints < 1 ||
+      costPoints > MAX_REWARD_COST
+    ) {
       setError("Completa bien el formulario de recompensa.");
       setSuccessMessage("");
       return;
@@ -1167,8 +1254,8 @@ export default function Dashboard() {
       return;
     }
 
-    const roomName = newRoomName.trim();
-    if (roomName.length < 3) {
+    const roomName = normalizeInputText(newRoomName);
+    if (roomName.length < 3 || roomName.length > MAX_ROOM_NAME_LENGTH || !ALLOWED_TEXT_PATTERN.test(roomName)) {
       setError("El nombre de la sala debe tener al menos 3 caracteres.");
       setSuccessMessage("");
       return;
@@ -1189,6 +1276,9 @@ export default function Dashboard() {
       setError("No se pudo crear la sala.");
       return;
     }
+
+    await supabase.from("pomodoro_room_presence").delete().eq("user_id", userId);
+    await supabase.from("pomodoro_room_members").delete().eq("user_id", userId);
 
     const { error: memberError } = await supabase.from("pomodoro_room_members").upsert({
       room_id: data.id,
@@ -1213,10 +1303,10 @@ export default function Dashboard() {
     });
 
     setRooms((previous) => [{ id: data.id, name: data.name, ownerId: data.owner_id }, ...previous]);
-    setJoinedRoomIds((previous) => new Set(previous).add(data.id));
+    setJoinedRoomIds(new Set([data.id]));
     setSelectedRoomId(data.id);
     setNewRoomName("");
-    setSuccessMessage("Sala creada y te uniste correctamente.");
+    setSuccessMessage("Sala creada y te uniste correctamente. Solo puedes estar en una sala a la vez.");
   };
 
   const handleJoinRoom = async (room: PomodoroRoom) => {
@@ -1227,6 +1317,9 @@ export default function Dashboard() {
     setJoiningRoomId(room.id);
     setError("");
     setSuccessMessage("");
+
+    await supabase.from("pomodoro_room_presence").delete().eq("user_id", userId);
+    await supabase.from("pomodoro_room_members").delete().eq("user_id", userId);
 
     const { error: joinError } = await supabase.from("pomodoro_room_members").upsert({
       room_id: room.id,
@@ -1250,9 +1343,9 @@ export default function Dashboard() {
       updated_at: new Date().toISOString(),
     });
 
-    setJoinedRoomIds((previous) => new Set(previous).add(room.id));
+    setJoinedRoomIds(new Set([room.id]));
     setSelectedRoomId(room.id);
-    setSuccessMessage(`Te uniste a ${room.name}.`);
+    setSuccessMessage(`Te uniste a ${room.name}. Se salió de cualquier otra sala previa.`);
   };
 
   const handleLeaveRoom = async (roomId: number) => {
@@ -1268,14 +1361,43 @@ export default function Dashboard() {
       return;
     }
 
-    setJoinedRoomIds((previous) => {
-      const next = new Set(previous);
-      next.delete(roomId);
-      return next;
-    });
+    setJoinedRoomIds(new Set());
 
     setSelectedRoomId((current) => (current === roomId ? null : current));
     setSuccessMessage("Saliste de la sala.");
+  };
+
+  const handleDeleteRoom = async (room: PomodoroRoom) => {
+    if (!userId) {
+      return;
+    }
+
+    setDeletingRoomId(room.id);
+    setError("");
+    setSuccessMessage("");
+
+    const { error: deleteError } = await supabase
+      .from("pomodoro_rooms")
+      .delete()
+      .eq("id", room.id)
+      .eq("owner_id", userId);
+
+    setDeletingRoomId(null);
+
+    if (deleteError) {
+      setError("No se pudo eliminar la sala.");
+      return;
+    }
+
+    setRooms((previous) => previous.filter((item) => item.id !== room.id));
+    setRoomMembers((previous) => previous.filter((member) => member.userId !== userId));
+    setJoinedRoomIds((previous) => {
+      const next = new Set(previous);
+      next.delete(room.id);
+      return next;
+    });
+    setSelectedRoomId((current) => (current === room.id ? null : current));
+    setSuccessMessage(`Sala "${room.name}" eliminada.`);
   };
 
   const sendTestNotification = async () => {
@@ -1368,19 +1490,23 @@ export default function Dashboard() {
   return (
     <div className="focus-shell focus-rings min-h-screen">
       <div className="relative z-10">
-        <header className="border-b border-[#b8ee73]/30 bg-[#5b30d9]">
-          <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-4 md:px-8">
-            <div className="leading-none">
-              <p className="display-font text-5xl text-[#b8ee73]">Focus</p>
-              <p className="display-font -mt-1 text-4xl text-[#f47c0f]">Zone</p>
+        <header className="border-b border-[#5b30d9]/20 bg-[#dcd2f7]/80 backdrop-blur">
+          <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-5 py-4 md:flex-nowrap md:px-8 md:py-5">
+            <div className="flex items-center gap-3">
+              <div className="grid size-10 place-items-center rounded-none bg-[#f47c0f] text-white md:size-11">
+                <Target className="size-5 md:size-6" />
+              </div>
+              <div>
+                <p className="display-font text-[2.1rem] leading-none text-[#5b30d9] md:text-3xl">Focus Zone</p>
+              </div>
             </div>
             <Button
               variant="outline"
               onClick={handleLogout}
-              className="rounded-none border-2 border-white bg-transparent font-bold text-white hover:bg-white hover:text-[#5b30d9]"
+              className="w-full rounded-none border-2 border-[#5b30d9] bg-transparent font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white sm:w-auto"
             >
               <LogOut className="mr-2 size-4" />
-              Cerrar sesion
+              Cerrar sesión
             </Button>
           </div>
         </header>
@@ -1433,7 +1559,6 @@ export default function Dashboard() {
               <TabsTrigger value="pomodoro" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Pomodoro</TabsTrigger>
               <TabsTrigger value="resumen" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Resumen</TabsTrigger>
               <TabsTrigger value="tareas" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Tareas</TabsTrigger>
-              <TabsTrigger value="recompensas" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Recompensas</TabsTrigger>
               <TabsTrigger value="cuenta" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Cuenta</TabsTrigger>
             </TabsList>
 
@@ -1447,12 +1572,12 @@ export default function Dashboard() {
                 <div className="mt-6 grid gap-5 lg:grid-cols-[300px_1fr]">
                   <div className="space-y-3">
                     <div className="rounded-2xl bg-[#5b30d9] p-3 text-white">
-                      <p className="text-xs font-bold uppercase tracking-wide text-white/80">Duracion de sesion</p>
+                      <p className="text-xs font-bold uppercase tracking-wide text-white/80">Duración de sesión</p>
                       <div className="mt-2 flex items-center justify-between">
                         <button
                           onClick={() => adjustDuration("focus", -1)}
                           className="grid size-8 place-items-center rounded-full bg-[#f47c0f] text-white"
-                          aria-label="Reducir sesion"
+                          aria-label="Reducir sesión"
                         >
                           <Minus className="size-4" />
                         </button>
@@ -1462,7 +1587,7 @@ export default function Dashboard() {
                         <button
                           onClick={() => adjustDuration("focus", 1)}
                           className="grid size-8 place-items-center rounded-full bg-[#f47c0f] text-white"
-                          aria-label="Aumentar sesion"
+                          aria-label="Aumentar sesión"
                         >
                           <Plus className="size-4" />
                         </button>
@@ -1555,23 +1680,45 @@ export default function Dashboard() {
                   </div>
                   <div className="mb-4 space-y-3 border border-[#5b30d9]/20 bg-white/70 p-3 sm:p-4">
                     <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Crear sala</p>
-                    <Input value={newRoomName} onChange={(event) => setNewRoomName(event.target.value)} placeholder="Ej: Diseno nocturno" />
+                    <Input
+                      value={newRoomName}
+                      maxLength={MAX_ROOM_NAME_LENGTH}
+                      onChange={(event) => setNewRoomName(event.target.value.slice(0, MAX_ROOM_NAME_LENGTH))}
+                      placeholder="Ej: Diseno nocturno"
+                    />
                     <Button disabled={isCreatingRoom} onClick={() => void handleCreateRoom()} className="w-full rounded-none bg-[#5b30d9] text-white hover:bg-[#4a22be] sm:w-auto">
                       {isCreatingRoom ? "Creando..." : "Crear sala"}
                     </Button>
                   </div>
 
+                  <div className="mb-4 space-y-2 border border-[#5b30d9]/20 bg-white/70 p-3 sm:p-4">
+                    <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Buscar salas</p>
+                    <Input
+                      value={roomSearchQuery}
+                      maxLength={MAX_ROOM_NAME_LENGTH}
+                      onChange={(event) => setRoomSearchQuery(event.target.value.slice(0, MAX_ROOM_NAME_LENGTH))}
+                      placeholder="Busca por nombre de sala"
+                    />
+                    <p className="text-xs font-bold text-[#5b30d9]/70">
+                      {filteredRooms.length} resultado{filteredRooms.length === 1 ? "" : "s"}
+                    </p>
+                  </div>
+
                   <div className="space-y-2">
-                    {rooms.length === 0 ? (
-                      <p className="text-sm text-[#5b30d9]/75">Aun no hay salas activas.</p>
+                    {filteredRooms.length === 0 ? (
+                      <p className="text-sm text-[#5b30d9]/75">Aún no hay salas activas.</p>
                     ) : (
-                      rooms.map((room) => {
+                      filteredRooms.map((room) => {
                         const isJoined = joinedRoomIds.has(room.id);
                         const isSelected = selectedRoomId === room.id;
+                        const isOwner = room.ownerId === userId;
                         return (
                           <div key={room.id} className={`border p-3 sm:p-4 ${isSelected ? "border-[#f47c0f] bg-[#fff4ea]" : "border-[#5b30d9]/20 bg-white/70"}`}>
                             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                              <p className="break-words font-bold text-[#5b30d9]">{room.name}</p>
+                              <div>
+                                <p className="break-words font-bold text-[#5b30d9]">{room.name}</p>
+                                {isOwner && <p className="text-xs font-bold uppercase tracking-wide text-[#f47c0f]">Eres dueño</p>}
+                              </div>
                               <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap">
                                 {isJoined ? (
                                   <>
@@ -1585,6 +1732,16 @@ export default function Dashboard() {
                                 ) : (
                                   <Button size="sm" disabled={joiningRoomId === room.id} onClick={() => void handleJoinRoom(room)} className="rounded-none bg-[#f47c0f] text-white hover:bg-[#dd6900]">
                                     {joiningRoomId === room.id ? "Uniendo..." : "Unirme"}
+                                  </Button>
+                                )}
+                                {isOwner && (
+                                  <Button
+                                    size="sm"
+                                    disabled={deletingRoomId === room.id}
+                                    onClick={() => void handleDeleteRoom(room)}
+                                    className="rounded-none bg-[#2f2f2f] text-white hover:bg-black sm:min-w-[92px]"
+                                  >
+                                    {deletingRoomId === room.id ? "Eliminando..." : "Eliminar"}
                                   </Button>
                                 )}
                               </div>
@@ -1681,7 +1838,7 @@ export default function Dashboard() {
                   <h3 className="display-font text-4xl">Ranking</h3>
                 </div>
                 {leaderboard.length === 0 ? (
-                  <p className="text-sm text-[#5b30d9]/75">Aun no hay participantes.</p>
+                  <p className="text-sm text-[#5b30d9]/75">Aún no hay participantes.</p>
                 ) : (
                   <div className="space-y-2">
                     {leaderboard.map((entry, index) => (
@@ -1712,7 +1869,8 @@ export default function Dashboard() {
                   <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Nombre del reto</p>
                   <Input
                     value={newChallengeTitle}
-                    onChange={(event) => setNewChallengeTitle(event.target.value)}
+                    maxLength={MAX_CHALLENGE_TITLE_LENGTH}
+                    onChange={(event) => setNewChallengeTitle(event.target.value.slice(0, MAX_CHALLENGE_TITLE_LENGTH))}
                     placeholder="Ej: Completa 5 sesiones de bocetos"
                   />
                   <div className="grid gap-3 sm:grid-cols-2">
@@ -1721,8 +1879,10 @@ export default function Dashboard() {
                       <Input
                         type="number"
                         min={1}
+                        max={MAX_CHALLENGE_TARGET}
+                        inputMode="numeric"
                         value={newChallengeTarget}
-                        onChange={(event) => setNewChallengeTarget(event.target.value)}
+                        onChange={(event) => setNewChallengeTarget(sanitizeDigitsInput(event.target.value, 2))}
                         placeholder="5"
                       />
                     </div>
@@ -1731,8 +1891,10 @@ export default function Dashboard() {
                       <Input
                         type="number"
                         min={1}
+                        max={MAX_CHALLENGE_POINTS}
+                        inputMode="numeric"
                         value={newChallengePoints}
-                        onChange={(event) => setNewChallengePoints(event.target.value)}
+                        onChange={(event) => setNewChallengePoints(sanitizeDigitsInput(event.target.value, 3))}
                         placeholder="50"
                       />
                     </div>
@@ -1761,87 +1923,6 @@ export default function Dashboard() {
                   })}
                 </div>
 
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="recompensas">
-              <Card className="focus-card rounded-none p-7 md:p-8">
-                <div className="mb-4 flex items-center gap-2">
-                  <Gift className="size-5 text-[#f47c0f]" />
-                  <h2 className="display-font text-5xl text-[#5b30d9]">Recompensas</h2>
-                </div>
-
-                <p className="mb-4 font-bold text-[#5b30d9]">Puntos disponibles: {availablePoints}</p>
-                <p className="mb-2 text-sm font-bold uppercase tracking-wide text-[#5b30d9]/80">Crear recompensa propia</p>
-                <div className="mb-6 space-y-3 border border-[#5b30d9]/20 bg-white/70 p-4">
-                  <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Nombre</p>
-                  <Input
-                    value={newRewardTitle}
-                    onChange={(event) => setNewRewardTitle(event.target.value)}
-                    placeholder="Ej: Salida a comer algo rico"
-                  />
-                  <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Descripcion (opcional)</p>
-                  <Input
-                    value={newRewardDescription}
-                    onChange={(event) => setNewRewardDescription(event.target.value)}
-                    placeholder="Detalle de la recompensa"
-                  />
-                  <div className="space-y-2">
-                    <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Costo en puntos</p>
-                    <Input
-                      type="number"
-                      min={1}
-                      value={newRewardCost}
-                      onChange={(event) => setNewRewardCost(event.target.value)}
-                      placeholder="60"
-                    />
-                  </div>
-                  <Button disabled={isSavingReward} onClick={() => void handleCreateReward()} className="rounded-none bg-[#5b30d9] text-white hover:bg-[#4a22be]">
-                    {isSavingReward ? "Guardando..." : "Crear recompensa"}
-                  </Button>
-                </div>
-
-                <div className="space-y-3">
-                  {rewards.length === 0 ? (
-                    <p className="text-sm text-[#5b30d9]/80">Aun no tienes recompensas. Crea la primera arriba.</p>
-                  ) : rewards.map((reward) => {
-                    const disabled = availablePoints < reward.costPoints || redeemingRewardId === reward.id;
-                    return (
-                      <div key={reward.id} className="rounded-none border border-[#5b30d9]/20 bg-white/70 p-4">
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <p className="font-bold text-[#5b30d9]">{reward.title}</p>
-                            <p className="text-sm text-[#5b30d9]/80">{reward.description}</p>
-                          </div>
-                          <span className="font-bold text-[#f47c0f]">{reward.costPoints} pts</span>
-                        </div>
-                        <Button
-                          onClick={() => void handleRedeemReward(reward)}
-                          disabled={disabled}
-                          className="mt-3 rounded-none bg-[#f47c0f] text-white hover:bg-[#dd6900]"
-                        >
-                          {redeemingRewardId === reward.id ? "Canjeando..." : "Canjear"}
-                        </Button>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div className="mt-6">
-                  <h3 className="mb-3 font-bold text-[#5b30d9]">Ultimos canjes</h3>
-                  {redemptions.length === 0 ? (
-                    <p className="text-sm text-[#5b30d9]/80">Aun no has hecho canjes.</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {redemptions.slice(0, 5).map((redemption) => (
-                        <div key={redemption.id} className="flex items-center justify-between border border-[#5b30d9]/15 bg-white/60 p-3 text-sm">
-                          <span className="font-bold text-[#5b30d9]">{findRewardName(redemption.rewardId)}</span>
-                          <span className="text-[#f47c0f]">-{redemption.pointsSpent} pts</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
               </Card>
             </TabsContent>
 
@@ -1894,8 +1975,7 @@ export default function Dashboard() {
                   <h3 className="display-font text-4xl text-[#5b30d9]">Resumen</h3>
                   <div className="mt-4 space-y-3 text-[#5b30d9]">
                     <p className="font-bold">Puntos totales: {points}</p>
-                    <p className="font-bold">Puntos canjeados: {spentPoints}</p>
-                    <p className="font-bold">Puntos disponibles: {availablePoints}</p>
+                    <p className="font-bold">Balance actual: {availablePoints}</p>
                     <p className="font-bold">Sesiones: {sessions.length}</p>
                     <p className="font-bold">Retos completados: {completedCount}</p>
                   </div>
@@ -1903,13 +1983,13 @@ export default function Dashboard() {
                   <div className="mt-6">
                     <h4 className="display-font text-3xl text-[#5b30d9]">Historial</h4>
                     {sessions.length === 0 ? (
-                      <p className="mt-2 text-sm text-[#5b30d9]/80">Aun no completas sesiones.</p>
+                      <p className="mt-2 text-sm text-[#5b30d9]/80">Aún no completas sesiones.</p>
                     ) : (
                       <div className="mt-3 max-h-72 space-y-2 overflow-y-auto pr-1">
                         {sessions.map((session) => (
                           <div key={session.id} className="flex items-center justify-between border border-[#5b30d9]/15 bg-white/70 p-3 text-sm">
                             <div>
-                              <p className="font-bold text-[#5b30d9]">Sesion de {Math.round(session.durationSeconds / 60)} min</p>
+                              <p className="font-bold text-[#5b30d9]">Sesión de {Math.round(session.durationSeconds / 60)} min</p>
                               <p className="text-xs text-[#5b30d9]/75">
                                 {new Date(session.completedAt).toLocaleDateString("es-CO", {
                                   day: "numeric",
@@ -1933,7 +2013,7 @@ export default function Dashboard() {
                     className="mt-6 rounded-none border-2 border-[#5b30d9] bg-transparent font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white"
                   >
                     <LogOut className="mr-2 size-4" />
-                    Cerrar sesion
+                    Cerrar sesión
                   </Button>
                 </Card>
               </div>
@@ -1942,7 +2022,7 @@ export default function Dashboard() {
         </main>
 
         <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-[#5b30d9]/30 bg-[#f2f0f3]/95 px-4 py-2 backdrop-blur md:hidden">
-          <div className="mx-auto grid w-full max-w-md grid-cols-5 gap-1 rounded-2xl border border-[#7d4cd8]/30 bg-white p-1">
+          <div className="mx-auto grid w-full max-w-md grid-cols-4 gap-1 rounded-2xl border border-[#7d4cd8]/30 bg-white p-1">
             <button
               onClick={() => setActiveTab("pomodoro")}
               className={`flex flex-col items-center gap-1 rounded-xl py-2 text-[11px] font-bold ${
@@ -1969,15 +2049,6 @@ export default function Dashboard() {
             >
               <ListTodo className="size-4" />
               <span>Tareas</span>
-            </button>
-            <button
-              onClick={() => setActiveTab("recompensas")}
-              className={`flex flex-col items-center gap-1 rounded-xl py-2 text-[11px] font-bold ${
-                activeTab === "recompensas" ? "bg-[#5b30d9] text-white" : "text-[#5b30d9]"
-              }`}
-            >
-              <Gift className="size-4" />
-              <span>Canjear</span>
             </button>
             <button
               onClick={() => setActiveTab("cuenta")}

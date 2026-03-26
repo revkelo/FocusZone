@@ -40,12 +40,12 @@ export default function Login() {
     }
 
     if (!isLogin && !email.includes("@")) {
-      setError("Ingresa un correo valido.");
+      setError("Ingresa un correo válido.");
       return;
     }
 
     if (password.length < 6) {
-      setError("La contrasena debe tener al menos 6 caracteres.");
+      setError("La contraseña debe tener al menos 6 caracteres.");
       return;
     }
 
@@ -95,7 +95,7 @@ export default function Login() {
       return;
     }
 
-    setInfo("Cuenta creada. Revisa tu correo para confirmar y luego inicia sesion.");
+    setInfo("Cuenta creada. Revisa tu correo para confirmar y luego inicia sesión.");
     setIsLogin(true);
     setLoading(false);
   };
@@ -164,7 +164,7 @@ export default function Login() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="font-bold text-[#5b30d9]">Contrasena</Label>
+              <Label htmlFor="password" className="font-bold text-[#5b30d9]">Contraseña</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-[#7d4cd8]/70" />
                 <Input
@@ -183,7 +183,7 @@ export default function Login() {
               disabled={loading}
               className="h-12 w-full rounded-none bg-[#f47c0f] text-base font-bold text-white hover:bg-[#dd6900] focus-glow-orange"
             >
-              {loading ? "Procesando..." : isLogin ? "Iniciar sesion" : "Crear cuenta"}
+              {loading ? "Procesando..." : isLogin ? "Iniciar sesión" : "Crear cuenta"}
             </Button>
           </form>
 
@@ -196,7 +196,7 @@ export default function Login() {
               }}
               className="font-bold text-[#5b30d9] hover:underline"
             >
-              {isLogin ? "No tienes cuenta? Registrate" : "Ya tienes cuenta? Inicia sesion"}
+              {isLogin ? "¿No tienes cuenta? Regístrate" : "¿Ya tienes cuenta? Inicia sesión"}
             </button>
           </div>
 
