@@ -235,6 +235,8 @@ export default function Dashboard() {
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [redemptions, setRedemptions] = useState<Redemption[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [leaderboardTotalUsers, setLeaderboardTotalUsers] = useState(0);
+  const [myLeaderboardRank, setMyLeaderboardRank] = useState<number | null>(null);
   const [rooms, setRooms] = useState<PomodoroRoom[]>([]);
   const [joinedRoomIds, setJoinedRoomIds] = useState<Set<number>>(new Set());
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
@@ -970,12 +972,20 @@ export default function Dashboard() {
         updated_at: new Date().toISOString(),
       });
 
-      const leaderboardResult = await supabase
-        .from("user_leaderboard")
-        .select("user_id, display_name, total_points")
-        .order("total_points", { ascending: false })
-        .order("updated_at", { ascending: true })
-        .limit(10);
+      const [leaderboardResult, leaderboardCountResult, leaderboardRankResult] = await Promise.all([
+        supabase
+          .from("user_leaderboard")
+          .select("user_id, display_name, total_points")
+          .order("total_points", { ascending: false })
+          .order("updated_at", { ascending: true })
+          .limit(10),
+        supabase.from("user_leaderboard").select("user_id", { count: "exact", head: true }),
+        supabase
+          .from("user_leaderboard")
+          .select("user_id")
+          .order("total_points", { ascending: false })
+          .order("updated_at", { ascending: true }),
+      ]);
 
       if (leaderboardResult.data) {
         setLeaderboard(
@@ -985,6 +995,13 @@ export default function Dashboard() {
             totalPoints: item.total_points,
           })),
         );
+      }
+
+      setLeaderboardTotalUsers(leaderboardCountResult.count ?? 0);
+
+      if (leaderboardRankResult.data) {
+        const rankIndex = leaderboardRankResult.data.findIndex((item) => item.user_id === userId);
+        setMyLeaderboardRank(rankIndex >= 0 ? rankIndex + 1 : null);
       }
     };
 
@@ -1801,7 +1818,7 @@ export default function Dashboard() {
     setIsCreatingRoom(false);
 
     if (memberError) {
-      setError("La sala se creo, pero no pudiste entrar automaticamente.");
+      setError("La sala se creó, pero no pudiste entrar automáticamente.");
       return;
     }
 
@@ -2500,6 +2517,16 @@ export default function Dashboard() {
                     ))}
                   </div>
                 )}
+                {leaderboardTotalUsers > 30 && myLeaderboardRank && myLeaderboardRank > 10 ? (
+                  <div className="mt-3 border border-[#f47c0f]/35 bg-[#fff4ea] p-3 text-sm">
+                    <p className="font-bold text-[#5b30d9]">
+                      Tu posición actual: <span className="text-[#f47c0f]">#{myLeaderboardRank}</span> de {leaderboardTotalUsers}
+                    </p>
+                    <p className="mt-1 text-xs font-semibold text-[#5b30d9]/75">
+                      Se muestran los 10 primeros. Tu puesto global está actualizado.
+                    </p>
+                  </div>
+                ) : null}
               </Card>
             </TabsContent>
 
@@ -2508,6 +2535,27 @@ export default function Dashboard() {
                 <div className="flex items-center gap-2">
                   <MessageCircle className="size-5 text-[#f47c0f]" />
                   <h2 className="display-font text-4xl text-[#5b30d9] sm:text-5xl">Chatbot Lumi</h2>
+                </div>
+
+                <div className="border border-[#5b30d9]/25 bg-[linear-gradient(180deg,#f8f5ff_0%,#ffffff_100%)] p-3 sm:p-4">
+                  <p className="text-xs font-black uppercase tracking-[0.12em] text-[#5b30d9]/70">Asistente Lumi</p>
+                  <p className="mt-1 text-sm font-semibold text-[#5b30d9] sm:text-base">
+                    Te ayuda a enfocarte y a usar mejor la biblioteca.
+                  </p>
+                  <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                    <div className="border border-[#5b30d9]/20 bg-white/80 p-2.5">
+                      <p className="text-[11px] font-black uppercase tracking-wide text-[#f47c0f]">Que puedes pedir</p>
+                      <p className="mt-1 text-xs font-semibold text-[#5b30d9]">Foco, pausas y planes cortos.</p>
+                    </div>
+                    <div className="border border-[#5b30d9]/20 bg-white/80 p-2.5">
+                      <p className="text-[11px] font-black uppercase tracking-wide text-[#f47c0f]">Contexto de biblioteca</p>
+                      <p className="mt-1 text-xs font-semibold text-[#5b30d9]">Recursos y espacios de estudio.</p>
+                    </div>
+                    <div className="border border-[#5b30d9]/20 bg-white/80 p-2.5">
+                      <p className="text-[11px] font-black uppercase tracking-wide text-[#f47c0f]">Tip rapido</p>
+                      <p className="mt-1 text-xs font-semibold text-[#5b30d9]">Pregunta corto para ir al punto.</p>
+                    </div>
+                  </div>
                 </div>
 
                 <div ref={chatScrollContainerRef} className="min-h-[320px] flex-1 space-y-3 overflow-y-auto border border-[#5b30d9]/20 bg-white/70 p-3 sm:min-h-[380px] sm:p-4 lg:min-h-[460px]">
