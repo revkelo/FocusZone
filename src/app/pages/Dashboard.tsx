@@ -1603,9 +1603,10 @@ export default function Dashboard() {
                           {roomMembers.map((member) => {
                             const memberDuration = estimateMemberDuration(member.timeLeft);
                             const normalizedDuration = Math.max(memberDuration, member.timeLeft, 1);
-                            const memberProgress = member.isActive
-                              ? Math.max(0, Math.min(100, Math.round(((normalizedDuration - member.timeLeft) / normalizedDuration) * 100)))
+                            const memberProgressRaw = member.isActive
+                              ? Math.max(0, Math.min(100, ((normalizedDuration - member.timeLeft) / normalizedDuration) * 100))
                               : 0;
+                            const memberProgressLabel = Math.round(memberProgressRaw);
 
                             return (
                             <div key={member.userId} className="border border-[#5b30d9]/20 bg-white p-3">
@@ -1625,13 +1626,13 @@ export default function Dashboard() {
                               </div>
                               <div className="mb-1 flex items-center justify-between text-xs text-[#5b30d9]/80">
                                 <span>Pomodoro</span>
-                                <span>{memberProgress}%</span>
+                                <span>{memberProgressLabel}%</span>
                               </div>
                               <div className="h-2 w-full overflow-hidden bg-[#5b30d9]/15">
                                 <div
-                                  className="h-full bg-gradient-to-r from-[#7d4cd8] via-[#5b30d9] to-[#00b6d9]"
+                                  className="h-full bg-gradient-to-r from-[#7d4cd8] via-[#5b30d9] to-[#00b6d9] transition-[width] duration-1000 ease-linear"
                                   style={{
-                                    width: `${memberProgress}%`,
+                                    width: `${memberProgressRaw}%`,
                                   }}
                                 />
                               </div>
