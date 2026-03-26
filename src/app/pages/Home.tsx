@@ -43,6 +43,7 @@ export default function Home() {
   const viewerItem = useMemo(() => (viewerIndex !== null ? artGallery[viewerIndex] : null), [viewerIndex]);
   const horizontalDesigns = useMemo(() => artGallery.filter((item) => item.orientation === "landscape"), []);
   const collectionDesigns = useMemo(() => artGallery.filter((item) => item.orientation === "portrait"), []);
+  const podium = [ranking[1], ranking[0], ranking[2]];
 
   useEffect(() => {
     const loadRanking = async () => {
@@ -132,8 +133,6 @@ export default function Home() {
     setViewerIndex((viewerIndex + 1) % artGallery.length);
   };
 
-  const podium = [ranking[1], ranking[0], ranking[2]];
-
   return (
     <div className="focus-shell focus-rings focus-no-stars min-h-screen overflow-x-hidden">
       <div className="relative z-10">
@@ -192,6 +191,75 @@ export default function Home() {
             </Card>
           </section>
 
+          <section className="grid gap-4 lg:grid-cols-[1fr_0.9fr]">
+            <div className="focus-reveal focus-reveal-delay-2 grid gap-4 sm:grid-cols-3">
+              <Card className="focus-card focus-glow-orange rounded-none p-4">
+                <Clock3 className="mb-2 size-5 text-[#f47c0f]" />
+                <p className="display-font text-4xl text-[#f47c0f]">50h</p>
+                <p className="font-bold text-[#5b30d9]">semanales sin control</p>
+              </Card>
+              <Card className="focus-card focus-glow-purple rounded-none p-4">
+                <TrendingUp className="mb-2 size-5 text-[#5b30d9]" />
+                <p className="display-font text-4xl text-[#5b30d9]">2do</p>
+                <p className="font-bold text-[#5b30d9]">lugar global en uso</p>
+              </Card>
+              <Card className="focus-card focus-glow-green rounded-none p-4">
+                <BookOpen className="mb-2 size-5 text-[#4f7c0f]" />
+                <p className="display-font text-4xl text-[#4f7c0f]">+50</p>
+                <p className="font-bold text-[#5b30d9]">recursos de estudio</p>
+              </Card>
+            </div>
+
+            <Card className="focus-card focus-heavy focus-reveal focus-reveal-delay-2 rounded-none border-2 border-[#f47c0f]/35 bg-[#fff8f0] p-5 md:p-7">
+              <div className="mb-4 flex items-center gap-2 text-[#5b30d9]">
+                <Trophy className="size-5 text-[#f47c0f]" />
+                <h3 className="display-font text-4xl">Ranking en vivo</h3>
+              </div>
+
+              {ranking.length === 0 ? (
+                <p className="font-bold text-[#5b30d9]/75">Aún no hay datos de ranking.</p>
+              ) : (
+                <>
+                  <div className="grid grid-cols-3 items-end gap-2">
+                    {podium.map((entry, index) => {
+                      const isCenter = index === 1;
+                      return (
+                        <div
+                          key={entry?.userId ?? `empty-${index}`}
+                          className={`rounded-none border p-3 text-center ${
+                            isCenter ? "border-[#f47c0f]/45 bg-[#ffe8cf]" : "border-[#5b30d9]/20 bg-white"
+                          }`}
+                        >
+                          {entry ? (
+                            <>
+                              <p className="mb-1 text-xs font-bold uppercase tracking-wide text-[#5b30d9]/70">
+                                {isCenter ? "#1" : index === 0 ? "#2" : "#3"}
+                              </p>
+                              <p className="line-clamp-2 font-bold text-[#5b30d9]">{entry.displayName}</p>
+                              <p className="mt-1 text-sm font-bold text-[#f47c0f]">{entry.totalPoints} pts</p>
+                            </>
+                          ) : (
+                            <p className="text-sm font-bold text-[#5b30d9]/50">-</p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {ranking.length > 3 && (
+                    <div className="mt-3 space-y-2">
+                      {ranking.slice(3).map((entry, index) => (
+                        <div key={entry.userId} className="flex items-center justify-between border border-[#5b30d9]/15 bg-white p-2 text-sm">
+                          <span className="font-bold text-[#5b30d9]">#{index + 4} {entry.displayName}</span>
+                          <span className="font-bold text-[#f47c0f]">{entry.totalPoints} pts</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </Card>
+          </section>
+
           <Card className="focus-card focus-reveal focus-reveal-delay-1 rounded-none border-2 border-[#5b30d9]/25 bg-[linear-gradient(180deg,#ffffff_0%,#f8f5ff_100%)] p-4 md:p-6">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
@@ -203,9 +271,9 @@ export default function Home() {
             <div className="mb-5">
               <div className="mb-2 flex items-center justify-between">
                 <p className="text-xs font-black uppercase tracking-[0.12em] text-[#5b30d9]/70">Carrusel horizontal</p>
-                <p className="text-xs text-[#5b30d9]/70">Piezas panoramicas</p>
+                <p className="text-xs text-[#5b30d9]/70">Piezas panorámicas</p>
               </div>
-              <Carousel setApi={setHorizontalCarouselApi} opts={{ align: "start", loop: true }} className="w-full">
+              <Carousel setApi={setHorizontalCarouselApi} opts={{ align: "start", loop: true }} className="w-full border-2 border-[#5b30d9]/45">
                 <CarouselContent>
                   {horizontalDesigns.map((item) => {
                     const originalIndex = artGallery.findIndex((entry) => entry.src === item.src);
@@ -216,16 +284,21 @@ export default function Home() {
                           onClick={() => setViewerIndex(originalIndex)}
                           className="group w-full overflow-hidden border border-[#5b30d9]/20 bg-white text-left transition hover:border-[#5b30d9]/45"
                         >
-                          <div className="relative bg-[#f7f5ff] p-2">
-                            <img src={item.src} alt={item.title} className="h-[220px] w-full object-contain md:h-[320px]" loading="lazy" />
+                          <div className="relative grid min-h-[260px] place-items-center bg-[#f7f5ff] p-3 sm:min-h-[320px] md:min-h-[420px]">
+                            <img
+                              src={item.src}
+                              alt={item.title}
+                              className="h-full max-h-[220px] w-full object-contain sm:max-h-[280px] md:max-h-[380px] lg:max-h-[420px]"
+                              loading="lazy"
+                            />
                           </div>
                         </button>
                       </CarouselItem>
                     );
                   })}
                 </CarouselContent>
-                <CarouselPrevious className="size-8 border-[#5b30d9] text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white -left-2 sm:-left-3 md:size-9" />
-                <CarouselNext className="size-8 border-[#5b30d9] text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white -right-2 sm:-right-3 md:size-9" />
+                <CarouselPrevious className="size-8 border-[#5b30d9] bg-white/95 text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white left-2 md:size-9 md:left-3" />
+                <CarouselNext className="size-8 border-[#5b30d9] bg-white/95 text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white right-2 md:size-9 md:right-3" />
               </Carousel>
               <div className="mt-3 flex justify-center gap-1.5">
                 {horizontalDesigns.map((item, index) => (
@@ -259,86 +332,12 @@ export default function Home() {
               </div>
             )}
           </Card>
-
-          <section className="grid gap-4 lg:grid-cols-[1fr_0.9fr]">
-            <div className="focus-reveal focus-reveal-delay-2 grid gap-4 sm:grid-cols-3">
-              <Card className="focus-card focus-glow-orange rounded-none p-4">
-                <Clock3 className="mb-2 size-5 text-[#f47c0f]" />
-                <p className="display-font text-4xl text-[#f47c0f]">50h</p>
-                <p className="font-bold text-[#5b30d9]">semanales sin control</p>
-              </Card>
-              <Card className="focus-card focus-glow-purple rounded-none p-4">
-                <TrendingUp className="mb-2 size-5 text-[#5b30d9]" />
-                <p className="display-font text-4xl text-[#5b30d9]">2do</p>
-                <p className="font-bold text-[#5b30d9]">lugar global en uso</p>
-              </Card>
-              <Card className="focus-card focus-glow-green rounded-none p-4">
-                <BookOpen className="mb-2 size-5 text-[#4f7c0f]" />
-                <p className="display-font text-4xl text-[#4f7c0f]">+50</p>
-                <p className="font-bold text-[#5b30d9]">recursos de estudio</p>
-              </Card>
-            </div>
-
-            <Card className="focus-card focus-heavy focus-reveal focus-reveal-delay-2 rounded-none border-2 border-[#f47c0f]/35 bg-[#fff8f0] p-5 md:p-7">
-              <div className="mb-4 flex items-center gap-2 text-[#5b30d9]">
-                <Trophy className="size-5 text-[#f47c0f]" />
-              <h3 className="display-font text-4xl">Ranking en vivo</h3>
-            </div>
-
-            {ranking.length === 0 ? (
-                <p className="font-bold text-[#5b30d9]/75">Aún no hay datos de ranking.</p>
-            ) : (
-                <>
-                  <div className="grid grid-cols-3 items-end gap-2">
-                    {podium.map((entry, index) => {
-                      const isCenter = index === 1;
-                      return (
-                        <div
-                          key={entry?.userId ?? `empty-${index}`}
-                          className={`rounded-none border p-3 text-center ${
-                            isCenter ? "border-[#f47c0f]/45 bg-[#ffe8cf]" : "border-[#5b30d9]/20 bg-white"
-                          }`}
-                        >
-                          {entry ? (
-                            <>
-                              <p className="mb-1 text-xs font-bold uppercase tracking-wide text-[#5b30d9]/70">
-                                {isCenter ? "#1" : index === 0 ? "#2" : "#3"}
-                              </p>
-                              <p className="line-clamp-2 font-bold text-[#5b30d9]">{entry.displayName}</p>
-                              <p className="mt-1 text-sm font-bold text-[#f47c0f]">{entry.totalPoints} pts</p>
-                            </>
-                          ) : (
-                            <p className="text-sm font-bold text-[#5b30d9]/50">-</p>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {ranking.length > 3 && (
-                    <div className="mt-3 space-y-2">
-                      {ranking.slice(3).map((entry, index) => (
-                        <div key={entry.userId} className="flex items-center justify-between border border-[#5b30d9]/15 bg-white p-2 text-sm">
-                          <span className="font-bold text-[#5b30d9]">#{index + 4} {entry.displayName}</span>
-                          <span className="font-bold text-[#f47c0f]">{entry.totalPoints} pts</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </>
-              )}
-            </Card>
-          </section>
         </main>
 
         {viewerItem && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#f2f0f3]/95 p-3 md:p-8" onClick={() => setViewerIndex(null)}>
             <div className="relative w-full max-w-6xl" onClick={(event) => event.stopPropagation()}>
-              <div className="mb-3 flex items-center justify-between text-[#2a2a2a]">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#5b30d9]/70">Obra</p>
-                  <p className="display-font text-3xl">{viewerItem.title}</p>
-                </div>
+              <div className="mb-3 flex items-center justify-end text-[#2a2a2a]">
                 <button
                   type="button"
                   onClick={() => setViewerIndex(null)}
