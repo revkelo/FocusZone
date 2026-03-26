@@ -2368,7 +2368,7 @@ export default function Dashboard() {
                       {roomMembers.length === 0 ? (
                         <p className="text-sm text-[#5b30d9]/75">Cargando miembros...</p>
                       ) : (
-                        <div className="grid max-h-[46vh] gap-2 overflow-y-auto pr-1 sm:max-h-[52vh] sm:grid-cols-2">
+                        <div className="grid max-h-[46vh] grid-cols-2 gap-2 overflow-y-auto pr-1 sm:max-h-[52vh] sm:grid-cols-2">
                           {roomMembers.map((member) => {
                             const memberDuration = estimateMemberDuration(member.timeLeft);
                             const normalizedDuration = Math.max(memberDuration, member.timeLeft, 1);
