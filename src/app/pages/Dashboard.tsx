@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import {
   Bell,
@@ -61,12 +61,16 @@ interface ChallengeItem {
   title: string;
   points: number;
   kind: "base" | "custom";
+  week?: number;
+  day?: number;
 }
 
 interface ChallengeCatalogEntry {
   code: string;
   title: string;
   points: number;
+  week: number;
+  day: number;
 }
 
 interface LeaderboardEntry {
@@ -121,6 +125,32 @@ const MAX_REWARD_DESCRIPTION_LENGTH = 180;
 const MAX_REWARD_COST = 5000;
 const MAX_ROOM_NAME_LENGTH = 40;
 const MAX_NUMERIC_INPUT_LENGTH = 4;
+const STREAK_WEEK_BONUS: Record<number, number> = {
+  1: 5,
+  2: 10,
+  3: 15,
+};
+
+const getChallengeStreakBonus = (challenge: { week?: number; day?: number }) => {
+  if (!challenge.week || !challenge.day || challenge.day < 2) {
+    return 0;
+  }
+  return STREAK_WEEK_BONUS[challenge.week] ?? 0;
+};
+
+const getCurrentStreak = (completedIds: Set<string>, baseChallenges: ChallengeItem[]) => {
+  const completedDays = new Set(
+    baseChallenges.filter((challenge) => completedIds.has(challenge.id)).map((challenge) => challenge.day).filter((day): day is number => typeof day === "number"),
+  );
+  let streak = 0;
+  for (let day = 1; day <= 21; day += 1) {
+    if (!completedDays.has(day)) {
+      break;
+    }
+    streak += 1;
+  }
+  return streak;
+};
 
 const playEventSound = (event: "pomodoro" | "reward" | "notification" | "error") => {
   try {
@@ -209,6 +239,12 @@ export default function Dashboard() {
   const [successMessage, setSuccessMessage] = useState("");
   const [toasts, setToasts] = useState<AppToast[]>([]);
   const [hydratedPomodoroKey, setHydratedPomodoroKey] = useState<string | null>(null);
+  const ownPresenceRef = useRef({
+    timeLeft: 40 * 60,
+    isActive: false,
+    isPaused: false,
+    displayName: "Usuario",
+  });
 
   const pomodoroStorageKey = useMemo(() => {
     if (!userId) {
@@ -268,7 +304,7 @@ export default function Dashboard() {
           .eq("user_id", user.id)
           .order("completed_at", { ascending: false }),
         supabase.from("user_challenge_progress").select("challenge_id").eq("user_id", user.id),
-        supabase.from("challenge_catalog").select("code, title, points").eq("is_active", true).order("week", { ascending: true }).order("day", { ascending: true }),
+        supabase.from("challenge_catalog").select("code, title, points, week, day").eq("is_active", true).order("week", { ascending: true }).order("day", { ascending: true }),
         supabase
           .from("custom_challenges")
           .select("id, title, target_sessions, points, is_group")
@@ -327,6 +363,8 @@ export default function Dashboard() {
             code: item.code,
             title: item.title,
             points: item.points,
+            week: item.week,
+            day: item.day,
           })),
         );
       }
@@ -578,6 +616,8 @@ export default function Dashboard() {
         title: challenge.title,
         points: challenge.points,
         kind: "base",
+        week: "week" in challenge ? challenge.week : undefined,
+        day: "day" in challenge ? challenge.day : undefined,
       })),
     [catalogChallenges],
   );
@@ -594,6 +634,23 @@ export default function Dashboard() {
   );
 
   const allChallenges: ChallengeItem[] = useMemo(() => [...baseChallenges, ...customChallengeItems], [baseChallenges, customChallengeItems]);
+  const weeklyBaseChallenges = useMemo(() => {
+    const grouped = new Map<number, ChallengeItem[]>();
+    for (const challenge of baseChallenges) {
+      const week = challenge.week ?? 1;
+      const current = grouped.get(week) ?? [];
+      current.push(challenge);
+      grouped.set(week, current);
+    }
+
+    return Array.from(grouped.entries())
+      .sort(([weekA], [weekB]) => weekA - weekB)
+      .map(([week, items]) => ({
+        week,
+        items: items.sort((a, b) => (a.day ?? 0) - (b.day ?? 0)),
+      }));
+  }, [baseChallenges]);
+
   const filteredRooms = useMemo(() => {
     const query = roomSearchQuery.trim().toLowerCase();
     if (!query) {
@@ -607,7 +664,18 @@ export default function Dashboard() {
   const challengePoints = allChallenges
     .filter((challenge) => completedChallenges.has(challenge.id))
     .reduce((sum, challenge) => sum + challenge.points, 0);
-  const points = sessions.length * SESSION_POINTS + challengePoints;
+  const currentChallengeStreak = getCurrentStreak(completedChallenges, baseChallenges);
+  const streakBonusPoints = baseChallenges.reduce((sum, challenge) => {
+    if (!completedChallenges.has(challenge.id)) {
+      return sum;
+    }
+    if (!challenge.day || challenge.day > currentChallengeStreak) {
+      return sum;
+    }
+    return sum + getChallengeStreakBonus(challenge);
+  }, 0);
+
+  const points = sessions.length * SESSION_POINTS + challengePoints + streakBonusPoints;
   const availablePoints = points;
 
   useEffect(() => {
@@ -645,6 +713,15 @@ export default function Dashboard() {
   }, [userId, name, points]);
 
   useEffect(() => {
+    ownPresenceRef.current = {
+      timeLeft,
+      isActive,
+      isPaused,
+      displayName: name || email || "Usuario",
+    };
+  }, [timeLeft, isActive, isPaused, name, email]);
+
+  useEffect(() => {
     const loadRoomMembers = async () => {
       if (!selectedRoomId) {
         setRoomMembers([]);
@@ -680,6 +757,16 @@ export default function Dashboard() {
 
       setRoomMembers(
         membersResult.data.map((member) => {
+          if (member.user_id === userId) {
+            return {
+              userId: member.user_id,
+              displayName: ownPresenceRef.current.displayName,
+              timeLeft: ownPresenceRef.current.timeLeft,
+              isActive: ownPresenceRef.current.isActive,
+              isPaused: ownPresenceRef.current.isPaused,
+            };
+          }
+
           const current = presenceMap.get(member.user_id);
           return {
             userId: member.user_id,
@@ -734,7 +821,7 @@ export default function Dashboard() {
       clearInterval(pollInterval);
       void supabase.removeChannel(channel);
     };
-  }, [selectedRoomId, focusMinutes]);
+  }, [selectedRoomId, focusMinutes, userId]);
 
   useEffect(() => {
     if (!userId) {
@@ -874,6 +961,10 @@ export default function Dashboard() {
     const interval = window.setInterval(() => {
       setRoomMembers((previous) =>
         previous.map((member) => {
+          if (member.userId === userId) {
+            return member;
+          }
+
           if (!member.isActive || member.isPaused || member.timeLeft <= 0) {
             return member;
           }
@@ -889,7 +980,7 @@ export default function Dashboard() {
     return () => {
       clearInterval(interval);
     };
-  }, [selectedRoomId]);
+  }, [selectedRoomId, userId]);
 
   const handleTimerComplete = async () => {
     if (!userId) {
@@ -1044,7 +1135,18 @@ export default function Dashboard() {
       return;
     }
 
-    setCompletedChallenges((previous) => new Set(previous).add(challengeId));
+    const completedNext = new Set(completedChallenges).add(challengeId);
+    const previousStreak = getCurrentStreak(completedChallenges, baseChallenges);
+    const nextStreak = getCurrentStreak(completedNext, baseChallenges);
+    const completedBaseChallenge = baseChallenges.find((challenge) => challenge.id === challengeId);
+    const streakBonus = completedBaseChallenge && nextStreak > previousStreak ? getChallengeStreakBonus(completedBaseChallenge) : 0;
+
+    setCompletedChallenges(completedNext);
+    if (streakBonus > 0) {
+      setSuccessMessage(`Reto completado. +${completedBaseChallenge?.points ?? 0} base y +${streakBonus} por racha.`);
+      return;
+    }
+
     setSuccessMessage("Reto marcado como completado.");
   };
 
@@ -1860,6 +1962,20 @@ export default function Dashboard() {
                 </div>
 
                 <Progress value={progressPercentage} className="mb-6 h-3 rounded-none bg-[#5b30d9]/20 [&>div]:rounded-none [&>div]:bg-[#f47c0f]" />
+                <div className="mb-6 grid gap-3 sm:grid-cols-3">
+                  <div className="border border-[#5b30d9]/25 bg-white/70 p-3">
+                    <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/70">Racha actual</p>
+                    <p className="display-font mt-1 text-4xl text-[#5b30d9]">{currentChallengeStreak} días</p>
+                  </div>
+                  <div className="border border-[#f47c0f]/30 bg-[#fff4ea] p-3">
+                    <p className="text-xs font-bold uppercase tracking-wide text-[#f47c0f]/80">Bono por racha</p>
+                    <p className="display-font mt-1 text-4xl text-[#f47c0f]">+{streakBonusPoints}</p>
+                  </div>
+                  <div className="border border-[#4f7c0f]/25 bg-[#eff9db] p-3">
+                    <p className="text-xs font-bold uppercase tracking-wide text-[#4f7c0f]/80">Estado</p>
+                    <p className="mt-2 font-bold text-[#325f0b]">{currentChallengeStreak > 0 ? "Vas en racha" : "Inicia tu racha"}</p>
+                  </div>
+                </div>
 
                 <p className="mb-2 text-sm font-bold uppercase tracking-wide text-[#5b30d9]/80">
                   Crea un reto propio para tu semana
@@ -1904,23 +2020,69 @@ export default function Dashboard() {
                   </Button>
                 </div>
 
-                <div className="space-y-3">
-                  {allChallenges.map((challenge) => {
-                    const done = completedChallenges.has(challenge.id);
-                    return (
-                      <button
-                        key={challenge.id}
-                        onClick={() => void toggleChallenge(challenge.id)}
-                        className={`flex w-full items-center gap-3 rounded-none border p-4 text-left transition ${
-                          done ? "border-[#4f7c0f]/40 bg-[#b8ee73]/35" : "border-[#5b30d9]/20 bg-white/70 hover:bg-white"
-                        }`}
-                      >
-                        {done ? <CheckCircle className="size-5 shrink-0 text-[#4f7c0f]" /> : <Circle className="size-5 shrink-0 text-[#7d4cd8]" />}
-                        <span className={`flex-1 font-bold ${done ? "text-[#325f0b]" : "text-[#5b30d9]"}`}>{challenge.title}</span>
-                        <span className="font-bold text-[#f47c0f]">+{challenge.points}</span>
-                      </button>
-                    );
-                  })}
+                <div className="space-y-6">
+                  {weeklyBaseChallenges.map((weekGroup) => (
+                    <div key={weekGroup.week} className="space-y-3">
+                      <div className="flex items-center justify-between border-b border-[#5b30d9]/20 pb-2">
+                        <h3 className="font-bold uppercase tracking-wide text-[#5b30d9]">Semana {weekGroup.week}</h3>
+                        <span className="text-xs font-bold text-[#5b30d9]/70">
+                          +{STREAK_WEEK_BONUS[weekGroup.week] ?? 0} por reto en racha
+                        </span>
+                      </div>
+                      {weekGroup.items.map((challenge) => {
+                        const done = completedChallenges.has(challenge.id);
+                        const streakBonus = getChallengeStreakBonus(challenge);
+                        const bonusActive = Boolean(challenge.day && challenge.day <= currentChallengeStreak && streakBonus > 0);
+
+                        return (
+                          <button
+                            key={challenge.id}
+                            onClick={() => void toggleChallenge(challenge.id)}
+                            className={`flex w-full items-center gap-3 rounded-none border p-4 text-left transition ${
+                              done ? "border-[#4f7c0f]/40 bg-[#b8ee73]/35" : "border-[#5b30d9]/20 bg-white/70 hover:bg-white"
+                            }`}
+                          >
+                            {done ? <CheckCircle className="size-5 shrink-0 text-[#4f7c0f]" /> : <Circle className="size-5 shrink-0 text-[#7d4cd8]" />}
+                            <span className={`flex-1 font-bold ${done ? "text-[#325f0b]" : "text-[#5b30d9]"}`}>
+                              Día {challenge.day}: {challenge.title}
+                            </span>
+                            <div className="text-right">
+                              <p className="font-bold text-[#f47c0f]">+{challenge.points}</p>
+                              {streakBonus > 0 && (
+                                <p className={`text-xs font-bold ${bonusActive ? "text-[#4f7c0f]" : "text-[#5b30d9]/60"}`}>
+                                  {bonusActive ? `+${streakBonus} racha` : `+${streakBonus} posible`}
+                                </p>
+                              )}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ))}
+
+                  {customChallengeItems.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between border-b border-[#5b30d9]/20 pb-2">
+                        <h3 className="font-bold uppercase tracking-wide text-[#5b30d9]">Retos personalizados</h3>
+                      </div>
+                      {customChallengeItems.map((challenge) => {
+                        const done = completedChallenges.has(challenge.id);
+                        return (
+                          <button
+                            key={challenge.id}
+                            onClick={() => void toggleChallenge(challenge.id)}
+                            className={`flex w-full items-center gap-3 rounded-none border p-4 text-left transition ${
+                              done ? "border-[#4f7c0f]/40 bg-[#b8ee73]/35" : "border-[#5b30d9]/20 bg-white/70 hover:bg-white"
+                            }`}
+                          >
+                            {done ? <CheckCircle className="size-5 shrink-0 text-[#4f7c0f]" /> : <Circle className="size-5 shrink-0 text-[#7d4cd8]" />}
+                            <span className={`flex-1 font-bold ${done ? "text-[#325f0b]" : "text-[#5b30d9]"}`}>{challenge.title}</span>
+                            <span className="font-bold text-[#f47c0f]">+{challenge.points}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
 
               </Card>
@@ -1976,6 +2138,8 @@ export default function Dashboard() {
                   <div className="mt-4 space-y-3 text-[#5b30d9]">
                     <p className="font-bold">Puntos totales: {points}</p>
                     <p className="font-bold">Balance actual: {availablePoints}</p>
+                    <p className="font-bold">Racha actual: {currentChallengeStreak} días</p>
+                    <p className="font-bold">Bono acumulado por racha: +{streakBonusPoints}</p>
                     <p className="font-bold">Sesiones: {sessions.length}</p>
                     <p className="font-bold">Retos completados: {completedCount}</p>
                   </div>
