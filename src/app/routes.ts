@@ -3,11 +3,12 @@ import { supabase } from "./lib/supabase";
 
 const requireAuth = async () => {
   const {
-    data: { session },
+    data: { user },
     error,
-  } = await supabase.auth.getSession();
+  } = await supabase.auth.getUser();
 
-  if (error || !session) {
+  if (error || !user) {
+    await supabase.auth.signOut();
     throw redirect("/login");
   }
 

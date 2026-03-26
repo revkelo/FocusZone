@@ -20,8 +20,10 @@ export default function Login() {
 
   useEffect(() => {
     const checkSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (data.session) {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
         navigate("/dashboard");
       }
     };
