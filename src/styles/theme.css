@@ -211,11 +211,24 @@
   }
 
   .focus-campaign-card {
-    @apply rounded-none border-2 border-[#cbbdf3] bg-[#f6f2ff] shadow-[0_14px_30px_-20px_rgba(69,36,179,0.35)];
+    @apply rounded-none border-2 border-[#bca8f2] bg-[#f6f2ff] shadow-[0_12px_22px_-18px_rgba(69,36,179,0.45),0_2px_0_0_rgba(143,116,239,0.5)];
+    transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+  }
+
+  .focus-campaign-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(125, 76, 216, 0.55);
+    box-shadow: 0 22px 34px -24px rgba(69, 36, 179, 0.5);
   }
 
   .focus-campaign-purple {
     @apply rounded-none border-2 border-[#5b30d9]/45 bg-[#5b30d9] text-white shadow-[0_18px_34px_-20px_rgba(49,18,128,0.65)];
+    transition: transform 240ms ease, box-shadow 240ms ease;
+  }
+
+  .focus-campaign-purple:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 24px 38px -24px rgba(49, 18, 128, 0.72);
   }
 
   .focus-campaign-green {
@@ -224,6 +237,12 @@
 
   .focus-campaign-cream {
     @apply rounded-none border-2 border-[#f0bc8b]/60 bg-[#fff5e8] text-[#5b30d9];
+    transition: transform 220ms ease, box-shadow 220ms ease;
+  }
+
+  .focus-campaign-cream:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 32px -24px rgba(244, 124, 15, 0.52);
   }
 
   .focus-kicker {
@@ -267,6 +286,7 @@
       radial-gradient(circle at 32% 50%, transparent 0 24%, rgba(184, 238, 115, 0.58) 24% 34%, transparent 34% 45%, rgba(184, 238, 115, 0.44) 45% 56%, transparent 56% 100%);
     opacity: 0.7;
     filter: saturate(105%);
+    animation: focusFloatArcA 14s ease-in-out infinite alternate;
   }
 
   .focus-figure-arc-right {
@@ -279,6 +299,7 @@
     background:
       radial-gradient(circle at 50% 50%, transparent 0 36%, rgba(184, 238, 115, 0.34) 36% 45%, transparent 45% 58%, rgba(91, 48, 217, 0.18) 58% 65%, transparent 65% 100%);
     opacity: 0.62;
+    animation: focusFloatArcB 18s ease-in-out infinite alternate;
   }
 
   .focus-figure-dot {
@@ -297,6 +318,7 @@
     width: 120px;
     height: 120px;
     opacity: 0.45;
+    animation: focusDotPulse 6s ease-in-out infinite;
   }
 
   .focus-figure-dot-b {
@@ -305,6 +327,7 @@
     width: 160px;
     height: 160px;
     opacity: 0.38;
+    animation: focusDotPulse 7s ease-in-out infinite reverse;
   }
 
   .focus-figure-arc-right-2 {
@@ -318,6 +341,7 @@
     background:
       radial-gradient(circle at 50% 50%, transparent 0 42%, rgba(184, 238, 115, 0.42) 42% 52%, transparent 52% 64%, rgba(91, 48, 217, 0.2) 64% 70%, transparent 70% 100%);
     opacity: 0.6;
+    animation: focusFloatArcB 16s ease-in-out infinite alternate-reverse;
   }
 
   .focus-figure-right-pill {
@@ -328,6 +352,7 @@
     height: 170px;
     background: linear-gradient(180deg, rgba(91, 48, 217, 0.7) 0%, rgba(184, 238, 115, 0.35) 100%);
     opacity: 0.5;
+    animation: focusPillarDrift 8s ease-in-out infinite;
   }
 
   .focus-figure-right-square {
@@ -339,6 +364,81 @@
     border: 2px solid rgba(91, 48, 217, 0.45);
     background: rgba(255, 255, 255, 0.35);
     opacity: 0.6;
+    animation: focusDotPulse 5.5s ease-in-out infinite;
+  }
+
+  .focus-cta {
+    transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease, color 180ms ease;
+  }
+
+  .focus-cta:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px -16px rgba(69, 36, 179, 0.65);
+  }
+
+  .focus-divider-animated {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .focus-divider-animated::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -40%;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.65), transparent);
+    animation: focusDividerSweep 3.4s linear infinite;
+  }
+
+  @keyframes focusFloatArcA {
+    from {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    to {
+      transform: translate3d(10px, -12px, 0) scale(1.03);
+    }
+  }
+
+  @keyframes focusFloatArcB {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(-10px, 10px, 0);
+    }
+  }
+
+  @keyframes focusDotPulse {
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 0.42;
+    }
+    50% {
+      transform: scale(1.06);
+      opacity: 0.62;
+    }
+  }
+
+  @keyframes focusPillarDrift {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+  @keyframes focusDividerSweep {
+    from {
+      left: -40%;
+    }
+    to {
+      left: 110%;
+    }
   }
 
   .focus-tag {
@@ -429,6 +529,17 @@
     .focus-reveal-delay-3 {
       opacity: 1;
       transform: none;
+      animation: none;
+    }
+
+    .focus-figure-arc-left,
+    .focus-figure-arc-right,
+    .focus-figure-arc-right-2,
+    .focus-figure-dot-a,
+    .focus-figure-dot-b,
+    .focus-figure-right-pill,
+    .focus-figure-right-square,
+    .focus-divider-animated::after {
       animation: none;
     }
   }
