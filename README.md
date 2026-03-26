@@ -32,7 +32,7 @@ OPENROUTER_SITE_URL=https://focuszone.app
 OPENROUTER_SITE_NAME=FocusZone
 ```
 
-Variables adicionales para verificacion por codigo (registro y recuperar clave):
+Variables adicionales para verificación por código (registro y recuperar clave):
 
 ```bash
 SUPABASE_SERVICE_ROLE_KEY=TU_SUPABASE_SERVICE_ROLE_KEY
@@ -52,7 +52,7 @@ SMTP_FROM_NAME=Focus Zone
 - Historial de pomodoros: tabla `pomodoro_sessions`
 - SQL listo para crear tablas + RLS: `supabase/schema.sql`
 
-### Setup rapido de base de datos
+### Setup rápido de base de datos
 
 1. Abre Supabase > SQL Editor.
 2. Ejecuta `supabase/schema.sql`.
@@ -61,20 +61,20 @@ SMTP_FROM_NAME=Focus Zone
    - `public.pomodoro_sessions`
 4. Prueba en `/app`: al marcar retos o completar pomodoro, los datos quedan guardados por usuario.
 
-### Verificacion por codigo de 4 digitos (registro y recuperacion)
+### Verificación por código de 4 dígitos (registro y recuperación)
 
 El login ya incluye:
-- Registro en 2 pasos (datos + codigo de 4 digitos).
-- Validacion de contrasena repetida en registro.
-- Recuperacion de clave por codigo de 4 digitos.
-- Cambio de contrasena usando ese codigo.
+- Registro en 2 pasos (datos + código de 4 dígitos).
+- Validación de contraseña repetida en registro.
+- Recuperación de clave por código de 4 dígitos.
+- Cambio de contraseña usando ese código.
 
 Para usarlo debes:
 1. Ejecutar `supabase/schema.sql` (incluye tabla `public.auth_email_codes`).
 2. Definir `SUPABASE_SERVICE_ROLE_KEY` y variables SMTP en Vercel/entorno.
 3. Desplegar.
 
-Importante: la contrasena de aplicacion es secreta. Si ya se compartio publicamente, revocala y genera una nueva.
+Importante: la contraseña de aplicación es secreta. Si ya se compartió públicamente, revócala y genera una nueva.
 
 ## Deploy recomendado
 

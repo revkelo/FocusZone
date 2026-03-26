@@ -276,7 +276,7 @@ export default function Dashboard() {
     {
       id: 1,
       role: "assistant",
-      text: "Soy Lumi. Te ayudo con Zone Focus, biblioteca, pausa digital y concentración.",
+      text: "Soy Lumi. Te ayudo con Zone Focus: enfoque, pausas y planes cortos para usar mejor la biblioteca, con pausa digital y concentración.",
     },
   ]);
   const [chatInput, setChatInput] = useState("");
@@ -2084,7 +2084,7 @@ export default function Dashboard() {
         body: JSON.stringify({
           userId,
           title: "FocusZone | Prueba Push",
-          body: "Push real enviada. Si ves esto, movil ya esta listo.",
+          body: "Push real enviada. Si ves esto, móvil ya está listo.",
         }),
       });
 
@@ -2105,7 +2105,7 @@ export default function Dashboard() {
     const now = Date.now();
     if (chatRetryAt > now) {
       const waitSeconds = Math.max(1, Math.ceil((chatRetryAt - now) / 1000));
-      setError(`Lumi esta ocupada. Espera ${waitSeconds}s e intenta de nuevo.`);
+      setError(`Lumi está ocupada. Espera ${waitSeconds}s e intenta de nuevo.`);
       return;
     }
 
@@ -2124,7 +2124,7 @@ export default function Dashboard() {
     const pendingAssistantMessage: ChatMessage = {
       id: pendingAssistantId,
       role: "assistant",
-      text: "Lumi esta escribiendo...",
+      text: "Lumi está escribiendo...",
       pending: true,
     };
 
@@ -2144,7 +2144,7 @@ export default function Dashboard() {
         if (response.status === 429) {
           const retryAfterSeconds = Number(payload.retryAfter) > 0 ? Number(payload.retryAfter) : 20;
           setChatRetryAt(Date.now() + retryAfterSeconds * 1000);
-          throw new Error(`Lumi esta saturada. Intenta de nuevo en ${retryAfterSeconds}s.`);
+          throw new Error(`Lumi está saturada. Intenta de nuevo en ${retryAfterSeconds}s.`);
         }
         throw new Error(payload.error ?? "No se pudo obtener respuesta.");
       }
@@ -2410,7 +2410,7 @@ export default function Dashboard() {
                   <div className="mb-4 space-y-3 border border-[#5b30d9]/20 bg-white/70 p-3 sm:p-4">
                     <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Crear sala</p>
                     {ownedRoom && (
-                      <p className="text-xs font-bold text-[#d4183d]">
+                      <p className="text-xs font-bold text-[#6b7280]">
                         Ya eres dueño de "{ownedRoom.name}". Solo puedes tener 1 sala propia.
                       </p>
                     )}
@@ -2605,27 +2605,6 @@ export default function Dashboard() {
                 <div className="flex items-center gap-2">
                   <MessageCircle className="size-5 text-[#f47c0f]" />
                   <h2 className="display-font text-4xl text-[#5b30d9] sm:text-5xl">Chatbot Lumi</h2>
-                </div>
-
-                <div className="border border-[#5b30d9]/25 bg-[linear-gradient(180deg,#f8f5ff_0%,#ffffff_100%)] p-3 sm:p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.12em] text-[#5b30d9]/70">Asistente Lumi</p>
-                  <p className="mt-1 text-sm font-semibold text-[#5b30d9] sm:text-base">
-                    Te ayuda a enfocarte y a usar mejor la biblioteca.
-                  </p>
-                  <div className="mt-3 grid gap-2 sm:grid-cols-3">
-                    <div className="border border-[#5b30d9]/20 bg-white/80 p-2.5">
-                      <p className="text-[11px] font-black uppercase tracking-wide text-[#f47c0f]">Que puedes pedir</p>
-                      <p className="mt-1 text-xs font-semibold text-[#5b30d9]">Foco, pausas y planes cortos.</p>
-                    </div>
-                    <div className="border border-[#5b30d9]/20 bg-white/80 p-2.5">
-                      <p className="text-[11px] font-black uppercase tracking-wide text-[#f47c0f]">Contexto de biblioteca</p>
-                      <p className="mt-1 text-xs font-semibold text-[#5b30d9]">Recursos y espacios de estudio.</p>
-                    </div>
-                    <div className="border border-[#5b30d9]/20 bg-white/80 p-2.5">
-                      <p className="text-[11px] font-black uppercase tracking-wide text-[#f47c0f]">Tip rapido</p>
-                      <p className="mt-1 text-xs font-semibold text-[#5b30d9]">Pregunta corto para ir al punto.</p>
-                    </div>
-                  </div>
                 </div>
 
                 <div ref={chatScrollContainerRef} className="min-h-[320px] flex-1 space-y-3 overflow-y-auto border border-[#5b30d9]/20 bg-white/70 p-3 sm:min-h-[380px] sm:p-4 lg:min-h-[460px]">

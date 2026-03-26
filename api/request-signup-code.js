@@ -37,7 +37,7 @@ export default async function handler(req, res) {
 
     const existingNickname = await listUserByNickname(admin, nickname);
     if (existingNickname) {
-      return json(res, 409, { error: "Ese nickname ya esta en uso." });
+      return json(res, 409, { error: "Ese nickname ya está en uso." });
     }
 
     const code = generate4DigitCode();

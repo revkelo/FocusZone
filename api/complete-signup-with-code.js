@@ -46,12 +46,12 @@ export default async function handler(req, res) {
 
     const finalNickname = normalizeNickname(verification.metadata?.nickname || nickname);
     if (finalNickname.length < 3 || /\s/.test(finalNickname)) {
-      return json(res, 400, { error: "Nickname invalido." });
+      return json(res, 400, { error: "Nickname inválido." });
     }
 
     const existingNickname = await listUserByNickname(admin, finalNickname);
     if (existingNickname) {
-      return json(res, 409, { error: "Ese nickname ya esta en uso." });
+      return json(res, 409, { error: "Ese nickname ya está en uso." });
     }
     const { data, error } = await admin.auth.admin.createUser({
       email,

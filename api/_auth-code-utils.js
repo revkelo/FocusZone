@@ -64,7 +64,7 @@ export const sendCodeEmail = async ({ to, subject, heading, code, description })
       to,
       replyTo: fromEmail,
       subject,
-      text: `${heading}\n\nCodigo: ${code}\n\n${description}\n\nEste codigo vence en ${CODE_TTL_MINUTES} minutos.`,
+      text: `${heading}\n\nCodigo: ${code}\n\n${description}\n\nEste código vence en ${CODE_TTL_MINUTES} minutos.`,
       html: `
       <div style="margin:0;padding:24px;background:#f5f2ff">
         <div style="font-family:Segoe UI,Arial,sans-serif;max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #e6ddff">
@@ -77,9 +77,9 @@ export const sendCodeEmail = async ({ to, subject, heading, code, description })
             <div style="font-size:38px;letter-spacing:10px;font-weight:800;background:#f3efff;border:1px solid #d7c8ff;padding:16px 18px;display:inline-block;color:#5b30d9">
               ${code}
             </div>
-            <p style="margin:16px 0 0;font-size:14px;color:#4b5563">Este codigo vence en ${CODE_TTL_MINUTES} minutos.</p>
+            <p style="margin:16px 0 0;font-size:14px;color:#4b5563">Este código vence en ${CODE_TTL_MINUTES} minutos.</p>
             <p style="margin:18px 0 0;font-size:13px;color:#6b7280">
-              Si no solicitaste este codigo, ignora este correo.
+              Si no solicitaste este código, ignora este correo.
             </p>
           </div>
           <div style="padding:14px 18px;border-top:1px solid #ece7ff;color:#6b7280;font-size:12px;line-height:1.5">
