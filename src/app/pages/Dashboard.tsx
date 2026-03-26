@@ -5,13 +5,15 @@ import {
   CheckCircle,
   Circle,
   Clock,
+  Coffee,
   Gift,
-  History,
   ListTodo,
   LogOut,
   Mail,
+  Minus,
   PauseCircle,
   PlayCircle,
+  Plus,
   RotateCcw,
   Target,
   Trophy,
@@ -91,7 +93,19 @@ interface AppToast {
   description?: string;
 }
 
-const POMODORO_SECONDS = 10;
+type TimerMode = "focus" | "shortBreak" | "longBreak";
+interface PomodoroSnapshot {
+  focusMinutes: number;
+  shortBreakMinutes: number;
+  longBreakMinutes: number;
+  timerMode: TimerMode;
+  focusStreak: number;
+  timeLeft: number;
+  isActive: boolean;
+  isPaused: boolean;
+  savedAt: number;
+}
+
 const SESSION_POINTS = 10;
 
 const playEventSound = (event: "pomodoro" | "reward" | "notification" | "error") => {
@@ -151,7 +165,12 @@ export default function Dashboard() {
   const [joinedRoomIds, setJoinedRoomIds] = useState<Set<number>>(new Set());
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
   const [roomMembers, setRoomMembers] = useState<RoomMember[]>([]);
-  const [timeLeft, setTimeLeft] = useState(POMODORO_SECONDS);
+  const [focusMinutes, setFocusMinutes] = useState(40);
+  const [shortBreakMinutes, setShortBreakMinutes] = useState(5);
+  const [longBreakMinutes, setLongBreakMinutes] = useState(15);
+  const [timerMode, setTimerMode] = useState<TimerMode>("focus");
+  const [focusStreak, setFocusStreak] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(40 * 60);
   const [isActive, setIsActive] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [activeTab, setActiveTab] = useState("pomodoro");
@@ -172,6 +191,36 @@ export default function Dashboard() {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [toasts, setToasts] = useState<AppToast[]>([]);
+  const [hydratedPomodoroKey, setHydratedPomodoroKey] = useState<string | null>(null);
+
+  const pomodoroStorageKey = useMemo(() => {
+    if (!userId) {
+      return null;
+    }
+    return `focuszone:pomodoro:${userId}`;
+  }, [userId]);
+
+  const getModeSeconds = (mode: TimerMode) => {
+    if (mode === "focus") {
+      return Math.max(1, Math.round(focusMinutes * 60));
+    }
+    if (mode === "shortBreak") {
+      return Math.max(1, Math.round(shortBreakMinutes * 60));
+    }
+    return Math.max(1, Math.round(longBreakMinutes * 60));
+  };
+
+  const getModeLabel = (mode: TimerMode) => {
+    if (mode === "focus") {
+      return "En foco";
+    }
+    if (mode === "shortBreak") {
+      return "Descanso corto";
+    }
+    return "Descanso largo";
+  };
+
+  const maxTimerSeconds = Math.max(getModeSeconds("focus"), getModeSeconds("shortBreak"), getModeSeconds("longBreak"));
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -337,6 +386,90 @@ export default function Dashboard() {
     setNotificationPermission(window.Notification.permission);
   }, []);
 
+  useEffect(() => {
+    if (!pomodoroStorageKey || hydratedPomodoroKey === pomodoroStorageKey || typeof window === "undefined") {
+      return;
+    }
+
+    try {
+      const raw = window.localStorage.getItem(pomodoroStorageKey);
+      if (!raw) {
+        setHydratedPomodoroKey(pomodoroStorageKey);
+        return;
+      }
+
+      const snapshot = JSON.parse(raw) as PomodoroSnapshot;
+      const safeFocusMinutes = Math.max(1, Math.min(90, Number(snapshot.focusMinutes) || 40));
+      const safeShortBreakMinutes = Math.max(1, Math.min(90, Number(snapshot.shortBreakMinutes) || 5));
+      const safeLongBreakMinutes = Math.max(1, Math.min(90, Number(snapshot.longBreakMinutes) || 15));
+      const safeMode: TimerMode =
+        snapshot.timerMode === "focus" || snapshot.timerMode === "shortBreak" || snapshot.timerMode === "longBreak"
+          ? snapshot.timerMode
+          : "focus";
+      const safeFocusStreak = Math.max(0, Number(snapshot.focusStreak) || 0);
+      const safeSavedAt = Number(snapshot.savedAt) || Date.now();
+
+      const fallbackSeconds =
+        safeMode === "focus" ? safeFocusMinutes * 60 : safeMode === "shortBreak" ? safeShortBreakMinutes * 60 : safeLongBreakMinutes * 60;
+      const storedSeconds = Math.max(0, Number(snapshot.timeLeft) || fallbackSeconds);
+      const wasRunning = Boolean(snapshot.isActive) && !Boolean(snapshot.isPaused);
+      const elapsedSeconds = wasRunning ? Math.max(0, Math.floor((Date.now() - safeSavedAt) / 1000)) : 0;
+      const recoveredSeconds = Math.max(0, storedSeconds - elapsedSeconds);
+      const didExpireWhileAway = wasRunning && recoveredSeconds === 0;
+      const recoveredIsActive = wasRunning ? recoveredSeconds > 0 : Boolean(snapshot.isActive);
+      const recoveredIsPaused = recoveredIsActive ? Boolean(snapshot.isPaused) : false;
+      const restoredTimeLeft = didExpireWhileAway ? fallbackSeconds : recoveredSeconds;
+
+      setFocusMinutes(safeFocusMinutes);
+      setShortBreakMinutes(safeShortBreakMinutes);
+      setLongBreakMinutes(safeLongBreakMinutes);
+      setTimerMode(safeMode);
+      setFocusStreak(safeFocusStreak);
+      setTimeLeft(restoredTimeLeft);
+      setIsActive(recoveredIsActive);
+      setIsPaused(recoveredIsPaused);
+
+      if (didExpireWhileAway) {
+        setSuccessMessage("El pomodoro termino mientras estabas fuera. Estado recuperado.");
+      }
+    } catch {
+      // Ignore invalid local snapshots.
+    }
+
+    setHydratedPomodoroKey(pomodoroStorageKey);
+  }, [pomodoroStorageKey, hydratedPomodoroKey]);
+
+  useEffect(() => {
+    if (!pomodoroStorageKey || hydratedPomodoroKey !== pomodoroStorageKey || typeof window === "undefined") {
+      return;
+    }
+
+    const snapshot: PomodoroSnapshot = {
+      focusMinutes,
+      shortBreakMinutes,
+      longBreakMinutes,
+      timerMode,
+      focusStreak,
+      timeLeft,
+      isActive,
+      isPaused,
+      savedAt: Date.now(),
+    };
+
+    window.localStorage.setItem(pomodoroStorageKey, JSON.stringify(snapshot));
+  }, [
+    pomodoroStorageKey,
+    hydratedPomodoroKey,
+    focusMinutes,
+    shortBreakMinutes,
+    longBreakMinutes,
+    timerMode,
+    focusStreak,
+    timeLeft,
+    isActive,
+    isPaused,
+  ]);
+
   const removeToast = (toastId: number) => {
     setToasts((previous) => previous.filter((toast) => toast.id !== toastId));
   };
@@ -379,7 +512,7 @@ export default function Dashboard() {
     }
 
     if (isActive && timeLeft === 0) {
-      void handleSessionComplete();
+      void handleTimerComplete();
     }
 
     return () => {
@@ -387,7 +520,15 @@ export default function Dashboard() {
         clearInterval(interval);
       }
     };
-  }, [isActive, isPaused, timeLeft]);
+  }, [isActive, isPaused, timeLeft, timerMode, focusMinutes, shortBreakMinutes, longBreakMinutes]);
+
+  useEffect(() => {
+    if (isActive) {
+      return;
+    }
+
+    setTimeLeft(getModeSeconds(timerMode));
+  }, [timerMode, focusMinutes, shortBreakMinutes, longBreakMinutes, isActive]);
 
   const baseChallenges: ChallengeItem[] = useMemo(
     () => CHALLENGES.map((challenge) => ({ id: challenge.id, title: challenge.title, points: challenge.points, kind: "base" })),
@@ -490,7 +631,7 @@ export default function Dashboard() {
           return {
             userId: member.user_id,
             displayName: member.display_name,
-            timeLeft: current?.timeLeft ?? POMODORO_SECONDS,
+            timeLeft: current?.timeLeft ?? getModeSeconds("focus"),
             isActive: current?.isActive ?? false,
             isPaused: current?.isPaused ?? false,
           };
@@ -535,7 +676,7 @@ export default function Dashboard() {
     return () => {
       void supabase.removeChannel(channel);
     };
-  }, [selectedRoomId]);
+  }, [selectedRoomId, focusMinutes]);
 
   useEffect(() => {
     if (!userId) {
@@ -623,49 +764,135 @@ export default function Dashboard() {
     void syncRoomPresence();
   }, [selectedRoomId, userId, timeLeft, isActive, isPaused]);
 
-  const handleSessionComplete = async () => {
+  useEffect(() => {
+    if (!userId || !selectedRoomId || !joinedRoomIds.has(selectedRoomId)) {
+      return;
+    }
+
+    setRoomMembers((previous) => {
+      const ownMemberIndex = previous.findIndex((member) => member.userId === userId);
+
+      if (ownMemberIndex === -1) {
+        return [
+          ...previous,
+          {
+            userId,
+            displayName: name || email || "Usuario",
+            timeLeft,
+            isActive,
+            isPaused,
+          },
+        ];
+      }
+
+      return previous.map((member) =>
+        member.userId === userId
+          ? {
+              ...member,
+              timeLeft,
+              isActive,
+              isPaused,
+              displayName: member.displayName || name || email || "Usuario",
+            }
+          : member,
+      );
+    });
+  }, [userId, selectedRoomId, joinedRoomIds, timeLeft, isActive, isPaused, name, email]);
+
+  const handleTimerComplete = async () => {
     if (!userId) {
       return;
     }
 
+    const completedMode = timerMode;
+    const focusDurationSeconds = getModeSeconds("focus");
+    const shortDurationSeconds = getModeSeconds("shortBreak");
+    const longDurationSeconds = getModeSeconds("longBreak");
+
     setIsActive(false);
     setIsPaused(false);
-    setTimeLeft(POMODORO_SECONDS);
 
-    const { data, error: insertError } = await supabase
-      .from("pomodoro_sessions")
-      .insert({
-        user_id: userId,
-        duration_seconds: POMODORO_SECONDS,
-      })
-      .select("id, duration_seconds, completed_at")
-      .single();
+    if (completedMode === "focus") {
+      const { data, error: insertError } = await supabase
+        .from("pomodoro_sessions")
+        .insert({
+          user_id: userId,
+          duration_seconds: focusDurationSeconds,
+        })
+        .select("id, duration_seconds, completed_at")
+        .single();
 
-    if (insertError || !data) {
-      setError("No se pudo guardar la sesion.");
-      setSuccessMessage("");
+      if (insertError || !data) {
+        setError("No se pudo guardar la sesion.");
+        return;
+      }
+
+      setSessions((previous) => [
+        {
+          id: data.id,
+          durationSeconds: data.duration_seconds,
+          completedAt: data.completed_at,
+        },
+        ...previous,
+      ]);
+
+      const nextFocusStreak = focusStreak + 1;
+      const shouldUseLongBreak = nextFocusStreak % 4 === 0;
+      const nextMode: TimerMode = shouldUseLongBreak ? "longBreak" : "shortBreak";
+      setFocusStreak(nextFocusStreak);
+      setTimerMode(nextMode);
+      setTimeLeft(nextMode === "longBreak" ? longDurationSeconds : shortDurationSeconds);
+      setSuccessMessage(`Sesion completada. +${SESSION_POINTS} puntos.`);
+
+      if (typeof window !== "undefined" && "Notification" in window && window.Notification.permission === "granted") {
+        new window.Notification("FocusZone | Pomodoro completado", {
+          body: `Sumaste +${SESSION_POINTS} puntos. Sigue asi.`,
+          icon: "/favicon.svg",
+          badge: "/favicon.svg",
+          tag: "focuszone-pomodoro-complete",
+        });
+      }
       return;
     }
 
-    setSessions((previous) => [
-      {
-        id: data.id,
-        durationSeconds: data.duration_seconds,
-        completedAt: data.completed_at,
-      },
-      ...previous,
-    ]);
+    setTimerMode("focus");
+    setTimeLeft(focusDurationSeconds);
+    setSuccessMessage(completedMode === "shortBreak" ? "Descanso corto terminado. Volvemos al foco." : "Descanso largo terminado. Volvemos al foco.");
+  };
 
-    setSuccessMessage("Pomodoro completado. Se sumaron tus puntos.");
+  const adjustDuration = (mode: TimerMode, delta: number) => {
+    const applyDelta = (current: number) => Math.max(1, Math.min(90, current + delta));
 
-    if (typeof window !== "undefined" && "Notification" in window && window.Notification.permission === "granted") {
-      new window.Notification("FocusZone | Pomodoro completado", {
-        body: "Sumaste +10 puntos. Mantén el ritmo.",
-        icon: "/favicon.svg",
-        badge: "/favicon.svg",
-        tag: "focuszone-pomodoro-complete",
-      });
+    if (mode === "focus") {
+      const next = applyDelta(focusMinutes);
+      setFocusMinutes(next);
+      if (!isActive && timerMode === "focus") {
+        setTimeLeft(next * 60);
+      }
+      return;
     }
+
+    if (mode === "shortBreak") {
+      const next = applyDelta(shortBreakMinutes);
+      setShortBreakMinutes(next);
+      if (!isActive && timerMode === "shortBreak") {
+        setTimeLeft(next * 60);
+      }
+      return;
+    }
+
+    const next = applyDelta(longBreakMinutes);
+    setLongBreakMinutes(next);
+    if (!isActive && timerMode === "longBreak") {
+      setTimeLeft(next * 60);
+    }
+  };
+
+  const switchTimerMode = (mode: TimerMode) => {
+    setTimerMode(mode);
+    setIsActive(false);
+    setIsPaused(false);
+    setTimeLeft(getModeSeconds(mode));
   };
 
   const toggleTimer = () => {
@@ -681,7 +908,7 @@ export default function Dashboard() {
   const resetTimer = () => {
     setIsActive(false);
     setIsPaused(false);
-    setTimeLeft(POMODORO_SECONDS);
+    setTimeLeft(getModeSeconds(timerMode));
   };
 
   const toggleChallenge = async (challengeId: string) => {
@@ -1096,6 +1323,14 @@ export default function Dashboard() {
     return rewards.find((reward) => reward.id === rewardId)?.title ?? "Recompensa";
   };
 
+  const currentModeSeconds = getModeSeconds(timerMode);
+  const timerProgress = Math.max(0, Math.min(100, Math.round(((currentModeSeconds - timeLeft) / currentModeSeconds) * 100)));
+  const estimateMemberDuration = (memberTimeLeft: number) => {
+    const presets = [getModeSeconds("focus"), getModeSeconds("shortBreak"), getModeSeconds("longBreak")].sort((a, b) => a - b);
+    const matched = presets.find((value) => value >= memberTimeLeft);
+    return matched ?? maxTimerSeconds;
+  };
+
   if (isLoading) {
     return <div className="focus-shell min-h-screen grid place-items-center text-xl font-bold">Cargando...</div>;
   }
@@ -1167,57 +1402,117 @@ export default function Dashboard() {
             <TabsList className="mb-6 hidden h-auto w-full flex-wrap rounded-none bg-[#5b30d9] p-1 md:flex">
               <TabsTrigger value="pomodoro" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Pomodoro</TabsTrigger>
               <TabsTrigger value="resumen" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Resumen</TabsTrigger>
-              <TabsTrigger value="historial" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Historial</TabsTrigger>
               <TabsTrigger value="tareas" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Tareas</TabsTrigger>
               <TabsTrigger value="recompensas" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Recompensas</TabsTrigger>
               <TabsTrigger value="cuenta" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Cuenta</TabsTrigger>
             </TabsList>
 
             <TabsContent value="pomodoro" className="space-y-5">
-              <Card className="focus-card rounded-none p-7 md:p-8">
+              <Card className="focus-card rounded-none p-5 md:p-7">
                 <div className="flex items-center gap-2">
                   <Clock className="size-5 text-[#f47c0f]" />
-                  <h2 className="display-font text-5xl text-[#5b30d9]">Temporizador pomodoro</h2>
+                  <h2 className="display-font text-5xl text-[#5b30d9]">Pomodoro</h2>
                 </div>
 
-                <div className="mt-7 flex flex-col items-center gap-6">
-                  <div className="relative flex h-60 w-60 items-center justify-center">
-                    <svg className="absolute inset-0 size-full -rotate-90">
-                      <circle cx="120" cy="120" r="103" stroke="currentColor" strokeWidth="12" fill="none" className="text-[#5b30d9]/15" />
-                      <circle
-                        cx="120"
-                        cy="120"
-                        r="103"
-                        stroke="currentColor"
-                        strokeWidth="12"
-                        fill="none"
-                        strokeDasharray={2 * Math.PI * 103}
-                        strokeDashoffset={2 * Math.PI * 103 * (1 - timeLeft / POMODORO_SECONDS)}
-                        className="text-[#f47c0f] transition-all duration-1000"
-                        strokeLinecap="square"
-                      />
-                    </svg>
-                    <div className="text-center">
-                      <p className="display-font text-8xl text-[#5b30d9]">{formatTime(timeLeft)}</p>
-                      <p className="font-bold text-[#5b30d9]/80">{isActive ? (isPaused ? "Pausado" : "En progreso") : "Listo"}</p>
+                <div className="mt-6 grid gap-5 lg:grid-cols-[300px_1fr]">
+                  <div className="space-y-3">
+                    <div className="rounded-2xl bg-[#5b30d9] p-3 text-white">
+                      <p className="text-xs font-bold uppercase tracking-wide text-white/80">Duracion de sesion</p>
+                      <div className="mt-2 flex items-center justify-between">
+                        <button
+                          onClick={() => adjustDuration("focus", -1)}
+                          className="grid size-8 place-items-center rounded-full bg-[#f47c0f] text-white"
+                          aria-label="Reducir sesion"
+                        >
+                          <Minus className="size-4" />
+                        </button>
+                        <button onClick={() => switchTimerMode("focus")} className={`font-bold ${timerMode === "focus" ? "text-[#b8ee73]" : "text-white"}`}>
+                          {focusMinutes} min
+                        </button>
+                        <button
+                          onClick={() => adjustDuration("focus", 1)}
+                          className="grid size-8 place-items-center rounded-full bg-[#f47c0f] text-white"
+                          aria-label="Aumentar sesion"
+                        >
+                          <Plus className="size-4" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="rounded-2xl bg-[#5b30d9] p-3 text-white">
+                      <p className="text-xs font-bold uppercase tracking-wide text-white/80">Duracion de descanso</p>
+                      <div className="mt-2 flex items-center justify-between">
+                        <button onClick={() => adjustDuration("shortBreak", -1)} className="grid size-8 place-items-center rounded-full bg-[#f47c0f] text-white" aria-label="Reducir descanso corto">
+                          <Minus className="size-4" />
+                        </button>
+                        <button onClick={() => switchTimerMode("shortBreak")} className={`font-bold ${timerMode === "shortBreak" ? "text-[#b8ee73]" : "text-white"}`}>
+                          {shortBreakMinutes} min
+                        </button>
+                        <button onClick={() => adjustDuration("shortBreak", 1)} className="grid size-8 place-items-center rounded-full bg-[#f47c0f] text-white" aria-label="Aumentar descanso corto">
+                          <Plus className="size-4" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="rounded-2xl bg-[#5b30d9] p-3 text-white">
+                      <p className="text-xs font-bold uppercase tracking-wide text-white/80">Duracion de descanso largo</p>
+                      <div className="mt-2 flex items-center justify-between">
+                        <button onClick={() => adjustDuration("longBreak", -1)} className="grid size-8 place-items-center rounded-full bg-[#f47c0f] text-white" aria-label="Reducir descanso largo">
+                          <Minus className="size-4" />
+                        </button>
+                        <button onClick={() => switchTimerMode("longBreak")} className={`font-bold ${timerMode === "longBreak" ? "text-[#b8ee73]" : "text-white"}`}>
+                          {longBreakMinutes} min
+                        </button>
+                        <button onClick={() => adjustDuration("longBreak", 1)} className="grid size-8 place-items-center rounded-full bg-[#f47c0f] text-white" aria-label="Aumentar descanso largo">
+                          <Plus className="size-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="flex gap-3">
-                    <Button size="lg" onClick={toggleTimer} className="rounded-none bg-[#f47c0f] px-6 text-white hover:bg-[#dd6900]">
-                      {!isActive || isPaused ? (
-                        <>
-                          <PlayCircle className="mr-2 size-5" /> {!isActive ? "Iniciar" : "Reanudar"}
-                        </>
-                      ) : (
-                        <>
-                          <PauseCircle className="mr-2 size-5" /> Pausar
-                        </>
-                      )}
-                    </Button>
-                    <Button size="lg" variant="outline" onClick={resetTimer} className="rounded-none border-2 border-[#5b30d9] text-[#5b30d9]">
-                      <RotateCcw className="size-5" />
-                    </Button>
+                  <div className="flex flex-col items-center justify-between gap-5">
+                    <div className="relative flex h-64 w-64 items-center justify-center sm:h-72 sm:w-72">
+                      <svg viewBox="0 0 288 288" className="absolute inset-0 size-full -rotate-90">
+                        <circle cx="144" cy="144" r="118" stroke="currentColor" strokeWidth="12" fill="none" className="text-[#5b30d9]/20" />
+                        <circle
+                          cx="144"
+                          cy="144"
+                          r="118"
+                          stroke="currentColor"
+                          strokeWidth="12"
+                          fill="none"
+                          strokeDasharray={2 * Math.PI * 118}
+                          strokeDashoffset={2 * Math.PI * 118 * (1 - timerProgress / 100)}
+                          className="text-[#f47c0f] transition-all duration-1000"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      <div className="text-center">
+                        <p className="display-font text-8xl text-[#5b30d9]">{formatTime(timeLeft)}</p>
+                        <p className="mt-1 font-bold text-[#5b30d9]/85">{isActive ? (isPaused ? "Pausado" : getModeLabel(timerMode)) : "Listo"}</p>
+                        <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Ciclo {Math.min(focusStreak % 4, 3) + 1}/4</p>
+                      </div>
+                    </div>
+
+                    <div className="grid w-full grid-cols-2 gap-3 sm:max-w-[360px]">
+                      <Button size="lg" onClick={toggleTimer} className="rounded-xl bg-[#f47c0f] px-6 text-white hover:bg-[#dd6900]">
+                        {!isActive || isPaused ? <><PlayCircle className="mr-2 size-5" /> {!isActive ? "Iniciar" : "Reanudar"}</> : <><PauseCircle className="mr-2 size-5" /> Pausar</>}
+                      </Button>
+                      <Button size="lg" variant="outline" onClick={resetTimer} className="rounded-xl border-2 border-[#5b30d9] text-[#5b30d9]">
+                        <RotateCcw className="mr-2 size-5" />
+                        Reiniciar
+                      </Button>
+                    </div>
+
+                    <div className="flex w-full items-center justify-center gap-2 sm:max-w-[360px]">
+                      {[0, 1, 2, 3].map((index) => (
+                        <span
+                          key={index}
+                          className={`h-2 flex-1 rounded-full ${index < focusStreak % 4 ? "bg-[#f47c0f]" : "bg-[#5b30d9]/25"}`}
+                        />
+                      ))}
+                      <span className="ml-2 grid size-7 place-items-center rounded-full border border-[#5b30d9]/45 text-[#5b30d9]">
+                        <Coffee className="size-4" />
+                      </span>
+                    </div>
                   </div>
                 </div>
               </Card>
@@ -1231,7 +1526,7 @@ export default function Dashboard() {
                   <div className="mb-4 space-y-2 border border-[#5b30d9]/20 bg-white/70 p-3">
                     <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Crear sala</p>
                     <Input value={newRoomName} onChange={(event) => setNewRoomName(event.target.value)} placeholder="Ej: Diseno nocturno" />
-                    <Button disabled={isCreatingRoom} onClick={() => void handleCreateRoom()} className="rounded-none bg-[#5b30d9] text-white hover:bg-[#4a22be]">
+                    <Button disabled={isCreatingRoom} onClick={() => void handleCreateRoom()} className="w-full rounded-none bg-[#5b30d9] text-white hover:bg-[#4a22be] sm:w-auto">
                       {isCreatingRoom ? "Creando..." : "Crear sala"}
                     </Button>
                   </div>
@@ -1245,9 +1540,9 @@ export default function Dashboard() {
                         const isSelected = selectedRoomId === room.id;
                         return (
                           <div key={room.id} className={`border p-3 ${isSelected ? "border-[#f47c0f] bg-[#fff4ea]" : "border-[#5b30d9]/20 bg-white/70"}`}>
-                            <div className="flex items-center justify-between gap-2">
-                              <p className="font-bold text-[#5b30d9]">{room.name}</p>
-                              <div className="flex gap-2">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                              <p className="break-words font-bold text-[#5b30d9]">{room.name}</p>
+                              <div className="flex flex-wrap gap-2">
                                 {isJoined ? (
                                   <>
                                     <Button size="sm" variant="outline" onClick={() => setSelectedRoomId(room.id)} className="rounded-none border-[#5b30d9] text-[#5b30d9]">
@@ -1272,7 +1567,7 @@ export default function Dashboard() {
 
                   {selectedRoomId && (
                     <div className="mt-4 border border-[#5b30d9]/20 bg-white/70 p-3">
-                      <div className="mb-3 flex items-center justify-between">
+                      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                         <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Miembros en sala</p>
                         <span className="rounded-full bg-[#5b30d9]/10 px-2 py-1 text-xs font-bold text-[#5b30d9]">Vista en tiempo real</span>
                       </div>
@@ -1280,7 +1575,14 @@ export default function Dashboard() {
                         <p className="text-sm text-[#5b30d9]/75">Cargando miembros...</p>
                       ) : (
                         <div className="grid gap-2 sm:grid-cols-2">
-                          {roomMembers.map((member) => (
+                          {roomMembers.map((member) => {
+                            const memberDuration = estimateMemberDuration(member.timeLeft);
+                            const normalizedDuration = Math.max(memberDuration, member.timeLeft, 1);
+                            const memberProgress = member.isActive
+                              ? Math.max(0, Math.min(100, Math.round(((normalizedDuration - member.timeLeft) / normalizedDuration) * 100)))
+                              : 0;
+
+                            return (
                             <div key={member.userId} className="border border-[#5b30d9]/20 bg-white p-3">
                               <div className="mb-2 flex items-center justify-between">
                                 <span className="font-bold text-[#5b30d9]">{member.displayName}</span>
@@ -1298,16 +1600,13 @@ export default function Dashboard() {
                               </div>
                               <div className="mb-1 flex items-center justify-between text-xs text-[#5b30d9]/80">
                                 <span>Pomodoro</span>
-                                <span>{Math.max(0, Math.min(100, Math.round(((POMODORO_SECONDS - member.timeLeft) / POMODORO_SECONDS) * 100)))}%</span>
+                                <span>{memberProgress}%</span>
                               </div>
                               <div className="h-2 w-full overflow-hidden bg-[#5b30d9]/15">
                                 <div
                                   className="h-full bg-gradient-to-r from-[#7d4cd8] via-[#5b30d9] to-[#00b6d9]"
                                   style={{
-                                    width: `${Math.max(
-                                      0,
-                                      Math.min(100, Math.round(((POMODORO_SECONDS - member.timeLeft) / POMODORO_SECONDS) * 100)),
-                                    )}%`,
+                                    width: `${memberProgress}%`,
                                   }}
                                 />
                               </div>
@@ -1315,7 +1614,8 @@ export default function Dashboard() {
                                 {member.isActive ? formatTime(member.timeLeft) : "00:00"}
                               </p>
                             </div>
-                          ))}
+                          );
+                        })}
                         </div>
                       )}
                     </div>
@@ -1357,42 +1657,6 @@ export default function Dashboard() {
                       <div key={entry.userId} className="flex items-center justify-between border border-[#5b30d9]/15 bg-white/70 p-3 text-sm">
                         <span className="font-bold text-[#5b30d9]">{index + 1}. {entry.displayName}</span>
                         <span className="text-[#f47c0f]">{entry.totalPoints} pts</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="historial">
-              <Card className="focus-card rounded-none p-7 md:p-8">
-                {sessions.length === 0 ? (
-                  <div className="py-12 text-center text-[#5b30d9]/80">
-                    <Clock className="mx-auto mb-2 size-10" />
-                    <p className="font-bold">Aun no completas sesiones.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {sessions.map((session) => (
-                      <div key={session.id} className="flex items-center justify-between rounded-none bg-white/80 p-4">
-                        <div className="flex items-center gap-3">
-                          <span className="grid size-9 place-items-center bg-[#5b30d9] text-white">
-                            <CheckCircle className="size-5" />
-                          </span>
-                          <div>
-                            <p className="font-bold text-[#5b30d9]">Sesion de {Math.round(session.durationSeconds / 60)} minutos</p>
-                            <p className="text-sm text-[#5b30d9]/75">
-                              {new Date(session.completedAt).toLocaleDateString("es-CO", {
-                                day: "numeric",
-                                month: "long",
-                                year: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
-                            </p>
-                          </div>
-                        </div>
-                        <p className="display-font text-4xl text-[#f47c0f]">+{SESSION_POINTS}</p>
                       </div>
                     ))}
                   </div>
@@ -1604,6 +1868,34 @@ export default function Dashboard() {
                     <p className="font-bold">Sesiones: {sessions.length}</p>
                     <p className="font-bold">Retos completados: {completedCount}</p>
                   </div>
+
+                  <div className="mt-6">
+                    <h4 className="display-font text-3xl text-[#5b30d9]">Historial</h4>
+                    {sessions.length === 0 ? (
+                      <p className="mt-2 text-sm text-[#5b30d9]/80">Aun no completas sesiones.</p>
+                    ) : (
+                      <div className="mt-3 max-h-72 space-y-2 overflow-y-auto pr-1">
+                        {sessions.map((session) => (
+                          <div key={session.id} className="flex items-center justify-between border border-[#5b30d9]/15 bg-white/70 p-3 text-sm">
+                            <div>
+                              <p className="font-bold text-[#5b30d9]">Sesion de {Math.round(session.durationSeconds / 60)} min</p>
+                              <p className="text-xs text-[#5b30d9]/75">
+                                {new Date(session.completedAt).toLocaleDateString("es-CO", {
+                                  day: "numeric",
+                                  month: "short",
+                                  year: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </p>
+                            </div>
+                            <span className="font-bold text-[#f47c0f]">+{SESSION_POINTS}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
                   <Button
                     variant="outline"
                     onClick={handleLogout}
@@ -1619,7 +1911,7 @@ export default function Dashboard() {
         </main>
 
         <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-[#5b30d9]/30 bg-[#f2f0f3]/95 px-4 py-2 backdrop-blur md:hidden">
-          <div className="mx-auto grid w-full max-w-md grid-cols-6 gap-1 rounded-2xl border border-[#7d4cd8]/30 bg-white p-1">
+          <div className="mx-auto grid w-full max-w-md grid-cols-5 gap-1 rounded-2xl border border-[#7d4cd8]/30 bg-white p-1">
             <button
               onClick={() => setActiveTab("pomodoro")}
               className={`flex flex-col items-center gap-1 rounded-xl py-2 text-[11px] font-bold ${
@@ -1637,15 +1929,6 @@ export default function Dashboard() {
             >
               <Trophy className="size-4" />
               <span>Resumen</span>
-            </button>
-            <button
-              onClick={() => setActiveTab("historial")}
-              className={`flex flex-col items-center gap-1 rounded-xl py-2 text-[11px] font-bold ${
-                activeTab === "historial" ? "bg-[#5b30d9] text-white" : "text-[#5b30d9]"
-              }`}
-            >
-              <History className="size-4" />
-              <span>Historial</span>
             </button>
             <button
               onClick={() => setActiveTab("tareas")}
