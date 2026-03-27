@@ -30,7 +30,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
 import { CHALLENGES } from "../lib/challenges";
 import {
   GUIDED_CATEGORIES,
-  buildGuidedRecommendationPrompt,
   getGuidedCategoryById,
   getQuickReplyForOption,
   getQuickReplyForQuestion,
@@ -2263,25 +2262,6 @@ export default function Dashboard() {
     setIsGuidedMenuOpen(false);
   };
 
-  const handleGuidedRecommendation = async () => {
-    const prompt = buildGuidedRecommendationPrompt({
-      categoryId: guidedCategoryId,
-      selectedOptionIds: guidedOptionIds,
-      userNote: normalizeInputText(chatInput),
-    });
-
-    const categoryLabel = selectedGuidedCategory?.label ?? "Sin categoria";
-    const selectedLabels = (selectedGuidedCategory?.options ?? [])
-      .filter((option) => guidedOptionIds.includes(option.id))
-      .map((option) => option.label);
-    const userVisibleText = `Habla con Lumi: ${categoryLabel}${selectedLabels.length > 0 ? ` | ${selectedLabels.join(", ")}` : ""}`;
-
-    setChatInput("");
-    await sendMessageToLumi(prompt, userVisibleText);
-    resetGuidedSelection();
-    setIsGuidedMenuOpen(false);
-  };
-
   useEffect(() => {
     if (activeTab !== "chatbot") {
       return;
@@ -2775,6 +2755,20 @@ export default function Dashboard() {
                           <div className="border-b border-[#5b30d9]/15 bg-[#f7f3ff] px-3 py-2 text-center text-xs font-bold uppercase tracking-wide text-[#5b30d9]/70">
                             Selecciona una opcion
                           </div>
+                          <button
+                            type="button"
+                            onClick={resetGuidedSelection}
+                            disabled={isSendingChat}
+                            className="flex w-full items-start gap-3 border-b border-[#5b30d9]/10 px-3 py-3 text-left transition hover:bg-[#f6f2ff] disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-bold text-[#2f1b73]">Cambiar categoria</p>
+                              <p className="line-clamp-2 text-xs text-[#5b30d9]/75">Volver al menu principal de opciones.</p>
+                            </div>
+                            <span className="mt-0.5 shrink-0 text-[#5b30d9]/50">
+                              <RotateCcw className="size-5" />
+                            </span>
+                          </button>
                           {selectedGuidedCategory.options.map((option) => {
                             const selected = guidedOptionIds.includes(option.id);
                             return (
@@ -2796,34 +2790,6 @@ export default function Dashboard() {
                               </button>
                             );
                           })}
-                          <button
-                            type="button"
-                            onClick={() => void handleGuidedRecommendation()}
-                            disabled={isSendingChat}
-                            className="flex w-full items-start gap-3 border-b border-[#5b30d9]/10 px-3 py-3 text-left transition hover:bg-[#fff4ea] disabled:cursor-not-allowed disabled:opacity-60"
-                          >
-                            <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm font-bold text-[#8a4f00]">Habla con Lumi</p>
-                              <p className="line-clamp-2 text-xs text-[#8a4f00]/85">Recibe una respuesta mas personalizada con IA.</p>
-                            </div>
-                            <span className="mt-0.5 shrink-0 text-[#f47c0f]">
-                              <MessageCircle className="size-5" />
-                            </span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={resetGuidedSelection}
-                            disabled={isSendingChat}
-                            className="flex w-full items-start gap-3 px-3 py-3 text-left transition hover:bg-[#f6f2ff] disabled:cursor-not-allowed disabled:opacity-60"
-                          >
-                            <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm font-bold text-[#2f1b73]">Cambiar categoria</p>
-                              <p className="line-clamp-2 text-xs text-[#5b30d9]/75">Volver al menu principal de opciones.</p>
-                            </div>
-                            <span className="mt-0.5 shrink-0 text-[#5b30d9]/50">
-                              <RotateCcw className="size-5" />
-                            </span>
-                          </button>
                         </div>
                       </div>
                     )}
