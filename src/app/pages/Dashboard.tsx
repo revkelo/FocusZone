@@ -28,6 +28,13 @@ import { Input } from "../components/ui/input";
 import { Progress } from "../components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { CHALLENGES } from "../lib/challenges";
+import {
+  GUIDED_CATEGORIES,
+  buildGuidedRecommendationPrompt,
+  getGuidedCategoryById,
+  getQuickReplyForOption,
+  getQuickReplyForQuestion,
+} from "../lib/lumiGuidedFlow";
 import { supabase } from "../lib/supabase";
 
 interface Session {
@@ -277,12 +284,15 @@ export default function Dashboard() {
     {
       id: 1,
       role: "assistant",
-      text: "Soy Lumi. Te ayudo con Zone Focus: enfoque, pausas y planes cortos para usar mejor la biblioteca, con pausa digital y concentración.",
+      text: "Soy Lumi. Puedes explorar por opciones o escribirme directo. Si eliges varias opciones, te doy una recomendacion personalizada.",
     },
   ]);
   const [chatInput, setChatInput] = useState("");
   const [isSendingChat, setIsSendingChat] = useState(false);
   const [chatRetryAt, setChatRetryAt] = useState<number>(0);
+  const [guidedCategoryId, setGuidedCategoryId] = useState<string | null>(null);
+  const [guidedOptionIds, setGuidedOptionIds] = useState<string[]>([]);
+  const [isGuidedMenuOpen, setIsGuidedMenuOpen] = useState(true);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [toasts, setToasts] = useState<AppToast[]>([]);
@@ -336,13 +346,21 @@ export default function Dashboard() {
   const sanitizeDigitsInput = (value: string, maxLength = MAX_NUMERIC_INPUT_LENGTH) => value.replace(/\D/g, "").slice(0, maxLength);
   const normalizeInputText = (value: string) => value.replace(/\s+/g, " ").trim();
   const ALLOWED_TEXT_PATTERN = /^[\p{L}\p{N}\s.,:;!?'"()\-_/+#&]+$/u;
+  const selectedGuidedCategory = useMemo(() => (guidedCategoryId ? getGuidedCategoryById(guidedCategoryId) : null), [guidedCategoryId]);
   const renderInlineMarkdown = (value: string) => {
-    const parts = value.split(/(\*\*[^*]+\*\*)/g);
+    const parts = value.split(/(\*\*[^*\n]+\*\*|\*[^*\n]+\*)/g);
     return parts.map((part, index) => {
       if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
         return (
           <strong key={`${part}-${index}`} className="font-extrabold">
             {part.slice(2, -2)}
+          </strong>
+        );
+      }
+      if (part.startsWith("*") && part.endsWith("*") && part.length > 2) {
+        return (
+          <strong key={`${part}-${index}`} className="font-extrabold">
+            {part.slice(1, -1)}
           </strong>
         );
       }
@@ -385,6 +403,9 @@ export default function Dashboard() {
         })}
       </div>
     );
+  };
+  const withLumiPresentation = (content: string) => {
+    return `¡Hola! 👋 Soy Lumi.\n\n${content}\n\n¿Quieres que te muestre otra opcion o una recomendacion personalizada? ✨`;
   };
 
   useEffect(() => {
@@ -2112,17 +2133,21 @@ export default function Dashboard() {
       setSuccessMessage("");
     }
   };
-  const handleSendChat = async () => {
+  const resetGuidedSelection = () => {
+    setGuidedCategoryId(null);
+    setGuidedOptionIds([]);
+  };
+
+  const sendMessageToLumi = async (message: string, userVisibleText?: string) => {
     const now = Date.now();
     if (chatRetryAt > now) {
       const waitSeconds = Math.max(1, Math.ceil((chatRetryAt - now) / 1000));
       setError(`Lumi está ocupada. Espera ${waitSeconds}s e intenta de nuevo.`);
-      return;
+      return false;
     }
 
-    const message = normalizeInputText(chatInput);
     if (!message) {
-      return;
+      return false;
     }
 
     const baseId = Date.now();
@@ -2130,7 +2155,7 @@ export default function Dashboard() {
     const userMessage: ChatMessage = {
       id: baseId,
       role: "user",
-      text: message,
+      text: userVisibleText ?? message,
     };
     const pendingAssistantMessage: ChatMessage = {
       id: pendingAssistantId,
@@ -2173,6 +2198,7 @@ export default function Dashboard() {
         ),
       );
       playEventSound("notification");
+      return true;
     } catch (chatError) {
       setChatMessages((previous) =>
         previous.map((item) =>
@@ -2186,10 +2212,76 @@ export default function Dashboard() {
         ),
       );
       setError(chatError instanceof Error ? chatError.message : "No se pudo consultar a Lumi en este momento.");
+      return false;
     } finally {
       setIsSendingChat(false);
     }
   };
+
+  const handleSendChat = async () => {
+    const message = normalizeInputText(chatInput);
+    if (!message) {
+      return;
+    }
+
+    const quickReply = getQuickReplyForQuestion(message);
+    if (quickReply) {
+      const baseId = Date.now();
+      setChatMessages((previous) => [
+        ...previous,
+        { id: baseId, role: "user", text: message },
+        { id: baseId + 1, role: "assistant", text: withLumiPresentation(quickReply) },
+      ]);
+      setChatInput("");
+      playEventSound("notification");
+      return;
+    }
+
+    setChatInput("");
+    await sendMessageToLumi(message);
+  };
+
+  const handleGuidedOptionSelect = (optionId: string) => {
+    const selectedLabel = selectedGuidedCategory?.options.find((option) => option.id === optionId)?.label ?? "Opcion seleccionada";
+    const quickReply = getQuickReplyForOption(optionId);
+
+    setGuidedOptionIds([optionId]);
+
+    if (!quickReply) {
+      setError("No hay respuesta disponible para esta opcion.");
+      return;
+    }
+
+    const baseId = Date.now();
+    setChatMessages((previous) => [
+      ...previous,
+      { id: baseId, role: "user", text: `Seleccion: ${selectedLabel}` },
+      { id: baseId + 1, role: "assistant", text: withLumiPresentation(quickReply) },
+    ]);
+    playEventSound("notification");
+    resetGuidedSelection();
+    setIsGuidedMenuOpen(false);
+  };
+
+  const handleGuidedRecommendation = async () => {
+    const prompt = buildGuidedRecommendationPrompt({
+      categoryId: guidedCategoryId,
+      selectedOptionIds: guidedOptionIds,
+      userNote: normalizeInputText(chatInput),
+    });
+
+    const categoryLabel = selectedGuidedCategory?.label ?? "Sin categoria";
+    const selectedLabels = (selectedGuidedCategory?.options ?? [])
+      .filter((option) => guidedOptionIds.includes(option.id))
+      .map((option) => option.label);
+    const userVisibleText = `Habla con Lumi: ${categoryLabel}${selectedLabels.length > 0 ? ` | ${selectedLabels.join(", ")}` : ""}`;
+
+    setChatInput("");
+    await sendMessageToLumi(prompt, userVisibleText);
+    resetGuidedSelection();
+    setIsGuidedMenuOpen(false);
+  };
+
   useEffect(() => {
     if (activeTab !== "chatbot") {
       return;
@@ -2634,6 +2726,108 @@ export default function Dashboard() {
                       <div className={`${message.pending ? "animate-pulse" : ""}`}>{renderChatMessageText(message.text)}</div>
                     </div>
                   ))}
+                  <div className="w-full max-w-full rounded-2xl border border-[#5b30d9]/20 bg-[linear-gradient(180deg,#f6f2ff_0%,#f0e9ff_100%)] px-3 py-2 text-sm text-[#4a22be] shadow-[0_10px_24px_-18px_rgba(17,24,39,0.65)] sm:w-fit sm:max-w-[95%]">
+                    <div className="mb-1 flex items-center justify-between gap-2">
+                      <p className="text-[11px] font-black uppercase tracking-wide opacity-80">Lumi</p>
+                      <button
+                        type="button"
+                        onClick={() => setIsGuidedMenuOpen((previous) => !previous)}
+                        className="rounded-full border border-[#5b30d9]/25 bg-white px-2.5 py-1 text-[11px] font-bold text-[#5b30d9] transition hover:bg-[#f3eeff]"
+                      >
+                        {isGuidedMenuOpen ? "Ocultar menu" : "Abrir menu"}
+                      </button>
+                    </div>
+
+                    {!isGuidedMenuOpen ? (
+                      <p className="text-sm">Menu rapido listo. Usa el boton de arriba para abrir opciones.</p>
+                    ) : !selectedGuidedCategory ? (
+                      <div className="space-y-2">
+                        <p>Que quieres explorar hoy?</p>
+                        <div className="w-full overflow-hidden rounded-xl border border-[#5b30d9]/20 bg-white/85">
+                          <div className="border-b border-[#5b30d9]/15 bg-[#f7f3ff] px-3 py-2 text-center text-xs font-bold uppercase tracking-wide text-[#5b30d9]/70">
+                            Opcion
+                          </div>
+                          {GUIDED_CATEGORIES.map((category) => (
+                            <button
+                              key={category.id}
+                              type="button"
+                              onClick={() => {
+                                setGuidedCategoryId(category.id);
+                                setGuidedOptionIds([]);
+                              }}
+                              className="flex w-full items-start gap-3 border-b border-[#5b30d9]/10 px-3 py-3 text-left transition last:border-b-0 hover:bg-[#f6f2ff]"
+                            >
+                              <div className="min-w-0 flex-1">
+                                <p className="text-sm font-bold leading-tight text-[#2f1b73]">{category.label}</p>
+                                <p className="line-clamp-2 text-xs text-[#5b30d9]/75">{category.question}</p>
+                              </div>
+                              <span className="mt-0.5 shrink-0 text-[#5b30d9]/50">
+                                <Circle className="size-5" />
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <p>{selectedGuidedCategory.question}</p>
+                        <div className="w-full overflow-hidden rounded-xl border border-[#5b30d9]/20 bg-white/85">
+                          <div className="border-b border-[#5b30d9]/15 bg-[#f7f3ff] px-3 py-2 text-center text-xs font-bold uppercase tracking-wide text-[#5b30d9]/70">
+                            Selecciona una opcion
+                          </div>
+                          {selectedGuidedCategory.options.map((option) => {
+                            const selected = guidedOptionIds.includes(option.id);
+                            return (
+                              <button
+                                key={option.id}
+                                type="button"
+                                onClick={() => handleGuidedOptionSelect(option.id)}
+                                className={`flex w-full items-start gap-3 border-b border-[#5b30d9]/10 px-3 py-3 text-left transition last:border-b-0 ${
+                                  selected ? "bg-[#fff4ea]" : "hover:bg-[#f6f2ff]"
+                                }`}
+                              >
+                                <div className="min-w-0 flex-1">
+                                  <p className={`truncate text-sm ${selected ? "font-black text-[#6a3a00]" : "font-bold text-[#2f1b73]"}`}>{option.label}</p>
+                                  <p className={`line-clamp-2 text-xs ${selected ? "text-[#8a4f00]/85" : "text-[#5b30d9]/75"}`}>{option.quickReply}</p>
+                                </div>
+                                <span className={`mt-0.5 shrink-0 ${selected ? "text-[#f47c0f]" : "text-[#5b30d9]/50"}`}>
+                                  {selected ? <CheckCircle className="size-5" /> : <Circle className="size-5" />}
+                                </span>
+                              </button>
+                            );
+                          })}
+                          <button
+                            type="button"
+                            onClick={() => void handleGuidedRecommendation()}
+                            disabled={isSendingChat}
+                            className="flex w-full items-start gap-3 border-b border-[#5b30d9]/10 px-3 py-3 text-left transition hover:bg-[#fff4ea] disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-bold text-[#8a4f00]">Habla con Lumi</p>
+                              <p className="line-clamp-2 text-xs text-[#8a4f00]/85">Recibe una respuesta mas personalizada con IA.</p>
+                            </div>
+                            <span className="mt-0.5 shrink-0 text-[#f47c0f]">
+                              <MessageCircle className="size-5" />
+                            </span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={resetGuidedSelection}
+                            disabled={isSendingChat}
+                            className="flex w-full items-start gap-3 px-3 py-3 text-left transition hover:bg-[#f6f2ff] disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-bold text-[#2f1b73]">Cambiar categoria</p>
+                              <p className="line-clamp-2 text-xs text-[#5b30d9]/75">Volver al menu principal de opciones.</p>
+                            </div>
+                            <span className="mt-0.5 shrink-0 text-[#5b30d9]/50">
+                              <RotateCcw className="size-5" />
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                   <div ref={chatScrollAnchorRef} />
                 </div>
 
@@ -2649,7 +2843,7 @@ export default function Dashboard() {
                           void handleSendChat();
                         }
                       }}
-                      placeholder="Type your message"
+                      placeholder="Escribe tu mensaje o agrega un contexto para la recomendacion"
                       className="h-8 flex-1 bg-transparent text-sm text-[#2a2a2a] outline-none placeholder:text-[#5b30d9]/35"
                     />
                     <Button
