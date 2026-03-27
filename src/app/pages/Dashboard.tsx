@@ -561,7 +561,15 @@ export default function Dashboard() {
       return;
     }
 
-    setNotificationPermission(window.Notification.permission);
+    const askPermission = async () => {
+      let permission = window.Notification.permission;
+      if (permission !== "granted") {
+        permission = await window.Notification.requestPermission();
+      }
+      setNotificationPermission(permission);
+    };
+
+    void askPermission();
   }, []);
 
   useEffect(() => {
@@ -582,9 +590,9 @@ export default function Dashboard() {
         pomodoroReminderMinutes?: number;
       };
 
-      setDailyReminderEnabled(parsed.dailyReminderEnabled ?? true);
+      setDailyReminderEnabled(true);
       setDailyReminderHour(String(Math.max(0, Math.min(23, Number(parsed.dailyReminderHour) || DEFAULT_DAILY_REMINDER_HOUR))));
-      setPomodoroReminderEnabled(parsed.pomodoroReminderEnabled ?? true);
+      setPomodoroReminderEnabled(true);
       setPomodoroReminderMinutes(String(Math.max(1, Math.min(60, Number(parsed.pomodoroReminderMinutes) || DEFAULT_POMODORO_REMINDER_MINUTES))));
     } catch {
       // Ignore invalid local settings.
@@ -599,9 +607,9 @@ export default function Dashboard() {
     window.localStorage.setItem(
       notificationSettingsStorageKey,
       JSON.stringify({
-        dailyReminderEnabled,
+        dailyReminderEnabled: true,
         dailyReminderHour: Math.max(0, Math.min(23, Number(dailyReminderHour) || DEFAULT_DAILY_REMINDER_HOUR)),
-        pomodoroReminderEnabled,
+        pomodoroReminderEnabled: true,
         pomodoroReminderMinutes: Math.max(1, Math.min(60, Number(pomodoroReminderMinutes) || DEFAULT_POMODORO_REMINDER_MINUTES)),
       }),
     );
@@ -3039,10 +3047,10 @@ export default function Dashboard() {
                           <div className="flex items-center gap-2">
                             <Button
                               variant={dailyReminderEnabled ? "default" : "outline"}
-                              onClick={() => setDailyReminderEnabled((value) => !value)}
+                              disabled
                               className={dailyReminderEnabled ? "rounded-none bg-[#5b30d9] text-white hover:bg-[#4a22be]" : "rounded-none border-[#5b30d9] text-[#5b30d9]"}
                             >
-                              {dailyReminderEnabled ? "Activo" : "Inactivo"}
+                              Siempre activo
                             </Button>
                             <Input
                               type="number"
@@ -3061,10 +3069,10 @@ export default function Dashboard() {
                           <div className="flex items-center gap-2">
                             <Button
                               variant={pomodoroReminderEnabled ? "default" : "outline"}
-                              onClick={() => setPomodoroReminderEnabled((value) => !value)}
+                              disabled
                               className={pomodoroReminderEnabled ? "rounded-none bg-[#5b30d9] text-white hover:bg-[#4a22be]" : "rounded-none border-[#5b30d9] text-[#5b30d9]"}
                             >
-                              {pomodoroReminderEnabled ? "Activo" : "Inactivo"}
+                              Siempre activo
                             </Button>
                             <Input
                               type="number"
