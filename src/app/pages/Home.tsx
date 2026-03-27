@@ -69,7 +69,7 @@ const libraryPillars = [
 const libraryResourceHighlights = [
   { value: "+50", label: "Softwares especializados", Icon: Monitor },
   { value: "", label: "Cursos formativos", Icon: GraduationCap },
-  { value: "", label: "Realidad aumentada", Icon: Sparkles },
+  { value: "", label: "Realidad aumentada", Icon: WandSparkles },
   { value: "", label: "Bases de datos académicos", Icon: Database },
 ];
 
@@ -95,7 +95,8 @@ export default function Home() {
   const viewerItem = useMemo(() => (viewerIndex !== null ? artGallery[viewerIndex] : null), [viewerIndex]);
   const horizontalDesigns = useMemo(() => artGallery.filter((item) => item.orientation === "landscape"), []);
   const collectionDesigns = useMemo(() => artGallery.filter((item) => item.orientation === "portrait"), []);
-  const podium = [ranking[1], ranking[0], ranking[2]];
+  const topFiveRanking = ranking.slice(0, 5);
+  const podium = [topFiveRanking[1], topFiveRanking[0], topFiveRanking[2]];
 
   useEffect(() => {
     const loadRanking = async () => {
@@ -272,12 +273,22 @@ export default function Home() {
                 <h3 className="display-font text-3xl text-[#5b30d9] md:text-4xl">Recursos de la biblioteca</h3>
                 <span className="focus-kicker hidden md:inline-flex">Disponibles hoy</span>
               </div>
-              <div className="grid flex-1 content-start gap-3 sm:grid-cols-2 sm:gap-4">
-                {libraryResourceHighlights.map((item) => (
-                  <div key={item.label} className="rounded-[0.9rem] border-2 border-[#d4c8f6] bg-white/90 p-4 shadow-[0_10px_20px_-18px_rgba(69,36,179,0.45)]">
+              <div className="grid flex-1 gap-3 sm:grid-cols-2 sm:gap-4">
+                {libraryResourceHighlights.map((item, index) => {
+                  const isFeatured = index === 0;
+                  const isLast = index === libraryResourceHighlights.length - 1;
+                  return (
+                  <div
+                    key={item.label}
+                    className={`rounded-[0.9rem] border-2 border-[#d4c8f6] p-4 shadow-[0_10px_20px_-18px_rgba(69,36,179,0.45)] ${
+                      isFeatured
+                        ? "sm:col-span-2 bg-[linear-gradient(120deg,#fff8ef_0%,#ffffff_56%,#f7f2ff_100%)]"
+                        : `${isLast ? "sm:col-span-2" : ""} bg-white/90 sm:min-h-[138px]`
+                    }`}
+                  >
                     <div className="flex items-start justify-between gap-3">
                       {item.value ? (
-                        <p className="display-font text-4xl leading-none text-[#f47c0f] md:text-5xl">{item.value}</p>
+                        <p className={`display-font leading-none text-[#f47c0f] ${isFeatured ? "text-5xl md:text-6xl" : "text-4xl md:text-5xl"}`}>{item.value}</p>
                       ) : (
                         <span className="inline-flex size-8 items-center justify-center border border-[#f47c0f]/35 bg-[#fff7ef] text-[#f47c0f]">
                           <item.Icon className="size-4" />
@@ -285,9 +296,11 @@ export default function Home() {
                       )}
                       {item.value ? <item.Icon className="size-5 text-[#5b30d9]/65" /> : null}
                     </div>
-                    <p className={`font-bold text-[#5b30d9] ${item.value ? "mt-2" : "mt-3"} text-[1.05rem]`}>{item.label}</p>
+                    <p className={`font-bold text-[#5b30d9] ${item.value ? "mt-2" : "mt-3"} ${isFeatured ? "text-[1.2rem]" : "text-[1.05rem]"}`}>{item.label}</p>
+                    {isFeatured ? <p className="mt-1 text-sm font-semibold text-[#5b30d9]/70">Herramientas clave para potenciar estudio e investigacion.</p> : null}
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
@@ -327,10 +340,10 @@ export default function Home() {
                   );
                 })}
               </div>
-              {ranking.length === 0 ? <p className="mt-3 text-sm font-bold text-[#5b30d9]/70">Aún no hay datos de ranking.</p> : null}
-              {ranking.length > 3 && (
+              {topFiveRanking.length === 0 ? <p className="mt-3 text-sm font-bold text-[#5b30d9]/70">Aún no hay datos de ranking.</p> : null}
+              {topFiveRanking.length > 3 && (
                 <div className="mt-3 space-y-2">
-                  {ranking.slice(3).map((entry, index) => (
+                  {topFiveRanking.slice(3, 5).map((entry, index) => (
                     <div key={entry.userId} className="flex items-center justify-between rounded-[0.55rem] border border-[#5b30d9]/15 bg-white p-2 text-sm">
                       <span className="font-bold text-[#5b30d9]">#{index + 4} {entry.displayName}</span>
                       <span className="font-bold text-[#f47c0f]">{entry.totalPoints} pts</span>

@@ -283,7 +283,7 @@ export default function Dashboard() {
     {
       id: 1,
       role: "assistant",
-      text: "Soy Lumi. Puedes explorar por opciones o escribirme directo. Si eliges varias opciones, te doy una recomendacion personalizada.",
+      text: "Soy Lumi. Puedes explorar por opciones o escribirme directo. Si eliges varias opciones, te doy una recomendación personalizada.",
     },
   ]);
   const [chatInput, setChatInput] = useState("");
@@ -404,7 +404,7 @@ export default function Dashboard() {
     );
   };
   const withLumiPresentation = (content: string) => {
-    return `¡Hola! 👋 Soy Lumi.\n\n${content}\n\n¿Quieres que te muestre otra opcion o una recomendacion personalizada? ✨`;
+    return `¡Hola! 👋 Soy Lumi.\n\n${content}\n\n¿Quieres que te muestre otra opción o una recomendación personalizada? ✨`;
   };
 
   useEffect(() => {
@@ -2247,7 +2247,7 @@ export default function Dashboard() {
     setGuidedOptionIds([optionId]);
 
     if (!quickReply) {
-      setError("No hay respuesta disponible para esta opcion.");
+      setError("No hay respuesta disponible para esta opción.");
       return;
     }
 
@@ -2714,15 +2714,15 @@ export default function Dashboard() {
                         onClick={() => setIsGuidedMenuOpen((previous) => !previous)}
                         className="rounded-full border border-[#5b30d9]/25 bg-white px-2.5 py-1 text-[11px] font-bold text-[#5b30d9] transition hover:bg-[#f3eeff]"
                       >
-                        {isGuidedMenuOpen ? "Ocultar menu" : "Abrir menu"}
+                        {isGuidedMenuOpen ? "Ocultar menú" : "Abrir menú"}
                       </button>
                     </div>
 
                     {!isGuidedMenuOpen ? (
-                      <p className="text-sm">Menu rapido listo. Usa el boton de arriba para abrir opciones.</p>
+                      <p className="text-sm">Menú rápido listo. Usa el botón de arriba para abrir opciones.</p>
                     ) : !selectedGuidedCategory ? (
                       <div className="space-y-2">
-                        <p>Que quieres explorar hoy?</p>
+                        <p>¿Qué quieres explorar hoy?</p>
                         <div className="w-full overflow-hidden rounded-xl border border-[#5b30d9]/20 bg-white/85">
                           <div className="border-b border-[#5b30d9]/15 bg-[#f7f3ff] px-3 py-2 text-center text-xs font-bold uppercase tracking-wide text-[#5b30d9]/70">
                             Opcion
@@ -2753,7 +2753,7 @@ export default function Dashboard() {
                         <p>{selectedGuidedCategory.question}</p>
                         <div className="w-full overflow-hidden rounded-xl border border-[#5b30d9]/20 bg-white/85">
                           <div className="border-b border-[#5b30d9]/15 bg-[#f7f3ff] px-3 py-2 text-center text-xs font-bold uppercase tracking-wide text-[#5b30d9]/70">
-                            Selecciona una opcion
+                            Selecciona una opción
                           </div>
                           <button
                             type="button"
@@ -2762,8 +2762,8 @@ export default function Dashboard() {
                             className="flex w-full items-start gap-3 border-b border-[#5b30d9]/10 px-3 py-3 text-left transition hover:bg-[#f6f2ff] disabled:cursor-not-allowed disabled:opacity-60"
                           >
                             <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm font-bold text-[#2f1b73]">Cambiar categoria</p>
-                              <p className="line-clamp-2 text-xs text-[#5b30d9]/75">Volver al menu principal de opciones.</p>
+                              <p className="truncate text-sm font-bold text-[#2f1b73]">Cambiar categoría</p>
+                              <p className="line-clamp-2 text-xs text-[#5b30d9]/75">Volver al menú principal de opciones.</p>
                             </div>
                             <span className="mt-0.5 shrink-0 text-[#5b30d9]/50">
                               <RotateCcw className="size-5" />
@@ -2809,7 +2809,7 @@ export default function Dashboard() {
                           void handleSendChat();
                         }
                       }}
-                      placeholder="Escribe tu mensaje o agrega un contexto para la recomendacion"
+                      placeholder="Escribe tu mensaje o agrega un contexto para la recomendación"
                       className="h-8 flex-1 bg-transparent text-sm text-[#2a2a2a] outline-none placeholder:text-[#5b30d9]/35"
                     />
                     <Button
