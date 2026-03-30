@@ -673,7 +673,7 @@ export default function Home() {
         <footer className="mx-auto w-full max-w-6xl px-5 pb-10 pt-4 md:px-8">
           <div className="border-t border-[#5b30d9]/25 pt-5 text-sm text-[#5b30d9]">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <p>Proyecto de grado 2026 · Universidad El Bosque</p>
+              <p>Proyecto de grado 2026 · Universidad El Bosque - Catalina Barrera</p>
               <p className="font-bold">Focus Zone</p>
             </div>
             <p className="mt-2 text-xs text-[#5b30d9]/75 md:text-sm">
