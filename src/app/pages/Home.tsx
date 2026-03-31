@@ -1,6 +1,6 @@
-﻿import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router";
-import { BookOpenText, Bot, Building2, Cpu, Database, Glasses, GraduationCap, Lightbulb, MessageSquareQuote, Monitor, Trophy, WandSparkles, X } from "lucide-react";
+import { BookOpenText, Bot, Building2, Cpu, Database, Glasses, GraduationCap, Lightbulb, MessageSquareQuote, Monitor, Trophy, Volume2, WandSparkles, X } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "../components/ui/carousel";
@@ -86,10 +86,10 @@ const relatedNews = [
   },
 ];
 
-const lumiPrompts = [
-  "Dame un plan de enfoque de 25 minutos para estudiar.",
-  "¿Qué recurso de biblioteca me sirve para mi tema?",
-  "Ayúdame a salir del scroll y volver al foco.",
+const LUMI_SPEAKING_FRAMES = [
+  "/assets/chatbot/lumi-speaking-01.png",
+  "/assets/chatbot/lumi-speaking-02.png",
+  "/assets/chatbot/lumi-speaking-04.png",
 ];
 
 export default function Home() {
@@ -99,12 +99,16 @@ export default function Home() {
   const [activeHorizontalSlide, setActiveHorizontalSlide] = useState(0);
   const [isViewerTransitioning, setIsViewerTransitioning] = useState(false);
   const [isLumiAlt, setIsLumiAlt] = useState(true);
+  const [isLumiSpeaking, setIsLumiSpeaking] = useState(false);
+  const [lumiSpeakingFrame, setLumiSpeakingFrame] = useState(0);
+  const lumiAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const viewerItem = useMemo(() => (viewerIndex !== null ? artGallery[viewerIndex] : null), [viewerIndex]);
   const horizontalDesigns = useMemo(() => artGallery.filter((item) => item.orientation === "landscape"), []);
   const collectionDesigns = useMemo(() => artGallery.filter((item) => item.orientation === "portrait"), []);
   const topFiveRanking = ranking.slice(0, 5);
   const podium = [topFiveRanking[1], topFiveRanking[0], topFiveRanking[2]];
+  const activeLumiSpeakingIcon = LUMI_SPEAKING_FRAMES[lumiSpeakingFrame] ?? LUMI_SPEAKING_FRAMES[0];
 
   useEffect(() => {
     const loadRanking = async () => {
@@ -167,6 +171,21 @@ export default function Home() {
   }, [horizontalCarouselApi]);
 
   useEffect(() => {
+    if (!isLumiSpeaking) {
+      setLumiSpeakingFrame(0);
+      return;
+    }
+
+    const interval = window.setInterval(() => {
+      setLumiSpeakingFrame((previous) => (previous + 1) % LUMI_SPEAKING_FRAMES.length);
+    }, 140);
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [isLumiSpeaking]);
+
+  useEffect(() => {
     if (!horizontalCarouselApi) {
       return;
     }
@@ -206,6 +225,26 @@ export default function Home() {
     }
     const nextIndex = (viewerIndex + 1) % artGallery.length;
     switchDesign(nextIndex);
+  };
+
+  const toggleLumiSpeaking = async () => {
+    const audio = lumiAudioRef.current;
+    if (!audio) {
+      return;
+    }
+
+    if (audio.paused) {
+      try {
+        await audio.play();
+        setIsLumiSpeaking(true);
+      } catch {
+        setIsLumiSpeaking(false);
+      }
+      return;
+    }
+
+    audio.pause();
+    setIsLumiSpeaking(false);
   };
 
   return (
@@ -306,9 +345,11 @@ export default function Home() {
 
           <section className="focus-reveal focus-reveal-delay-1">
             <Card className="focus-campaign-card rounded-[1.2rem] p-4 md:p-6">
-              <div className="grid gap-4 lg:grid-cols-[0.82fr_1.18fr] lg:gap-6">
-                <div className="mx-auto w-full max-w-[290px]">
-                  <p className="mb-2 text-xs font-black uppercase tracking-[0.11em] text-[#5b30d9]/75">Video tutorial</p>
+              <div className="grid items-start gap-4 lg:grid-cols-[0.9fr_1.1fr] lg:gap-6">
+                <div className="mx-auto w-full max-w-[320px] rounded-[1rem] border border-[#d1d5db] bg-[linear-gradient(180deg,#ffffff_0%,#f7f8ff_100%)] p-3 sm:p-4">
+                  <div className="mb-2">
+                    <p className="text-xs font-black uppercase tracking-[0.11em] text-[#5b30d9]/75">Video tutorial</p>
+                  </div>
                   <div className="overflow-hidden rounded-[1rem] border-2 border-[#d1d5db] bg-[#111111] shadow-[0_14px_24px_-16px_rgba(17,17,17,0.55)]">
                     <video
                       className="aspect-[9/16] h-auto w-full object-cover"
@@ -320,7 +361,7 @@ export default function Home() {
                       Tu navegador no soporta video HTML5.
                     </video>
                   </div>
-                  <p className="mt-2 text-xs font-semibold text-[#5b30d9]/70">Demostración rápida de uso de Focus Zone en formato vertical.</p>
+                  <p className="mt-2 text-xs font-semibold leading-relaxed text-[#5b30d9]/72">Demostración rápida de uso de Focus Zone en formato vertical.</p>
                 </div>
 
                 <div className="rounded-[1rem] border-2 border-[#d1d5db] bg-[linear-gradient(180deg,#ffffff_0%,#f9fafb_100%)] p-4 md:p-5">
@@ -331,6 +372,51 @@ export default function Home() {
                   <p className="mt-3 text-base text-[#5b30d9] md:text-lg">
                     Lumi te acompaña con orientación rápida para enfoque, pausas conscientes y uso estratégico de recursos de biblioteca.
                   </p>
+                  <div className="mt-3 rounded-[0.9rem] border border-[#d1d5db] bg-[linear-gradient(135deg,#ffffff_0%,#f5f3ff_62%,#eef7ff_100%)] p-3 sm:p-4">
+                    <div className="grid gap-3 sm:grid-cols-[auto_1fr] sm:items-center">
+                      <div className={`mx-auto rounded-full border-2 p-1.5 sm:mx-0 ${isLumiSpeaking ? "border-[#f47c0f] shadow-[0_0_0_4px_rgba(244,124,15,0.15)]" : "border-[#5b30d9]/30"}`}>
+                        <img
+                          src={activeLumiSpeakingIcon}
+                          alt="Lumi speaking"
+                          className="size-16 rounded-full object-cover object-top"
+                          loading="lazy"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                          <p className="text-xs font-black uppercase tracking-[0.1em] text-[#5b30d9]/75">Lumi speaking</p>
+                          <span className={`rounded-full border px-2 py-0.5 text-[11px] font-bold ${isLumiSpeaking ? "border-[#f47c0f]/45 bg-[#fff3e8] text-[#f47c0f]" : "border-[#d1d5db] bg-white text-[#5b30d9]/70"}`}>
+                            {isLumiSpeaking ? "Reproduciendo" : "En pausa"}
+                          </span>
+                        </div>
+                        <p className="text-xs font-semibold text-[#5b30d9]/75">Escucha una muestra de voz de Lumi antes de abrir el chat.</p>
+                      </div>
+                    </div>
+                    <div className="mt-3 grid gap-2">
+                      <Button
+                        type="button"
+                        onClick={() => void toggleLumiSpeaking()}
+                        className="focus-cta h-10 w-full rounded-none border-2 border-[#f47c0f] bg-white px-4 text-sm font-bold text-[#f47c0f] hover:bg-[#f47c0f] hover:text-white"
+                      >
+                        <span className="inline-flex items-center gap-2">
+                          <Volume2 className="size-4" />
+                          {isLumiSpeaking ? "Pausar voz de Lumi" : "Escuchar voz de Lumi"}
+                        </span>
+                      </Button>
+                      <audio
+                        ref={lumiAudioRef}
+                        preload="metadata"
+                        onPlay={() => setIsLumiSpeaking(true)}
+                        onPause={() => setIsLumiSpeaking(false)}
+                        onEnded={() => setIsLumiSpeaking(false)}
+                        className="h-10 w-full"
+                        controls
+                      >
+                        <source src="/assets/audio_home_lumi.mp3" type="audio/mpeg" />
+                        Tu navegador no soporta audio HTML5.
+                      </audio>
+                    </div>
+                  </div>
                   <div className="mt-4 grid gap-3 sm:grid-cols-2">
                     <div className="rounded-[0.75rem] border border-[#d1d5db] bg-white p-3">
                       <p className="text-xs font-black uppercase tracking-[0.1em] text-[#f47c0f]">Te ayuda con</p>
@@ -339,16 +425,6 @@ export default function Home() {
                     <div className="rounded-[0.75rem] border border-[#d1d5db] bg-white p-3">
                       <p className="text-xs font-black uppercase tracking-[0.1em] text-[#f47c0f]">Conecta contigo</p>
                       <p className="mt-1 text-sm font-semibold text-[#5b30d9]">Recomendaciones de recursos, cursos y rutas de exploración.</p>
-                    </div>
-                  </div>
-                  <div className="mt-4 rounded-[0.75rem] border border-[#d1d5db] bg-white p-3">
-                    <p className="text-xs font-black uppercase tracking-[0.1em] text-[#5b30d9]/70">Prueba estas preguntas</p>
-                    <div className="mt-2 space-y-2">
-                      {lumiPrompts.map((prompt) => (
-                        <p key={prompt} className="rounded-[0.6rem] border border-[#e5e7eb] bg-[#f9fafb] px-2.5 py-2 text-sm font-semibold text-[#5b30d9]">
-                          "{prompt}"
-                        </p>
-                      ))}
                     </div>
                   </div>
                   <Link to="/login" className="mt-4 inline-block w-full sm:w-auto">
