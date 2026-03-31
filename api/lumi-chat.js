@@ -53,7 +53,11 @@ Instrucciones:
 - No hacer preguntas de seguimiento.
 - No extender la conversacion.
 - No sugerir continuar ni proponer interaccion.
-- Entregar solo la informacion final de forma clara, util y alineada a Zone Focus.`;
+- Entregar solo la informacion final de forma clara, util y alineada a Zone Focus.
+
+Genera las respuestas sin preguntas ni nada que genere una conversación nada de preguntas o ¿....?  
+
+`;
 
 const json = (res, status, body) => {
   res.statusCode = status;
