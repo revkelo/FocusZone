@@ -2301,18 +2301,36 @@ export default function Dashboard() {
   };
 
   if (isLoading) {
-    return <div className="focus-shell min-h-screen grid place-items-center text-xl font-bold">Cargando...</div>;
+    return (
+      <div className="focus-shell focus-grain focus-rings focus-no-stars focus-soft-round min-h-screen overflow-x-hidden">
+        <div className="focus-figure-layer" aria-hidden>
+          <div className="focus-figure-arc-left" />
+          <div className="focus-figure-arc-right" />
+          <div className="focus-figure-dot focus-figure-dot-a" />
+        </div>
+        <div className="relative z-10 grid min-h-screen place-items-center text-xl font-bold">Cargando...</div>
+      </div>
+    );
   }
 
   return (
-    <div className="focus-shell focus-rings focus-grain focus-soft-round min-h-screen">
+    <div className="focus-shell focus-grain focus-rings focus-no-stars focus-soft-round min-h-screen overflow-x-hidden">
+      <div className="focus-figure-layer" aria-hidden>
+        <div className="focus-figure-arc-left" />
+        <div className="focus-figure-arc-right" />
+        <div className="focus-figure-arc-right-2" />
+        <div className="focus-figure-right-pill" />
+        <div className="focus-figure-right-square" />
+        <div className="focus-figure-dot focus-figure-dot-a" />
+        <div className="focus-figure-dot focus-figure-dot-b" />
+      </div>
       <div className="relative z-10">
-        <header className="mx-auto mt-3 flex w-[calc(100%-1rem)] max-w-[calc(88rem-2.5rem)] items-center justify-between gap-2 rounded-[1rem] border-2 border-[#8f74ef]/55 bg-[#ece8f9]/90 px-3 py-3 shadow-[0_12px_22px_-18px_rgba(69,36,179,0.6),0_2px_0_0_rgba(143,116,239,0.55)] md:mt-3 md:w-full md:max-w-[calc(88rem-4rem)] md:gap-3 md:px-8 md:py-5">
+        <header className="mx-auto mt-3 flex w-[calc(100%-1rem)] max-w-[calc(88rem-2.5rem)] items-center justify-between gap-2 rounded-[1rem] border-2 border-[#9fd45a] bg-[#dff5b8]/90 px-3 py-3 shadow-[0_10px_20px_-18px_rgba(76,107,31,0.35),0_1px_0_0_rgba(159,212,90,0.9)] md:mt-3 md:w-full md:max-w-[calc(88rem-4rem)] md:gap-3 md:px-8 md:py-5">
           <div className="flex min-w-0 items-center">
             <img
               src="/assets/focuszone/logo.png"
               alt="Focus Zone"
-              className="h-14 w-auto object-contain sm:h-16 md:h-[4.5rem]"
+              className="h-16 w-auto object-contain md:h-[5rem]"
             />
           </div>
           <Button

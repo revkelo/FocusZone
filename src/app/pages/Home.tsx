@@ -200,7 +200,7 @@ export default function Home() {
         <div className="focus-figure-dot focus-figure-dot-b" />
       </div>
       <div className="relative z-10">
-        <header className="mx-auto mt-3 flex w-[calc(100%-1rem)] max-w-[calc(72rem-2.5rem)] items-center justify-between gap-2 rounded-[1rem] border-2 border-[#d1d5db] bg-[#f3f4f6]/90 px-3 py-3 shadow-[0_10px_20px_-18px_rgba(17,24,39,0.35),0_1px_0_0_rgba(209,213,219,0.9)] md:mt-3 md:w-full md:max-w-[calc(72rem-4rem)] md:gap-3 md:px-8 md:py-5">
+        <header className="mx-auto mt-3 flex w-[calc(100%-1rem)] max-w-[calc(72rem-2.5rem)] items-center justify-between gap-2 rounded-[1rem] border-2 border-[#9fd45a] bg-[#dff5b8]/90 px-3 py-3 shadow-[0_10px_20px_-18px_rgba(76,107,31,0.35),0_1px_0_0_rgba(159,212,90,0.9)] md:mt-3 md:w-full md:max-w-[calc(72rem-4rem)] md:gap-3 md:px-8 md:py-5">
           <div className="flex min-w-0 items-center">
             <img
               src="/assets/focuszone/logo.png"
