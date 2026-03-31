@@ -82,6 +82,7 @@ create table if not exists public.pomodoro_room_presence (
   room_id bigint not null references public.pomodoro_rooms(id) on delete cascade,
   user_id uuid not null references auth.users(id) on delete cascade,
   time_left integer not null check (time_left >= 0),
+  mode_duration_seconds integer not null default 1 check (mode_duration_seconds > 0),
   is_active boolean not null default false,
   is_paused boolean not null default false,
   timer_mode text not null default 'focus' check (timer_mode in ('focus', 'shortBreak', 'longBreak')),
@@ -92,10 +93,18 @@ create table if not exists public.pomodoro_room_presence (
 alter table public.pomodoro_room_presence
   add column if not exists timer_mode text not null default 'focus';
 
+alter table public.pomodoro_room_presence
+  add column if not exists mode_duration_seconds integer not null default 1;
+
 update public.pomodoro_room_presence
 set timer_mode = 'focus'
 where timer_mode not in ('focus', 'shortBreak', 'longBreak')
    or timer_mode is null;
+
+update public.pomodoro_room_presence
+set mode_duration_seconds = greatest(1, time_left)
+where mode_duration_seconds <= 0
+   or mode_duration_seconds is null;
 
 do $$
 begin
@@ -108,6 +117,20 @@ begin
     alter table public.pomodoro_room_presence
       add constraint pomodoro_room_presence_timer_mode_check
       check (timer_mode in ('focus', 'shortBreak', 'longBreak'));
+  end if;
+end $$;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'pomodoro_room_presence_mode_duration_seconds_check'
+      and conrelid = 'public.pomodoro_room_presence'::regclass
+  ) then
+    alter table public.pomodoro_room_presence
+      add constraint pomodoro_room_presence_mode_duration_seconds_check
+      check (mode_duration_seconds > 0);
   end if;
 end $$;
 

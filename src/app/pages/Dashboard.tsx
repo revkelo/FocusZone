@@ -101,6 +101,7 @@ interface RoomMember {
   userId: string;
   displayName: string;
   timeLeft: number;
+  modeDurationSeconds: number;
   isActive: boolean;
   isPaused: boolean;
   timerMode: TimerMode;
@@ -319,6 +320,7 @@ export default function Dashboard() {
   const chatScrollAnchorRef = useRef<HTMLDivElement | null>(null);
   const ownPresenceRef = useRef({
     timeLeft: 40 * 60,
+    modeDurationSeconds: 40 * 60,
     isActive: false,
     isPaused: false,
     timerMode: "focus" as TimerMode,
@@ -370,7 +372,6 @@ export default function Dashboard() {
     return { label: "Descanso", badgeClassName: "bg-[#fff2cc] text-[#7d5a00]" };
   };
 
-  const maxTimerSeconds = Math.max(getModeSeconds("focus"), getModeSeconds("shortBreak"), getModeSeconds("longBreak"));
   const sanitizeDigitsInput = (value: string, maxLength = MAX_NUMERIC_INPUT_LENGTH) => value.replace(/\D/g, "").slice(0, maxLength);
   const normalizeInputText = (value: string) => value.replace(/\s+/g, " ").trim();
   const parseNotificationVolume = (value: unknown) => {
@@ -1185,6 +1186,7 @@ export default function Dashboard() {
   useEffect(() => {
     ownPresenceRef.current = {
       timeLeft,
+      modeDurationSeconds: getModeSeconds(timerMode),
       isActive,
       isPaused,
       timerMode,
@@ -1211,6 +1213,7 @@ export default function Dashboard() {
       room_id: selectedRoomId,
       user_id: userId,
       time_left: ownPresenceRef.current.timeLeft,
+      mode_duration_seconds: ownPresenceRef.current.modeDurationSeconds,
       is_active: ownPresenceRef.current.isActive,
       is_paused: true,
       timer_mode: ownPresenceRef.current.timerMode,
@@ -1233,7 +1236,7 @@ export default function Dashboard() {
           .order("joined_at", { ascending: true }),
         supabase
           .from("pomodoro_room_presence")
-          .select("user_id, time_left, is_active, is_paused, timer_mode, updated_at")
+          .select("user_id, time_left, mode_duration_seconds, is_active, is_paused, timer_mode, updated_at")
           .eq("room_id", selectedRoomId),
       ]);
 
@@ -1246,6 +1249,7 @@ export default function Dashboard() {
           entry.user_id,
           {
             timeLeft: entry.time_left,
+            modeDurationSeconds: entry.mode_duration_seconds,
             isActive: entry.is_active,
             isPaused: entry.is_paused,
             timerMode: entry.timer_mode,
@@ -1261,6 +1265,7 @@ export default function Dashboard() {
               userId: member.user_id,
               displayName: ownPresenceRef.current.displayName,
               timeLeft: ownPresenceRef.current.timeLeft,
+              modeDurationSeconds: ownPresenceRef.current.modeDurationSeconds,
               isActive: ownPresenceRef.current.isActive,
               isPaused: ownPresenceRef.current.isPaused,
               timerMode: ownPresenceRef.current.timerMode,
@@ -1282,12 +1287,17 @@ export default function Dashboard() {
             currentTimerMode === "focus" || currentTimerMode === "shortBreak" || currentTimerMode === "longBreak"
               ? currentTimerMode
               : "focus";
+          const safeModeDurationSeconds =
+            typeof current?.modeDurationSeconds === "number"
+              ? Math.max(1, current.modeDurationSeconds, safeTimeLeft)
+              : Math.max(1, getModeSeconds(safeTimerMode), safeTimeLeft);
           const safeIsDisconnected = !current || stalePresence || !safeIsActive;
 
           return {
             userId: member.user_id,
             displayName: member.display_name,
             timeLeft: safeTimeLeft,
+            modeDurationSeconds: safeModeDurationSeconds,
             isActive: safeIsActive,
             isPaused: safeIsPaused,
             timerMode: safeTimerMode,
@@ -1342,7 +1352,7 @@ export default function Dashboard() {
       clearInterval(pollInterval);
       void supabase.removeChannel(channel);
     };
-  }, [selectedRoomId, focusMinutes, userId]);
+  }, [selectedRoomId, focusMinutes, shortBreakMinutes, longBreakMinutes, userId]);
 
   useEffect(() => {
     if (!userId) {
@@ -1458,6 +1468,7 @@ export default function Dashboard() {
         room_id: selectedRoomId,
         user_id: userId,
         time_left: timeLeft,
+        mode_duration_seconds: getModeSeconds(timerMode),
         is_active: isActive,
         is_paused: isPaused,
         timer_mode: timerMode,
@@ -1483,6 +1494,7 @@ export default function Dashboard() {
             userId,
             displayName: name || email || "Usuario",
             timeLeft,
+            modeDurationSeconds: getModeSeconds(timerMode),
             isActive,
             isPaused,
             timerMode,
@@ -1496,6 +1508,7 @@ export default function Dashboard() {
           ? {
               ...member,
               timeLeft,
+              modeDurationSeconds: getModeSeconds(timerMode),
               isActive,
               isPaused,
               timerMode,
@@ -2034,6 +2047,7 @@ export default function Dashboard() {
       room_id: data.id,
       user_id: userId,
       time_left: ownPresenceRef.current.timeLeft,
+      mode_duration_seconds: ownPresenceRef.current.modeDurationSeconds,
       is_active: ownPresenceRef.current.isActive,
       is_paused: ownPresenceRef.current.isPaused,
       timer_mode: ownPresenceRef.current.timerMode,
@@ -2076,6 +2090,7 @@ export default function Dashboard() {
       room_id: room.id,
       user_id: userId,
       time_left: ownPresenceRef.current.timeLeft,
+      mode_duration_seconds: ownPresenceRef.current.modeDurationSeconds,
       is_active: ownPresenceRef.current.isActive,
       is_paused: ownPresenceRef.current.isPaused,
       timer_mode: ownPresenceRef.current.timerMode,
@@ -2370,12 +2385,6 @@ export default function Dashboard() {
 
   const currentModeSeconds = getModeSeconds(timerMode);
   const timerProgress = Math.max(0, Math.min(100, Math.round(((currentModeSeconds - timeLeft) / currentModeSeconds) * 100)));
-  const estimateMemberDuration = (memberTimeLeft: number) => {
-    const presets = [getModeSeconds("focus"), getModeSeconds("shortBreak"), getModeSeconds("longBreak")].sort((a, b) => a - b);
-    const matched = presets.find((value) => value >= memberTimeLeft);
-    return matched ?? maxTimerSeconds;
-  };
-
   if (isLoading) {
     return (
       <div className="focus-login-shell min-h-screen overflow-x-hidden">
@@ -2767,7 +2776,7 @@ export default function Dashboard() {
                       ) : (
                         <div className="grid max-h-[46vh] grid-cols-2 gap-2 overflow-y-auto pr-1 sm:max-h-[52vh] sm:grid-cols-2">
                           {roomMembers.map((member) => {
-                            const memberDuration = member.isDisconnected ? estimateMemberDuration(member.timeLeft) : getModeSeconds(member.timerMode);
+                            const memberDuration = Math.max(1, member.modeDurationSeconds, member.timeLeft);
                             const normalizedDuration = Math.max(memberDuration, member.timeLeft, 1);
                             const memberProgressRaw = !member.isDisconnected
                               ? Math.max(0, Math.min(100, ((normalizedDuration - member.timeLeft) / normalizedDuration) * 100))
