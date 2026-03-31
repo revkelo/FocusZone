@@ -150,6 +150,12 @@ const STREAK_WEEK_BONUS: Record<number, number> = {
   2: 10,
   3: 15,
 };
+const LUMI_CHAT_PRESETS = [
+  "/assets/chatbot/lumi-speaking-01.png",
+  "/assets/chatbot/lumi-speaking-02.png",
+  "/assets/chatbot/lumi-speaking-03.png",
+  "/assets/chatbot/lumi-speaking-04.png",
+];
 
 const getChallengeStreakBonus = (challenge: { week?: number; day?: number }) => {
   if (!challenge.week || !challenge.day || challenge.day < 2) {
@@ -405,6 +411,10 @@ export default function Dashboard() {
   };
   const withLumiPresentation = (content: string) => {
     return content;
+  };
+  const getLumiPresetByMessage = (messageId: number) => {
+    const safeIndex = Math.abs(messageId) % LUMI_CHAT_PRESETS.length;
+    return LUMI_CHAT_PRESETS[safeIndex];
   };
 
   useEffect(() => {
@@ -2722,6 +2732,13 @@ export default function Dashboard() {
                   <MessageCircle className="size-5 text-[#f47c0f]" />
                   <h2 className="display-font text-4xl text-[#5b30d9] sm:text-5xl">Chatbot Lumi</h2>
                 </div>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {LUMI_CHAT_PRESETS.map((preset, index) => (
+                    <div key={preset} className="overflow-hidden rounded-xl border border-[#5b30d9]/20 bg-white/90 p-1.5">
+                      <img src={preset} alt={`Preset Lumi ${index + 1}`} className="h-16 w-full rounded-lg object-cover object-top sm:h-20" loading="lazy" />
+                    </div>
+                  ))}
+                </div>
 
                 <div ref={chatScrollContainerRef} className="min-h-[320px] flex-1 space-y-3 overflow-y-auto border border-[#5b30d9]/20 bg-white/70 p-3 sm:min-h-[380px] sm:p-4 lg:min-h-[460px]">
                   {chatMessages.map((message) => (
@@ -2733,15 +2750,31 @@ export default function Dashboard() {
                           : "border-[#5b30d9]/20 bg-[linear-gradient(180deg,#f6f2ff_0%,#f0e9ff_100%)] text-[#4a22be]"
                       }`}
                     >
-                      <p className="mb-1 text-[11px] font-black uppercase tracking-wide opacity-80">
-                        {message.role === "user" ? "Tu" : "Lumi"}
-                      </p>
+                      <div className="mb-1 flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wide opacity-80">
+                        {message.role === "assistant" ? (
+                          <img
+                            src={getLumiPresetByMessage(message.id)}
+                            alt="Lumi preset"
+                            className="size-5 rounded-full border border-[#5b30d9]/25 object-cover object-top"
+                            loading="lazy"
+                          />
+                        ) : null}
+                        <p>{message.role === "user" ? "Tu" : "Lumi"}</p>
+                      </div>
                       <div className={`${message.pending ? "animate-pulse" : ""}`}>{renderChatMessageText(message.text)}</div>
                     </div>
                   ))}
                   <div className="w-full max-w-full rounded-2xl border border-[#5b30d9]/20 bg-[linear-gradient(180deg,#f6f2ff_0%,#f0e9ff_100%)] px-3 py-2 text-sm text-[#4a22be] shadow-[0_10px_24px_-18px_rgba(17,24,39,0.65)] sm:w-fit sm:max-w-[95%]">
                     <div className="mb-1 flex items-center justify-between gap-2">
-                      <p className="text-[11px] font-black uppercase tracking-wide opacity-80">Lumi</p>
+                      <div className="flex items-center gap-1.5">
+                        <img
+                          src={LUMI_CHAT_PRESETS[0]}
+                          alt="Lumi preset activo"
+                          className="size-5 rounded-full border border-[#5b30d9]/25 object-cover object-top"
+                          loading="lazy"
+                        />
+                        <p className="text-[11px] font-black uppercase tracking-wide opacity-80">Lumi</p>
+                      </div>
                       <button
                         type="button"
                         onClick={() => setIsGuidedMenuOpen((previous) => !previous)}

@@ -92,6 +92,11 @@ const lumiPrompts = [
   "Ayúdame a salir del scroll y volver al foco.",
 ];
 
+const homeLumiShowcase = [
+  { label: "Lumi 1", src: "/assets/focuszone/lumi-home-01.png" },
+  { label: "Lumi 2", src: "/assets/focuszone/lumi-home-02.png" },
+];
+
 export default function Home() {
   const [ranking, setRanking] = useState<RankItem[]>([]);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
@@ -294,7 +299,7 @@ export default function Home() {
                       className="aspect-[9/16] h-auto w-full object-cover"
                       controls
                       preload="metadata"
-                      poster="/assets/Captura de pantalla 2026-03-26 165341.png"
+                      poster="/assets/tutorial-poster-01.png"
                     >
                       <source src="/assets/focuszone/tutorial-vertical.mp4" type="video/mp4" />
                       Tu navegador no soporta video HTML5.
@@ -311,6 +316,14 @@ export default function Home() {
                   <p className="mt-3 text-base text-[#5b30d9] md:text-lg">
                     Lumi te acompaña con orientación rápida para enfoque, pausas conscientes y uso estratégico de recursos de biblioteca.
                   </p>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    {homeLumiShowcase.map((item) => (
+                      <div key={item.label} className="rounded-[0.75rem] border border-[#d1d5db] bg-white p-2.5">
+                        <img src={item.src} alt={item.label} className="h-36 w-full rounded-[0.5rem] object-cover object-top sm:h-40" loading="lazy" />
+                        <p className="mt-2 text-center text-xs font-black uppercase tracking-[0.1em] text-[#5b30d9]/75">{item.label}</p>
+                      </div>
+                    ))}
+                  </div>
                   <div className="mt-4 grid gap-3 sm:grid-cols-2">
                     <div className="rounded-[0.75rem] border border-[#d1d5db] bg-white p-3">
                       <p className="text-xs font-black uppercase tracking-[0.1em] text-[#f47c0f]">Te ayuda con</p>
