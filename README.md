@@ -1,6 +1,6 @@
 # Focus Zone Web App
 
-Mini proyecto responsive con estilo premium, rutas `index/login/app`, autenticacion con Supabase y retos semanales.
+Mini proyecto responsive con estilo premium, rutas `index/login/app`, autenticación con Supabase y retos semanales.
 
 ## Scripts
 
@@ -21,7 +21,7 @@ VITE_SUPABASE_URL=TU_SUPABASE_URL
 VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY=TU_SUPABASE_ANON_KEY
 ```
 
-Tambien tienes referencia en `.env.example`.
+También tienes referencia en `.env.example`.
 
 Variables adicionales para chat Lumi:
 
@@ -91,7 +91,7 @@ Vercel (ideal para mini proyecto):
 - Body JSON: `{ "message": "..." }`
 - Respuesta: `{ "reply": "...", "model": "..." }`
 
-Este endpoint siempre envia el prompt de contexto de Lumi como `system` en cada peticion y no guarda historial en base de datos.
+Este endpoint siempre envía el prompt de contexto de Lumi como `system` en cada petición y no guarda historial en base de datos.
 
 ## Seguridad aplicada
 

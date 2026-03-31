@@ -20,7 +20,7 @@ export default async function handler(req, res) {
   const nickname = normalizeNickname(req.body?.nickname);
 
   if (!email || !email.includes("@")) {
-    return json(res, 400, { error: "Correo invalido." });
+    return json(res, 400, { error: "Correo inválido." });
   }
 
   const nicknameError = getNicknameValidationError(nickname);
@@ -32,12 +32,12 @@ export default async function handler(req, res) {
     const admin = createAdminClient();
     const existing = await listUserByEmail(admin, email);
     if (existing) {
-      return json(res, 409, { error: "Este correo ya esta registrado." });
+      return json(res, 409, { error: "Este correo ya está registrado." });
     }
 
     const existingNickname = await listUserByNickname(admin, nickname);
     if (existingNickname) {
-      return json(res, 409, { error: "Ese nickname ya esta en uso." });
+      return json(res, 409, { error: "Ese nickname ya está en uso." });
     }
 
     const code = generate4DigitCode();
@@ -50,10 +50,10 @@ export default async function handler(req, res) {
 
     await sendCodeEmail({
       to: email,
-      subject: "Focus Zone | Codigo de verificacion",
+      subject: "Focus Zone | Código de verificación",
       heading: "Verifica tu correo",
       code,
-      description: "Usa este codigo para terminar tu registro en Focus Zone.",
+      description: "Usa este código para terminar tu registro en Focus Zone.",
     });
 
     return json(res, 200, { ok: true });

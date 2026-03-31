@@ -20,17 +20,17 @@ export default async function handler(req, res) {
   const code = String(req.body?.code || "").trim();
 
   if (!email || !email.includes("@")) {
-    return json(res, 400, { error: "Correo invalido." });
+    return json(res, 400, { error: "Correo inválido." });
   }
   const nicknameError = getNicknameValidationError(nickname);
   if (nicknameError) {
     return json(res, 400, { error: nicknameError });
   }
   if (password.length < 6) {
-    return json(res, 400, { error: "La contrasena debe tener minimo 6 caracteres." });
+    return json(res, 400, { error: "La contraseña debe tener mínimo 6 caracteres." });
   }
   if (!/^\d{4}$/.test(code)) {
-    return json(res, 400, { error: "Codigo invalido." });
+    return json(res, 400, { error: "Código inválido." });
   }
 
   try {
@@ -38,17 +38,17 @@ export default async function handler(req, res) {
     const verification = await verifyCodeRecord(admin, { email, purpose: "signup", code });
     if (!verification.ok) {
       if (verification.reason === "expired") {
-        return json(res, 400, { error: "El codigo expiro. Solicita uno nuevo." });
+        return json(res, 400, { error: "El código expiró. Solicita uno nuevo." });
       }
       if (verification.reason === "invalid") {
-        return json(res, 400, { error: `Codigo incorrecto. Intentos restantes: ${verification.attemptsLeft}` });
+        return json(res, 400, { error: `Código incorrecto. Intentos restantes: ${verification.attemptsLeft}` });
       }
-      return json(res, 400, { error: "No hay codigo activo para este correo." });
+      return json(res, 400, { error: "No hay código activo para este correo." });
     }
 
     const existing = await listUserByEmail(admin, email);
     if (existing) {
-      return json(res, 409, { error: "Este correo ya esta registrado." });
+      return json(res, 409, { error: "Este correo ya está registrado." });
     }
 
     const finalNickname = normalizeNickname(verification.metadata?.nickname || nickname);
@@ -59,7 +59,7 @@ export default async function handler(req, res) {
 
     const existingNickname = await listUserByNickname(admin, finalNickname);
     if (existingNickname) {
-      return json(res, 409, { error: "Ese nickname ya esta en uso." });
+      return json(res, 409, { error: "Ese nickname ya está en uso." });
     }
 
     const { data, error } = await admin.auth.admin.createUser({

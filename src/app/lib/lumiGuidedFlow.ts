@@ -302,7 +302,7 @@ export const buildGuidedRecommendationPrompt = ({ categoryId, selectedOptionIds,
 
   return [
     "Genera una recomendacion personalizada para Zone Focus en espanol.",
-    "Manten un tono cercano, claro y accionable en maximo 120 palabras.",
+    "Mantén un tono cercano, claro y accionable en máximo 120 palabras.",
     `Categoria principal: ${categoryLabel}`,
     `Opciones seleccionadas: ${optionLabels.length > 0 ? optionLabels.join(", ") : "Ninguna"}`,
     `Contexto adicional del usuario: ${noteText}`,
