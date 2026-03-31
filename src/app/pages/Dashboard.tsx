@@ -103,6 +103,8 @@ interface RoomMember {
   timeLeft: number;
   isActive: boolean;
   isPaused: boolean;
+  timerMode: TimerMode;
+  isDisconnected: boolean;
 }
 
 type ToastType = "success" | "error" | "info";
@@ -319,6 +321,7 @@ export default function Dashboard() {
     timeLeft: 40 * 60,
     isActive: false,
     isPaused: false,
+    timerMode: "focus" as TimerMode,
     displayName: "Usuario",
   });
 
@@ -353,6 +356,18 @@ export default function Dashboard() {
       return "Descanso corto";
     }
     return "Descanso largo";
+  };
+  const getMemberStatusMeta = (member: RoomMember) => {
+    if (member.isDisconnected) {
+      return { label: "Desconectado", badgeClassName: "bg-[#f1ebff] text-[#5b30d9]" };
+    }
+    if (member.timerMode === "focus") {
+      return { label: "En foco", badgeClassName: "bg-[#d5fff2] text-[#00684f]" };
+    }
+    if (member.timerMode === "longBreak") {
+      return { label: "Descanso largo", badgeClassName: "bg-[#ffe8b3] text-[#7d5a00]" };
+    }
+    return { label: "Descanso", badgeClassName: "bg-[#fff2cc] text-[#7d5a00]" };
   };
 
   const maxTimerSeconds = Math.max(getModeSeconds("focus"), getModeSeconds("shortBreak"), getModeSeconds("longBreak"));
@@ -1172,9 +1187,10 @@ export default function Dashboard() {
       timeLeft,
       isActive,
       isPaused,
+      timerMode,
       displayName: name || email || "Usuario",
     };
-  }, [timeLeft, isActive, isPaused, name, email]);
+  }, [timeLeft, isActive, isPaused, timerMode, name, email]);
 
   const pausePomodoroAndSync = async () => {
     if (!ownPresenceRef.current.isActive || ownPresenceRef.current.isPaused) {
@@ -1197,6 +1213,7 @@ export default function Dashboard() {
       time_left: ownPresenceRef.current.timeLeft,
       is_active: ownPresenceRef.current.isActive,
       is_paused: true,
+      timer_mode: ownPresenceRef.current.timerMode,
       updated_at: new Date().toISOString(),
     });
   };
@@ -1216,7 +1233,7 @@ export default function Dashboard() {
           .order("joined_at", { ascending: true }),
         supabase
           .from("pomodoro_room_presence")
-          .select("user_id, time_left, is_active, is_paused, updated_at")
+          .select("user_id, time_left, is_active, is_paused, timer_mode, updated_at")
           .eq("room_id", selectedRoomId),
       ]);
 
@@ -1231,6 +1248,7 @@ export default function Dashboard() {
             timeLeft: entry.time_left,
             isActive: entry.is_active,
             isPaused: entry.is_paused,
+            timerMode: entry.timer_mode,
             updatedAt: entry.updated_at,
           },
         ]),
@@ -1245,18 +1263,26 @@ export default function Dashboard() {
               timeLeft: ownPresenceRef.current.timeLeft,
               isActive: ownPresenceRef.current.isActive,
               isPaused: ownPresenceRef.current.isPaused,
+              timerMode: ownPresenceRef.current.timerMode,
+              isDisconnected: !ownPresenceRef.current.isActive,
             };
           }
 
           const current = presenceMap.get(member.user_id);
           const stalePresence =
-            Boolean(current.isActive) &&
-            typeof current.updatedAt === "string" &&
+            Boolean(current?.isActive) &&
+            typeof current?.updatedAt === "string" &&
             Date.now() - new Date(current.updatedAt).getTime() > ROOM_PRESENCE_STALE_MS;
 
-          const safeTimeLeft = typeof current.timeLeft === "number" ? Math.max(0, current.timeLeft) : getModeSeconds("focus");
-          const safeIsActive = Boolean(current.isActive);
-          const safeIsPaused = stalePresence ? true : Boolean(current.isPaused);
+          const safeTimeLeft = typeof current?.timeLeft === "number" ? Math.max(0, current.timeLeft) : getModeSeconds("focus");
+          const safeIsActive = Boolean(current?.isActive);
+          const safeIsPaused = stalePresence ? true : Boolean(current?.isPaused);
+          const currentTimerMode = current?.timerMode;
+          const safeTimerMode: TimerMode =
+            currentTimerMode === "focus" || currentTimerMode === "shortBreak" || currentTimerMode === "longBreak"
+              ? currentTimerMode
+              : "focus";
+          const safeIsDisconnected = !current || stalePresence || !safeIsActive;
 
           return {
             userId: member.user_id,
@@ -1264,6 +1290,8 @@ export default function Dashboard() {
             timeLeft: safeTimeLeft,
             isActive: safeIsActive,
             isPaused: safeIsPaused,
+            timerMode: safeTimerMode,
+            isDisconnected: safeIsDisconnected,
           };
         }),
       );
@@ -1432,12 +1460,13 @@ export default function Dashboard() {
         time_left: timeLeft,
         is_active: isActive,
         is_paused: isPaused,
+        timer_mode: timerMode,
         updated_at: new Date().toISOString(),
       });
     };
 
     void syncRoomPresence();
-  }, [selectedRoomId, userId, timeLeft, isActive, isPaused]);
+  }, [selectedRoomId, userId, timeLeft, isActive, isPaused, timerMode]);
 
   useEffect(() => {
     if (!userId || !selectedRoomId || !joinedRoomIds.has(selectedRoomId)) {
@@ -1456,6 +1485,8 @@ export default function Dashboard() {
             timeLeft,
             isActive,
             isPaused,
+            timerMode,
+            isDisconnected: !isActive,
           },
         ];
       }
@@ -1467,12 +1498,14 @@ export default function Dashboard() {
               timeLeft,
               isActive,
               isPaused,
+              timerMode,
+              isDisconnected: !isActive,
               displayName: member.displayName || name || email || "Usuario",
             }
           : member,
       );
     });
-  }, [userId, selectedRoomId, joinedRoomIds, timeLeft, isActive, isPaused, name, email]);
+  }, [userId, selectedRoomId, joinedRoomIds, timeLeft, isActive, isPaused, timerMode, name, email]);
 
   useEffect(() => {
     if (!selectedRoomId) {
@@ -2003,6 +2036,7 @@ export default function Dashboard() {
       time_left: ownPresenceRef.current.timeLeft,
       is_active: ownPresenceRef.current.isActive,
       is_paused: ownPresenceRef.current.isPaused,
+      timer_mode: ownPresenceRef.current.timerMode,
       updated_at: new Date().toISOString(),
     });
 
@@ -2044,6 +2078,7 @@ export default function Dashboard() {
       time_left: ownPresenceRef.current.timeLeft,
       is_active: ownPresenceRef.current.isActive,
       is_paused: ownPresenceRef.current.isPaused,
+      timer_mode: ownPresenceRef.current.timerMode,
       updated_at: new Date().toISOString(),
     });
 
@@ -2732,27 +2767,20 @@ export default function Dashboard() {
                       ) : (
                         <div className="grid max-h-[46vh] grid-cols-2 gap-2 overflow-y-auto pr-1 sm:max-h-[52vh] sm:grid-cols-2">
                           {roomMembers.map((member) => {
-                            const memberDuration = estimateMemberDuration(member.timeLeft);
+                            const memberDuration = member.isDisconnected ? estimateMemberDuration(member.timeLeft) : getModeSeconds(member.timerMode);
                             const normalizedDuration = Math.max(memberDuration, member.timeLeft, 1);
-                            const memberProgressRaw = member.isActive
+                            const memberProgressRaw = !member.isDisconnected
                               ? Math.max(0, Math.min(100, ((normalizedDuration - member.timeLeft) / normalizedDuration) * 100))
                               : 0;
                             const memberProgressLabel = Math.round(memberProgressRaw);
+                            const statusMeta = getMemberStatusMeta(member);
 
                             return (
                             <div key={member.userId} className="rounded-xl border border-[#5b30d9]/20 bg-white p-3">
                               <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                                 <span className="break-all font-bold text-[#5b30d9]">{member.displayName}</span>
-                                <span
-                                  className={`w-fit rounded-full px-2 py-1 text-xs font-bold ${
-                                    member.isActive
-                                      ? member.isPaused
-                                        ? "bg-[#ffe8b3] text-[#7d5a00]"
-                                         : "bg-[#d5fff2] text-[#00684f]"
-                                      : "bg-[#f1ebff] text-[#5b30d9]"
-                                  }`}
-                                >
-                                  {member.isActive ? (member.isPaused ? "Descanso" : "En foco") : "Listo"}
+                                <span className={`w-fit rounded-full px-2 py-1 text-xs font-bold ${statusMeta.badgeClassName}`}>
+                                  {statusMeta.label}
                                 </span>
                               </div>
                               <div className="mb-1 flex items-center justify-between text-xs text-[#5b30d9]/80">
@@ -2768,7 +2796,7 @@ export default function Dashboard() {
                                 />
                               </div>
                               <p className="mt-2 text-sm font-bold text-[#f47c0f]">
-                                {member.isActive ? formatTime(member.timeLeft) : "00:00"}
+                                {!member.isDisconnected ? formatTime(member.timeLeft) : "00:00"}
                               </p>
                             </div>
                           );
