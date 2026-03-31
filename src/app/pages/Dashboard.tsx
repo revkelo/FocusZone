@@ -415,6 +415,7 @@ export default function Dashboard() {
     return content;
   };
   const activeLumiIcon = LUMI_CHAT_PRESETS[lumiSpeakingFrame] ?? LUMI_CHAT_PRESETS[0];
+  const staticLumiIcon = "/assets/chatbot/lumi-speaking-01.png";
 
   useEffect(() => {
     if (activeTab !== "chatbot" || !isSendingChat) {
@@ -2569,44 +2570,62 @@ export default function Dashboard() {
 
               <section className="grid gap-4">
                 <Card className="focus-card rounded-[1.2rem] p-4 sm:p-6">
-                  <div className="mb-3 flex items-center gap-2 text-[#5b30d9]">
-                    <Users className="size-5" />
-                    <h3 className="display-font text-3xl sm:text-4xl">Salas Pomodoro</h3>
-                  </div>
-                  <div className="mb-4 space-y-3 rounded-xl border border-[#5b30d9]/20 bg-white/70 p-3 sm:p-4">
-                    <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Crear sala</p>
-                    {ownedRoom && (
-                      <p className="text-xs font-bold text-[#6b7280]">
-                        Ya eres dueño de "{ownedRoom.name}". Solo puedes tener 1 sala propia.
-                      </p>
-                    )}
-                    <Input
-                      value={newRoomName}
-                      maxLength={MAX_ROOM_NAME_LENGTH}
-                      onChange={(event) => setNewRoomName(event.target.value.slice(0, MAX_ROOM_NAME_LENGTH))}
-                      placeholder="Ej: Diseño nocturno"
-                    />
-                    <Button disabled={isCreatingRoom || Boolean(ownedRoom)} onClick={() => void handleCreateRoom()} className="w-full rounded-xl bg-[#5b30d9] text-white hover:bg-[#4a22be] sm:w-auto">
-                      {isCreatingRoom ? "Creando..." : "Crear sala"}
-                    </Button>
-                  </div>
-
-                  <div className="mb-4 space-y-2 rounded-xl border border-[#5b30d9]/20 bg-white/70 p-3 sm:p-4">
-                    <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Buscar salas</p>
-                    <Input
-                      value={roomSearchQuery}
-                      maxLength={MAX_ROOM_NAME_LENGTH}
-                      onChange={(event) => setRoomSearchQuery(event.target.value.slice(0, MAX_ROOM_NAME_LENGTH))}
-                      placeholder="Busca por nombre de sala"
-                    />
-                    <p className="text-xs font-bold text-[#5b30d9]/70">
+                  <div className="mb-4 flex flex-wrap items-start justify-between gap-3 text-[#5b30d9]">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <Users className="size-5" />
+                        <h3 className="display-font text-3xl sm:text-4xl">Salas Pomodoro</h3>
+                      </div>
+                      <p className="text-sm font-semibold text-[#5b30d9]/75">Crea una sala o únete a una existente para sincronizar pomodoros en grupo.</p>
+                    </div>
+                    <span className="rounded-full bg-[#5b30d9]/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-[#5b30d9]">
                       {filteredRooms.length} resultado{filteredRooms.length === 1 ? "" : "s"}
-                    </p>
+                    </span>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="mb-4 grid gap-3 md:grid-cols-2">
+                    <div className="space-y-3 rounded-xl border border-[#5b30d9]/20 bg-white/70 p-3 sm:p-4">
+                      <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Crear sala</p>
+                      {ownedRoom && (
+                        <p className="rounded-lg bg-[#fff4ea] px-3 py-2 text-xs font-bold text-[#b05a00]">
+                          Ya eres dueño de "{ownedRoom.name}". Solo puedes tener 1 sala propia.
+                        </p>
+                      )}
+                      <div className="flex flex-col gap-2 sm:flex-row">
+                        <Input
+                          value={newRoomName}
+                          maxLength={MAX_ROOM_NAME_LENGTH}
+                          onChange={(event) => setNewRoomName(event.target.value.slice(0, MAX_ROOM_NAME_LENGTH))}
+                          placeholder="Ej: Diseño nocturno"
+                          className="sm:flex-1"
+                        />
+                        <Button disabled={isCreatingRoom || Boolean(ownedRoom)} onClick={() => void handleCreateRoom()} className="rounded-xl bg-[#5b30d9] text-white hover:bg-[#4a22be]">
+                          {isCreatingRoom ? "Creando..." : "Crear sala"}
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3 rounded-xl border border-[#5b30d9]/20 bg-white/70 p-3 sm:p-4">
+                      <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Buscar salas</p>
+                      <Input
+                        value={roomSearchQuery}
+                        maxLength={MAX_ROOM_NAME_LENGTH}
+                        onChange={(event) => setRoomSearchQuery(event.target.value.slice(0, MAX_ROOM_NAME_LENGTH))}
+                        placeholder="Busca por nombre de sala"
+                      />
+                      <p className="text-xs font-bold text-[#5b30d9]/70">Tip: escribe una palabra clave para filtrar rápido.</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 rounded-xl border border-[#5b30d9]/20 bg-white/65 p-3 sm:p-4">
+                    <div className="mb-1 flex items-center justify-between gap-2">
+                      <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Salas disponibles</p>
+                    </div>
                     {filteredRooms.length === 0 ? (
-                      <p className="text-sm text-[#5b30d9]/75">Aún no hay salas activas.</p>
+                      <div className="rounded-xl border border-dashed border-[#5b30d9]/30 bg-white/70 p-5 text-center">
+                        <p className="text-sm font-bold text-[#5b30d9]">Aún no hay salas activas.</p>
+                        <p className="mt-1 text-xs font-semibold text-[#5b30d9]/70">Crea la primera sala para empezar a estudiar en grupo.</p>
+                      </div>
                     ) : (
                       filteredRooms.map((room) => {
                         const isJoined = joinedRoomIds.has(room.id);
@@ -2788,16 +2807,16 @@ export default function Dashboard() {
                           : "border-[#5b30d9]/20 bg-[linear-gradient(180deg,#f6f2ff_0%,#f0e9ff_100%)] text-[#4a22be]"
                       }`}
                     >
-                      <div className="mb-1 flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wide opacity-80">
+                      <div className="mb-1 flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wide">
                         {message.role === "assistant" ? (
                           <img
-                            src={activeLumiIcon}
+                            src={message.pending ? activeLumiIcon : staticLumiIcon}
                             alt="Lumi hablando"
                             className="size-14 rounded-full border border-[#5b30d9]/25 object-cover object-top sm:size-16"
                             loading="lazy"
                           />
                         ) : null}
-                        <p>{message.role === "user" ? "Tu" : "Lumi"}</p>
+                        <p className="opacity-80">{message.role === "user" ? "Tu" : "Lumi"}</p>
                       </div>
                       <div className={`${message.pending ? "animate-pulse" : ""}`}>{renderChatMessageText(message.text)}</div>
                     </div>
@@ -2806,7 +2825,7 @@ export default function Dashboard() {
                     <div className="mb-1 flex items-center justify-between gap-2">
                       <div className="flex items-center gap-1.5">
                         <img
-                          src={activeLumiIcon}
+                          src={staticLumiIcon}
                           alt="Lumi hablando"
                           className="size-14 rounded-full border border-[#5b30d9]/25 object-cover object-top sm:size-16"
                           loading="lazy"

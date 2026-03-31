@@ -444,10 +444,10 @@ export default function Home() {
                 <div className="rounded-[1rem] border-2 border-[#d1d5db] bg-[linear-gradient(180deg,#ffffff_0%,#f9fafb_100%)] p-4 md:p-5">
                   <div className="flex items-center gap-2">
                     <Bot className="size-5 text-[#f47c0f]" />
-                    <h3 className="display-font text-3xl text-[#5b30d9] md:text-4xl">Chatbot Lumi</h3>
+                    <h3 className="display-font text-3xl text-[#5b30d9] md:text-4xl">Chatbot Lumi con IA</h3>
                   </div>
                   <p className="mt-3 text-base text-[#5b30d9] md:text-lg">
-                    Lumi te acompaña con orientación rápida para enfoque, pausas conscientes y uso estratégico de recursos de biblioteca.
+                    Lumi es un chatbot con IA que te acompaña con orientación rápida para enfoque, pausas conscientes y uso estratégico de recursos de biblioteca.
                   </p>
                   <div className="mt-3 rounded-[0.9rem] border border-[#d1d5db] bg-[linear-gradient(135deg,#ffffff_0%,#f5f3ff_62%,#eef7ff_100%)] p-3 sm:p-4">
                     <div className="grid gap-3 sm:grid-cols-[auto_1fr] sm:items-center">
