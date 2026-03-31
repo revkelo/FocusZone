@@ -1,6 +1,6 @@
 ﻿import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router";
-import { ArrowUpRight, BookOpenText, Bot, Building2, Cpu, Database, Glasses, GraduationCap, Lightbulb, MessageSquareQuote, Monitor, Newspaper, Trophy, Volume2, WandSparkles, X } from "lucide-react";
+import { ArrowUpRight, BookOpenText, Bot, Building2, ChevronLeft, ChevronRight, Cpu, Database, Glasses, GraduationCap, Lightbulb, MessageSquareQuote, Monitor, Newspaper, Trophy, Volume2, WandSparkles, X } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "../components/ui/carousel";
@@ -86,6 +86,22 @@ const relatedNews = [
     sourceDomain: "bbc.com/mundo",
     topic: "Salud digital",
   },
+  {
+    category: "El País",
+    title: "Universidades refuerzan estrategias para reducir distracciones digitales en el aula",
+    summary: "Nuevos pilotos combinan pausas activas, reglas de uso de pantalla y acompañamiento docente para mejorar concentración.",
+    sourceUrl: "https://example.com/noticia-2",
+    sourceDomain: "elpais.com",
+    topic: "Educación",
+  },
+  {
+    category: "The Conversation",
+    title: "Cómo diseñar rutinas de estudio con menor fatiga de pantalla y mejor rendimiento",
+    summary: "Especialistas recomiendan bloques cortos, descansos planificados y límites de notificaciones para sostener el foco.",
+    sourceUrl: "https://example.com/noticia-3",
+    sourceDomain: "theconversation.com",
+    topic: "Productividad",
+  },
 ];
 
 const LUMI_SPEAKING_FRAMES = [
@@ -99,6 +115,7 @@ export default function Home() {
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
   const [horizontalCarouselApi, setHorizontalCarouselApi] = useState<CarouselApi | null>(null);
   const [activeHorizontalSlide, setActiveHorizontalSlide] = useState(0);
+  const [activeNewsIndex, setActiveNewsIndex] = useState(0);
   const [isViewerTransitioning, setIsViewerTransitioning] = useState(false);
   const [isLumiAlt, setIsLumiAlt] = useState(true);
   const [isLumiSpeaking, setIsLumiSpeaking] = useState(false);
@@ -112,6 +129,7 @@ export default function Home() {
   const topFiveRanking = ranking.slice(0, 5);
   const podium = [topFiveRanking[1], topFiveRanking[0], topFiveRanking[2]];
   const activeLumiSpeakingIcon = LUMI_SPEAKING_FRAMES[lumiSpeakingFrame] ?? LUMI_SPEAKING_FRAMES[0];
+  const activeNews = relatedNews[activeNewsIndex] ?? relatedNews[0];
 
   useEffect(() => {
     const loadRanking = async () => {
@@ -259,6 +277,14 @@ export default function Home() {
 
     audio.pause();
     setIsLumiSpeaking(false);
+  };
+
+  const goPrevNews = () => {
+    setActiveNewsIndex((previous) => (previous - 1 + relatedNews.length) % relatedNews.length);
+  };
+
+  const goNextNews = () => {
+    setActiveNewsIndex((previous) => (previous + 1) % relatedNews.length);
   };
 
   const playLumiTransitionSound = () => {
@@ -599,17 +625,35 @@ export default function Home() {
                 <MessageSquareQuote className="size-5 text-[#f47c0f]" />
                 <h3 className="display-font text-3xl text-[#5b30d9] md:text-4xl">Noticias relacionadas</h3>
               </div>
-              <p className="mt-3 text-sm font-semibold text-[#5b30d9]/85 md:text-base">Feed de noticias externas sobre enfoque, bienestar digital y hábitos de estudio.</p>
-              <p className="mt-1 text-xs font-medium text-[#5b30d9]/65 md:text-sm">Vista previa de titulares y resumen para leer el artículo completo en su medio original.</p>
               <div className="mt-4 space-y-3">
                 <div className="flex items-center justify-between rounded-[0.75rem] border border-[#d1d5db] bg-white/75 px-3 py-2">
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.1em] text-[#5b30d9]/80">
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.1em] text-[#4f8a2d]">
                     <Newspaper className="size-3.5 text-[#f47c0f]" />
                     Preview de noticias
                   </span>
-                  <span className="rounded-full border border-[#5b30d9]/25 bg-[#f7f5ff] px-2 py-0.5 text-[11px] font-bold text-[#5b30d9]/80">
-                    {relatedNews.length} artículo
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="rounded-full border border-[#9fd45a]/45 bg-[#eff8de] px-2 py-0.5 text-[11px] font-bold text-[#4f8a2d]">
+                      {activeNewsIndex + 1}/{relatedNews.length}
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={goPrevNews}
+                        aria-label="Noticia anterior"
+                        className="inline-flex size-7 items-center justify-center rounded-full border border-[#9fd45a]/55 bg-white text-[#4f8a2d] hover:bg-[#eff8de]"
+                      >
+                        <ChevronLeft className="size-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={goNextNews}
+                        aria-label="Siguiente noticia"
+                        className="inline-flex size-7 items-center justify-center rounded-full border border-[#9fd45a]/55 bg-white text-[#4f8a2d] hover:bg-[#eff8de]"
+                      >
+                        <ChevronRight className="size-4" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
                 <article className="overflow-hidden rounded-[1rem] border-2 border-[#d1d5db] bg-[linear-gradient(145deg,#ffffff_0%,#f8faff_100%)] shadow-[0_14px_24px_-20px_rgba(17,24,39,0.45)]">
                   <div className="grid gap-0 sm:grid-cols-[170px_1fr]">
@@ -620,24 +664,24 @@ export default function Home() {
                       <div className="mt-3 inline-flex size-11 items-center justify-center rounded-[0.8rem] border border-[#5b30d9]/25 bg-white text-[#5b30d9]">
                         <Newspaper className="size-5" />
                       </div>
-                      <p className="mt-3 text-xs font-black uppercase tracking-[0.1em] text-[#f47c0f]">{relatedNews[0].category}</p>
-                      <p className="mt-1 text-xs font-semibold text-[#5b30d9]/75">{relatedNews[0].sourceDomain}</p>
+                      <p className="mt-3 text-xs font-black uppercase tracking-[0.1em] text-[#f47c0f]">{activeNews.category}</p>
+                      <p className="mt-1 text-xs font-semibold text-[#5b30d9]/75">{activeNews.sourceDomain}</p>
                     </div>
                     <div className="p-4">
                       <div className="flex flex-wrap items-center justify-between gap-2">
-                        <p className="rounded-full border border-[#5b30d9]/25 bg-[#f7f5ff] px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.1em] text-[#5b30d9]/80">
-                          {relatedNews[0].topic}
+                        <p className="rounded-full border border-[#9fd45a]/45 bg-[#eff8de] px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.1em] text-[#4f8a2d]">
+                          {activeNews.topic}
                         </p>
-                        <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#5b30d9]/65">Fuente externa</p>
+                        <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#4f8a2d]/80">Fuente externa</p>
                       </div>
-                      <p className="mt-2 text-[1.12rem] font-extrabold leading-[1.2] text-[#5b30d9]">{relatedNews[0].title}</p>
-                      <p className="mt-2 text-sm font-medium leading-[1.45] text-[#5b30d9]/80">{relatedNews[0].summary}</p>
-                      {relatedNews[0].sourceUrl ? (
+                      <p className="mt-2 text-[1.12rem] font-extrabold leading-[1.2] text-[#5b30d9]">{activeNews.title}</p>
+                      <p className="mt-2 text-sm font-medium leading-[1.45] text-[#5b30d9]/80">{activeNews.summary}</p>
+                      {activeNews.sourceUrl ? (
                         <a
-                          href={relatedNews[0].sourceUrl}
+                          href={activeNews.sourceUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-[#5b30d9]/35 bg-white px-3 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#5b30d9] hover:bg-[#f2f0f3]"
+                          className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-[#9fd45a]/55 bg-[#f7fbe9] px-3 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#4f8a2d] hover:bg-[#eff8de]"
                         >
                           Leer noticia completa
                           <ArrowUpRight className="size-3.5" />
