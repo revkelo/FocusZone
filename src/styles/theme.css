@@ -134,12 +134,12 @@
     position: relative;
     overflow: hidden;
     background:
-      radial-gradient(20% 16% at 8% 18%, rgba(75, 85, 99, 0.16) 0 58%, transparent 62%),
-      radial-gradient(16% 12% at 78% 88%, rgba(158, 255, 58, 0.28) 0 60%, transparent 64%),
-      radial-gradient(18% 14% at 94% 50%, rgba(242, 140, 56, 0.28) 0 56%, transparent 62%),
-      radial-gradient(46% 32% at 14% 86%, rgba(242, 140, 56, 0.42), transparent 72%),
-      radial-gradient(40% 28% at 86% 14%, rgba(107, 114, 128, 0.16), transparent 74%),
-      radial-gradient(30% 22% at 58% 4%, rgba(182, 227, 107, 0.3), transparent 76%),
+      radial-gradient(20% 16% at 8% 18%, rgba(75, 85, 99, 0.1) 0 58%, transparent 62%),
+      radial-gradient(16% 12% at 78% 88%, rgba(158, 255, 58, 0.16) 0 60%, transparent 64%),
+      radial-gradient(18% 14% at 94% 50%, rgba(242, 140, 56, 0.14) 0 56%, transparent 62%),
+      radial-gradient(46% 32% at 14% 86%, rgba(242, 140, 56, 0.18), transparent 72%),
+      radial-gradient(40% 28% at 86% 14%, rgba(107, 114, 128, 0.1), transparent 74%),
+      radial-gradient(30% 22% at 58% 4%, rgba(182, 227, 107, 0.16), transparent 76%),
       linear-gradient(160deg, #f2f1ec 0%, #f7f5ef 58%, #f9fafb 100%);
   }
 
@@ -149,12 +149,12 @@
     inset: 0;
     pointer-events: none;
     background:
-      radial-gradient(64% 44% at -8% 70%, rgba(158, 255, 58, 0.46) 0 44%, transparent 46%),
-      radial-gradient(52% 36% at 106% 20%, rgba(55, 65, 81, 0.25) 0 46%, transparent 48%),
-      radial-gradient(28% 18% at 82% 72%, rgba(242, 140, 56, 0.82) 0 42%, transparent 44%),
-      radial-gradient(22% 16% at 24% 24%, rgba(255, 77, 109, 0.14) 0 40%, transparent 42%),
-      radial-gradient(14% 10% at 34% 60%, rgba(75, 85, 99, 0.2) 0 44%, transparent 46%),
-      radial-gradient(12% 9% at 66% 38%, rgba(158, 255, 58, 0.28) 0 46%, transparent 48%);
+      radial-gradient(64% 44% at -8% 70%, rgba(158, 255, 58, 0.28) 0 44%, transparent 46%),
+      radial-gradient(52% 36% at 106% 20%, rgba(55, 65, 81, 0.14) 0 46%, transparent 48%),
+      radial-gradient(28% 18% at 82% 72%, rgba(242, 140, 56, 0.34) 0 42%, transparent 44%),
+      radial-gradient(22% 16% at 24% 24%, rgba(255, 77, 109, 0.08) 0 40%, transparent 42%),
+      radial-gradient(14% 10% at 34% 60%, rgba(75, 85, 99, 0.12) 0 44%, transparent 46%),
+      radial-gradient(12% 9% at 66% 38%, rgba(158, 255, 58, 0.16) 0 46%, transparent 48%);
     z-index: 0;
     filter: saturate(112%);
   }
@@ -181,13 +181,13 @@
   .focus-rings::before {
     content: "";
     position: absolute;
-    width: 1260px;
-    height: 1220px;
+    width: 1080px;
+    height: 1040px;
     border-radius: 56% 44% 58% 42% / 46% 54% 43% 57%;
-    left: -820px;
-    top: -300px;
+    left: -760px;
+    top: -260px;
     background:
-      radial-gradient(circle at center, rgba(158, 255, 58, 0.68) 0 26%, transparent 26% 40%, rgba(182, 227, 107, 0.54) 40% 56%, transparent 56% 72%, rgba(90, 45, 202, 0.52) 72% 100%);
+      radial-gradient(circle at center, rgba(158, 255, 58, 0.4) 0 26%, transparent 26% 40%, rgba(182, 227, 107, 0.32) 40% 56%, transparent 56% 72%, rgba(90, 45, 202, 0.3) 72% 100%);
     pointer-events: none;
     z-index: 0;
   }
@@ -195,17 +195,17 @@
   .focus-rings::after {
     content: "";
     position: absolute;
-    width: 760px;
-    height: 760px;
-    right: -360px;
-    top: 90px;
+    width: 620px;
+    height: 620px;
+    right: -300px;
+    top: 110px;
     border-radius: 41% 59% 63% 37% / 44% 36% 64% 56%;
     background:
-      radial-gradient(circle at 34% 34%, rgba(182, 227, 107, 0.92) 0 34%, transparent 36%),
-      radial-gradient(circle at 70% 68%, rgba(242, 140, 56, 0.88) 0 28%, transparent 31%),
-      linear-gradient(150deg, rgba(90, 45, 202, 0.8) 0%, rgba(90, 45, 202, 0.55) 100%);
+      radial-gradient(circle at 34% 34%, rgba(182, 227, 107, 0.62) 0 34%, transparent 36%),
+      radial-gradient(circle at 70% 68%, rgba(242, 140, 56, 0.5) 0 28%, transparent 31%),
+      linear-gradient(150deg, rgba(90, 45, 202, 0.52) 0%, rgba(90, 45, 202, 0.36) 100%);
     box-shadow: 0 24px 44px -34px rgba(17, 17, 17, 0.72);
-    opacity: 0.72;
+    opacity: 0.52;
     pointer-events: none;
     z-index: 0;
   }
@@ -433,7 +433,7 @@
     max-width: 980px;
     background:
       radial-gradient(circle at 32% 50%, transparent 0 24%, rgba(184, 238, 115, 0.58) 24% 34%, transparent 34% 45%, rgba(184, 238, 115, 0.44) 45% 56%, transparent 56% 100%);
-    opacity: 0.7;
+    opacity: 0.46;
     filter: saturate(105%);
     animation: focusFloatArcA 14s ease-in-out infinite alternate;
   }
@@ -447,7 +447,7 @@
     max-height: 760px;
     background:
       radial-gradient(circle at 50% 50%, transparent 0 36%, rgba(184, 238, 115, 0.34) 36% 45%, transparent 45% 58%, rgba(91, 48, 217, 0.18) 58% 65%, transparent 65% 100%);
-    opacity: 0.62;
+    opacity: 0.4;
     animation: focusFloatArcB 18s ease-in-out infinite alternate;
   }
 
@@ -466,54 +466,24 @@
     top: 16%;
     width: 120px;
     height: 120px;
-    opacity: 0.45;
+    opacity: 0.25;
     animation: focusDotPulse 6s ease-in-out infinite;
   }
 
   .focus-figure-dot-b {
-    left: 8%;
-    top: 72%;
-    width: 160px;
-    height: 160px;
-    opacity: 0.38;
-    animation: focusDotPulse 7s ease-in-out infinite reverse;
+    display: none;
   }
 
   .focus-figure-arc-right-2 {
-    position: absolute;
-    right: -20%;
-    top: 36%;
-    width: 56vw;
-    height: 56vw;
-    max-width: 700px;
-    max-height: 700px;
-    background:
-      radial-gradient(circle at 50% 50%, transparent 0 42%, rgba(184, 238, 115, 0.42) 42% 52%, transparent 52% 64%, rgba(91, 48, 217, 0.2) 64% 70%, transparent 70% 100%);
-    opacity: 0.6;
-    animation: focusFloatArcB 16s ease-in-out infinite alternate-reverse;
+    display: none;
   }
 
   .focus-figure-right-pill {
-    position: absolute;
-    right: 2.5%;
-    top: 26%;
-    width: 10px;
-    height: 170px;
-    background: linear-gradient(180deg, rgba(91, 48, 217, 0.7) 0%, rgba(184, 238, 115, 0.35) 100%);
-    opacity: 0.5;
-    animation: focusPillarDrift 8s ease-in-out infinite;
+    display: none;
   }
 
   .focus-figure-right-square {
-    position: absolute;
-    right: 6%;
-    top: 66%;
-    width: 22px;
-    height: 22px;
-    border: 2px solid rgba(91, 48, 217, 0.45);
-    background: rgba(255, 255, 255, 0.35);
-    opacity: 0.6;
-    animation: focusDotPulse 5.5s ease-in-out infinite;
+    display: none;
   }
 
   .focus-cta {

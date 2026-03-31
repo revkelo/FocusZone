@@ -1,6 +1,6 @@
 ﻿import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
-import { BookOpenText, Building2, Cpu, Database, Glasses, GraduationCap, Lightbulb, MessageSquareQuote, Monitor, Trophy, WandSparkles, X } from "lucide-react";
+import { BookOpenText, Bot, Building2, Cpu, Database, Glasses, GraduationCap, Lightbulb, MessageSquareQuote, Monitor, Trophy, WandSparkles, X } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "../components/ui/carousel";
@@ -35,10 +35,10 @@ const artGallery: ArtItem[] = [
 ];
 
 const researchStats = [
-  { value: "89%", label: "Dedica más de 3 horas al día a redes sociales", icon: "●" },
+  { value: "89%", label: "Dedica más de 3 horas al día a redes sociales", icon: "◆" },
   { value: "64%", label: "Nota afiches físicos en la biblioteca", icon: "◆" },
-  { value: "74%", label: "Ve pantallas digitales de biblioteca y universidad", icon: "◼" },
-  { value: "56%", label: "Se sienten poco o nada informados sobre los recursos tecnológicos que la biblioteca ofrece.", icon: "" },
+  { value: "74%", label: "Ve pantallas digitales de biblioteca y universidad", icon: "◆" },
+  { value: "56%", label: "Se sienten poco informados sobre recursos tecnológicos de la biblioteca.", icon: "◆" },
 ];
 
 const manifestoLines = [
@@ -84,6 +84,12 @@ const relatedNews = [
     summary: "Cobertura sobre un fallo clave que vincula plataformas digitales con riesgos de adicción y salud mental en jóvenes.",
     sourceUrl: "https://www.bbc.com/mundo/articles/c62j769d2xpo",
   },
+];
+
+const lumiPrompts = [
+  "Dame un plan de enfoque de 25 minutos para estudiar.",
+  "¿Qué recurso de biblioteca me sirve para mi tema?",
+  "Ayúdame a salir del scroll y volver al foco.",
 ];
 
 export default function Home() {
@@ -381,6 +387,63 @@ export default function Home() {
                 </Card>
               ))}
             </div>
+          </section>
+
+          <section className="focus-reveal focus-reveal-delay-1">
+            <Card className="focus-campaign-card rounded-[1.2rem] p-4 md:p-6">
+              <div className="grid gap-4 lg:grid-cols-[0.82fr_1.18fr] lg:gap-6">
+                <div className="mx-auto w-full max-w-[290px]">
+                  <p className="mb-2 text-xs font-black uppercase tracking-[0.11em] text-[#5b30d9]/75">Video tutorial</p>
+                  <div className="overflow-hidden rounded-[1rem] border-2 border-[#d1d5db] bg-[#111111] shadow-[0_14px_24px_-16px_rgba(17,17,17,0.55)]">
+                    <video
+                      className="aspect-[9/16] h-auto w-full object-cover"
+                      controls
+                      preload="metadata"
+                      poster="/assets/Captura de pantalla 2026-03-26 165341.png"
+                    >
+                      <source src="/assets/focuszone/tutorial-vertical.mp4" type="video/mp4" />
+                      Tu navegador no soporta video HTML5.
+                    </video>
+                  </div>
+                  <p className="mt-2 text-xs font-semibold text-[#5b30d9]/70">Demostración rápida de uso de Focus Zone en formato vertical.</p>
+                </div>
+
+                <div className="rounded-[1rem] border-2 border-[#d1d5db] bg-[linear-gradient(180deg,#ffffff_0%,#f9fafb_100%)] p-4 md:p-5">
+                  <div className="flex items-center gap-2">
+                    <Bot className="size-5 text-[#f47c0f]" />
+                    <h3 className="display-font text-3xl text-[#5b30d9] md:text-4xl">Chatbot Lumi</h3>
+                  </div>
+                  <p className="mt-3 text-base text-[#5b30d9] md:text-lg">
+                    Lumi te acompaña con orientación rápida para enfoque, pausas conscientes y uso estratégico de recursos de biblioteca.
+                  </p>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-[0.75rem] border border-[#d1d5db] bg-white p-3">
+                      <p className="text-xs font-black uppercase tracking-[0.1em] text-[#f47c0f]">Te ayuda con</p>
+                      <p className="mt-1 text-sm font-semibold text-[#5b30d9]">Plan de estudio corto, manejo de distracciones y ritmo de trabajo.</p>
+                    </div>
+                    <div className="rounded-[0.75rem] border border-[#d1d5db] bg-white p-3">
+                      <p className="text-xs font-black uppercase tracking-[0.1em] text-[#f47c0f]">Conecta contigo</p>
+                      <p className="mt-1 text-sm font-semibold text-[#5b30d9]">Recomendaciones de recursos, cursos y rutas de exploración.</p>
+                    </div>
+                  </div>
+                  <div className="mt-4 rounded-[0.75rem] border border-[#d1d5db] bg-white p-3">
+                    <p className="text-xs font-black uppercase tracking-[0.1em] text-[#5b30d9]/70">Prueba estas preguntas</p>
+                    <div className="mt-2 space-y-2">
+                      {lumiPrompts.map((prompt) => (
+                        <p key={prompt} className="rounded-[0.6rem] border border-[#e5e7eb] bg-[#f9fafb] px-2.5 py-2 text-sm font-semibold text-[#5b30d9]">
+                          "{prompt}"
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                  <Link to="/login" className="mt-4 inline-block w-full sm:w-auto">
+                    <Button className="focus-cta h-11 w-full rounded-none border-2 border-[#5b30d9] bg-white px-5 text-base font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white sm:w-auto">
+                      Abrir chat con Lumi
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </Card>
           </section>
 
           <section className="grid items-stretch gap-4 pb-1 lg:grid-cols-2">
