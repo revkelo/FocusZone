@@ -95,12 +95,12 @@ const relatedNews = [
     topic: "Salud digital",
   },
   {
-    category: "The Conversation",
-    title: "Cómo diseñar rutinas de estudio con menor fatiga de pantalla y mejor rendimiento",
-    summary: "Especialistas recomiendan bloques cortos, descansos planificados y límites de notificaciones para sostener el foco.",
-    sourceUrl: "https://example.com/noticia-3",
-    sourceDomain: "theconversation.com",
-    topic: "Productividad",
+    category: "Infobae Salud",
+    title: "FOMO y adicción al celular en los adolescentes: cómo lograr un uso saludable",
+    summary: "Análisis sobre ansiedad por estar desconectado y recomendaciones prácticas para reducir dependencia del celular en jóvenes.",
+    sourceUrl: "https://www.infobae.com/salud/2024/07/09/fomo-y-adiccion-al-celular-en-los-adolescentes-como-lograr-un-uso-saludable/",
+    sourceDomain: "infobae.com/salud",
+    topic: "Salud digital",
   },
 ];
 
