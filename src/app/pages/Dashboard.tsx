@@ -2274,7 +2274,11 @@ export default function Dashboard() {
     if (activeTab !== "chatbot") {
       return;
     }
-    chatScrollAnchorRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+    const anchor = chatScrollAnchorRef.current;
+    if (!anchor) {
+      return;
+    }
+    anchor.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [chatMessages, activeTab]);
   const handleLogout = async () => {
     await pausePomodoroAndSync();
@@ -2325,7 +2329,7 @@ export default function Dashboard() {
         <div className="focus-figure-dot focus-figure-dot-b" />
       </div>
       <div className="relative z-10">
-        <header className="mx-auto mt-3 flex w-[calc(100%-1rem)] max-w-[calc(88rem-2.5rem)] items-center justify-between gap-2 rounded-[1rem] border-2 border-[#9fd45a] bg-[#dff5b8]/90 px-3 py-3 shadow-[0_10px_20px_-18px_rgba(76,107,31,0.35),0_1px_0_0_rgba(159,212,90,0.9)] md:mt-3 md:w-full md:max-w-[calc(88rem-4rem)] md:gap-3 md:px-8 md:py-5">
+        <header className="mx-auto mt-3 flex w-[calc(100%-1rem)] max-w-[calc(72rem-2.5rem)] items-center justify-between gap-2 rounded-[1rem] border-2 border-[#9fd45a] bg-[#dff5b8]/90 px-3 py-3 shadow-[0_10px_20px_-18px_rgba(76,107,31,0.35),0_1px_0_0_rgba(159,212,90,0.9)] md:mt-3 md:w-full md:max-w-[calc(72rem-4rem)] md:gap-3 md:px-8 md:py-5">
           <div className="flex min-w-0 items-center">
             <img
               src="/assets/focuszone/logo.png"
@@ -2385,7 +2389,7 @@ export default function Dashboard() {
         </div>
 
         <main
-          className={`mx-auto flex min-h-[calc(100dvh-84px)] w-full max-w-[88rem] flex-col px-5 py-2 ${activeTab === "chatbot" ? "pb-[4.5rem]" : "pb-24"} md:min-h-0 md:px-8 md:py-10 md:pb-10`}
+          className={`mx-auto flex min-h-[calc(100dvh-84px)] w-full max-w-6xl flex-col px-3 py-2 ${activeTab === "chatbot" ? "pb-[4.5rem]" : "pb-24"} md:min-h-0 md:px-5 md:py-6 md:pb-10 lg:px-8 lg:py-8`}
         >
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex w-full flex-1 flex-col">
