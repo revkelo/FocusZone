@@ -1,6 +1,6 @@
 ﻿import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
-import { BookOpenText, Building2, Cpu, Database, GraduationCap, Lightbulb, MessageSquareQuote, Monitor, Sparkles, Trophy, WandSparkles, X } from "lucide-react";
+import { BookOpenText, Building2, Cpu, Database, Glasses, GraduationCap, Lightbulb, MessageSquareQuote, Monitor, Sparkles, Trophy, WandSparkles, X } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "../components/ui/carousel";
@@ -60,7 +60,7 @@ const libraryPillars = [
 const libraryResourceHighlights = [
   { value: "+50", label: "Softwares especializados", Icon: Monitor },
   { value: "", label: "Cursos formativos", Icon: GraduationCap },
-  { value: "", label: "Realidad aumentada", Icon: WandSparkles },
+  { value: "", label: "Realidad virtual", Icon: Glasses },
   { value: "", label: "Bases de datos académicos", Icon: Database },
 ];
 
@@ -205,7 +205,7 @@ export default function Home() {
             <img
               src="/assets/focuszone/logo.png"
               alt="Focus Zone"
-              className="h-12 w-auto object-contain md:h-16"
+              className="h-16 w-auto object-contain md:h-[5rem]"
             />
           </div>
           <Link to="/login" className="shrink-0">
@@ -225,8 +225,8 @@ export default function Home() {
               </p>
               <div className="mt-4 grid gap-2 sm:grid-cols-3">
                 <div className="rounded-[0.8rem] border border-[#d1d5db] bg-white/95 p-3">
-                  <p className="display-font text-3xl leading-none text-[#f47c0f]">25m</p>
-                  <p className="mt-1 text-xs font-bold uppercase tracking-[0.08em] text-[#5b30d9]/80">Bloques de foco</p>
+                  <p className="display-font text-3xl leading-none text-[#f47c0f]">Foco</p>
+                  <p className="mt-1 text-xs font-bold uppercase tracking-[0.08em] text-[#5b30d9]/80">Sesiones guiadas</p>
                 </div>
                 <div className="rounded-[0.8rem] border border-[#d1d5db] bg-white/95 p-3">
                   <p className="display-font text-3xl leading-none text-[#f47c0f]">+pts</p>
@@ -244,7 +244,7 @@ export default function Home() {
                   </Button>
                 </Link>
                 <Link to="/login" className="w-full">
-                  <Button className="focus-cta h-12 w-full rounded-none border-2 border-[#1f2937] bg-[#f2f0f3] px-4 text-base font-bold text-[#5b30d9] hover:bg-[#1f2937] hover:text-white md:h-14 md:px-8 md:text-lg">
+                  <Button className="focus-cta h-12 w-full rounded-none border-2 border-[#5b30d9] bg-[#f2f0f3] px-4 text-base font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white md:h-14 md:px-8 md:text-lg">
                     Crear cuenta
                   </Button>
                 </Link>
@@ -269,7 +269,6 @@ export default function Home() {
             <div className="focus-campaign-card focus-reveal focus-reveal-delay-2 flex h-full flex-col rounded-[1.2rem] bg-white p-4 md:p-5">
               <div className="mb-4 flex items-center justify-between gap-2">
                 <h3 className="display-font text-3xl text-[#5b30d9] md:text-4xl">Recursos de la biblioteca</h3>
-                <span className="focus-kicker hidden md:inline-flex">Disponibles hoy</span>
               </div>
               <div className="grid flex-1 gap-3 sm:grid-cols-2 sm:gap-4">
                 {libraryResourceHighlights.map((item, index) => {
@@ -318,7 +317,7 @@ export default function Home() {
                       className={`${podiumHeight} rounded-[0.7rem] border px-2 py-3 text-center md:px-3 ${
                         isCenter
                           ? "border-[#f47c0f]/55 bg-[#ffe8cf] shadow-[0_12px_20px_-18px_rgba(244,124,15,0.75)]"
-                          : "border-[#1f2937]/20 bg-white"
+                          : "border-[#5b30d9]/20 bg-white"
                       }`}
                     >
                       {entry ? (
@@ -342,7 +341,7 @@ export default function Home() {
               {topFiveRanking.length > 3 && (
                 <div className="mt-3 space-y-2">
                   {topFiveRanking.slice(3, 5).map((entry, index) => (
-                    <div key={entry.userId} className="flex items-center justify-between rounded-[0.55rem] border border-[#1f2937]/15 bg-white p-2 text-sm">
+                    <div key={entry.userId} className="flex items-center justify-between rounded-[0.55rem] border border-[#5b30d9]/15 bg-white p-2 text-sm">
                       <span className="font-bold text-[#5b30d9]">#{index + 4} {entry.displayName}</span>
                       <span className="font-bold text-[#f47c0f]">{entry.totalPoints} pts</span>
                     </div>
@@ -428,7 +427,7 @@ export default function Home() {
                 <h3 className="display-font text-3xl text-[#5b30d9] md:text-4xl">Biblioteca como alternativa</h3>
               </div>
               <p className="mt-3 text-[1.02rem] leading-relaxed text-[#5b30d9] md:text-lg">
-                Focus Zone no es solo una app de pomodoro: conecta hábitos saludables con recursos reales de la biblioteca como espacio de exploración tecnológica y bienestar académico.
+                Focus Zone no es solo una app de pomodoro: Conecta hábitos saludables con recursos reales de la biblioteca como espacio de exploración tecnológica y bienestar académico.
               </p>
               <div className="mt-5 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
                 {libraryPillars.map(({ label, Icon }) => (
@@ -455,7 +454,7 @@ export default function Home() {
                 <p className="text-xs font-black uppercase tracking-[0.12em] text-[#5b30d9]/70">Carrusel horizontal</p>
                 <p className="text-xs text-[#5b30d9]/70">Piezas panorámicas</p>
               </div>
-              <Carousel setApi={setHorizontalCarouselApi} opts={{ align: "start", loop: true }} className="w-full overflow-hidden rounded-[1.15rem] border-2 border-[#1f2937]/45">
+              <Carousel setApi={setHorizontalCarouselApi} opts={{ align: "start", loop: true }} className="w-full overflow-hidden rounded-[1.15rem] border-2 border-[#5b30d9]/45">
                 <CarouselContent>
                   {horizontalDesigns.map((item) => {
                     const originalIndex = artGallery.findIndex((entry) => entry.src === item.src);
@@ -464,7 +463,7 @@ export default function Home() {
                         <button
                           type="button"
                           onClick={() => setViewerIndex(originalIndex)}
-                          className="focus-gallery-tile group w-full overflow-hidden rounded-[1rem] border border-[#1f2937]/20 bg-white text-left transition hover:border-[#1f2937]/45"
+                          className="focus-gallery-tile group w-full overflow-hidden rounded-[1rem] border border-[#5b30d9]/20 bg-white text-left transition hover:border-[#5b30d9]/45"
                         >
                           <div className="relative rounded-[0.85rem] bg-[#f9fafb] p-3">
                             <img src={item.src} alt={item.title} className="h-auto w-full object-contain" loading="lazy" />
@@ -474,15 +473,15 @@ export default function Home() {
                     );
                   })}
                 </CarouselContent>
-                <CarouselPrevious className="hidden md:flex md:size-9 border-[#1f2937]/55 bg-white/45 text-[#5b30d9]/90 hover:bg-[#1f2937]/80 hover:text-white md:left-3" />
-                <CarouselNext className="hidden md:flex md:size-9 border-[#1f2937]/55 bg-white/45 text-[#5b30d9]/90 hover:bg-[#1f2937]/80 hover:text-white md:right-3" />
+                <CarouselPrevious className="hidden md:flex md:size-9 border-[#5b30d9]/55 bg-white/45 text-[#5b30d9]/90 hover:bg-[#5b30d9]/80 hover:text-white md:left-3" />
+                <CarouselNext className="hidden md:flex md:size-9 border-[#5b30d9]/55 bg-white/45 text-[#5b30d9]/90 hover:bg-[#5b30d9]/80 hover:text-white md:right-3" />
               </Carousel>
               <div className="mt-3 flex justify-center gap-1.5">
                 {horizontalDesigns.map((item, index) => (
                   <button
                     key={`horizontal-dot-${item.src}`}
                     onClick={() => horizontalCarouselApi?.scrollTo(index)}
-                    className={`h-2.5 w-6 rounded-full transition ${activeHorizontalSlide === index ? "bg-[#f47c0f]" : "bg-[#1f2937]/20"}`}
+                    className={`h-2.5 w-6 rounded-full transition ${activeHorizontalSlide === index ? "bg-[#f47c0f]" : "bg-[#5b30d9]/20"}`}
                     aria-label={`Ir al horizontal ${index + 1}`}
                   />
                 ))}
@@ -498,7 +497,7 @@ export default function Home() {
                       key={item.src}
                       type="button"
                       onClick={() => setViewerIndex(originalIndex)}
-                      className="focus-gallery-tile group block w-full overflow-hidden rounded-[1rem] border border-[#1f2937]/20 bg-white text-left shadow-[0_10px_24px_-18px_rgba(37,10,110,0.5)] transition hover:-translate-y-0.5 hover:border-[#1f2937]/45"
+                      className="focus-gallery-tile group block w-full overflow-hidden rounded-[1rem] border border-[#5b30d9]/20 bg-white text-left shadow-[0_10px_24px_-18px_rgba(37,10,110,0.5)] transition hover:-translate-y-0.5 hover:border-[#5b30d9]/45"
                     >
                       <div className="relative rounded-[0.85rem] bg-[#f9fafb] p-2">
                         <img src={item.src} alt={item.title} className="aspect-[3/4] w-full object-contain" loading="lazy" />
@@ -514,7 +513,7 @@ export default function Home() {
             <Card className="focus-campaign-card p-5 md:p-7">
               <h3 className="display-font text-3xl text-[#5b30d9] md:text-4xl">Sobre el proyecto</h3>
               <p className="mt-3 text-base text-[#5b30d9] md:text-lg">
-                Proyecto de grado de la Universidad El Bosque. Focus Zone es una campaña transmedia orientada a hábitos digitales saludables y a la biblioteca como espacio de pausa digital, concentración y aprendizaje activo.
+                Es una campaña transmedia de concientización que invita a los estudiantes a reflexionar sobre sus hábitos digitales, posicionando la biblioteca como un espacio de pausa, concentración y aprendizaje, y promoviendo un uso más consciente de la tecnología.
               </p>
             </Card>
           </section>
@@ -527,14 +526,14 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={() => setViewerIndex(null)}
-                  className="grid size-10 place-items-center rounded-full border border-[#1f2937]/60 bg-white/95 text-[#5b30d9] shadow-sm hover:bg-[#ece8f9]"
+                  className="grid size-10 place-items-center rounded-full border border-[#5b30d9]/60 bg-white/95 text-[#5b30d9] shadow-sm hover:bg-[#ece8f9]"
                   aria-label="Cerrar visor"
                 >
                   <X className="size-5" />
                 </button>
               </div>
 
-              <div className="relative flex items-center justify-center overflow-hidden rounded-[1.2rem] border border-[#1f2937]/25 bg-white">
+              <div className="relative flex items-center justify-center overflow-hidden rounded-[1.2rem] border border-[#5b30d9]/25 bg-white">
                 <img
                   src={viewerItem.src}
                   alt={viewerItem.title}
@@ -547,7 +546,7 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={goPrevDesign}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full border border-[#1f2937]/40 bg-white/55 px-2 py-1 text-xs font-bold text-[#5b30d9] hover:bg-white/75 md:px-3 md:py-2 md:text-sm"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full border border-[#5b30d9]/40 bg-white/55 px-2 py-1 text-xs font-bold text-[#5b30d9] hover:bg-white/75 md:px-3 md:py-2 md:text-sm"
                   aria-label="Imagen anterior"
                 >
                   {"<"}
@@ -555,7 +554,7 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={goNextDesign}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full border border-[#1f2937]/40 bg-white/55 px-2 py-1 text-xs font-bold text-[#5b30d9] hover:bg-white/75 md:px-3 md:py-2 md:text-sm"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full border border-[#5b30d9]/40 bg-white/55 px-2 py-1 text-xs font-bold text-[#5b30d9] hover:bg-white/75 md:px-3 md:py-2 md:text-sm"
                   aria-label="Imagen siguiente"
                 >
                   {">"}
@@ -566,7 +565,7 @@ export default function Home() {
         )}
 
         <footer className="mx-auto w-full max-w-6xl px-5 pb-10 pt-4 md:px-8">
-          <div className="border-t border-[#1f2937]/25 pt-5 text-sm text-[#5b30d9]">
+          <div className="border-t border-[#5b30d9]/25 pt-5 text-sm text-[#5b30d9]">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p>Proyecto de grado · Diseño de Comunicación 2026 · Universidad El Bosque - Catalina Barrera</p>
               <p className="font-bold">Focus Zone</p>
@@ -580,6 +579,8 @@ export default function Home() {
     </div>
   );
 }
+
+
 
 
 
