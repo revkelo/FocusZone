@@ -87,12 +87,12 @@ const relatedNews = [
     topic: "Salud digital",
   },
   {
-    category: "El País",
-    title: "Universidades refuerzan estrategias para reducir distracciones digitales en el aula",
-    summary: "Nuevos pilotos combinan pausas activas, reglas de uso de pantalla y acompañamiento docente para mejorar concentración.",
-    sourceUrl: "https://example.com/noticia-2",
-    sourceDomain: "elpais.com",
-    topic: "Educación",
+    category: "Mayo Clinic",
+    title: "Adolescentes y uso de redes sociales: ¿cuál es el impacto en su bienestar?",
+    summary: "Guía sobre riesgos, señales de alerta y recomendaciones para acompañar un uso más saludable de redes sociales en jóvenes.",
+    sourceUrl: "https://www.mayoclinic.org/es/healthy-lifestyle/tween-and-teen-health/in-depth/teens-and-social-media-use/art-20474437",
+    sourceDomain: "mayoclinic.org",
+    topic: "Salud digital",
   },
   {
     category: "The Conversation",
