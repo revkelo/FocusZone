@@ -201,6 +201,16 @@ export default function Home() {
   }, [horizontalCarouselApi]);
 
   useEffect(() => {
+    const autoplayNews = window.setInterval(() => {
+      setActiveNewsIndex((previous) => (previous + 1) % relatedNews.length);
+    }, 5000);
+
+    return () => {
+      window.clearInterval(autoplayNews);
+    };
+  }, []);
+
+  useEffect(() => {
     return () => {
       const context = lumiTransitionAudioContextRef.current;
       if (!context) {
@@ -411,15 +421,15 @@ export default function Home() {
                 </button>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 md:grid-cols-1">
                   <div className="rounded-[0.8rem] border border-[#d1d5db] bg-white/95 p-2.5 sm:p-3">
-                    <p className="display-font text-[1.85rem] leading-none text-[#f47c0f] sm:text-3xl">Foco</p>
-                    <p className="mt-1 text-xs font-bold uppercase tracking-[0.08em] text-[#5b30d9]/80">Sesiones guiadas</p>
+                    <p className="display-font text-[1.85rem] leading-none text-[#f47c0f] sm:text-3xl">Reto</p>
+                    <p className="mt-1 text-xs font-bold uppercase tracking-[0.08em] text-[#5b30d9]/80">21 días</p>
                   </div>
                   <div className="rounded-[0.8rem] border border-[#d1d5db] bg-white/95 p-2.5 sm:p-3">
                     <p className="display-font text-[1.85rem] leading-none text-[#f47c0f] sm:text-3xl">+pts</p>
                     <p className="mt-1 text-xs font-bold uppercase tracking-[0.08em] text-[#5b30d9]/80">Progreso visible</p>
                   </div>
                   <div className="rounded-[0.8rem] border border-[#d1d5db] bg-white/95 p-2.5 sm:p-3">
-                    <p className="display-font text-[1.85rem] leading-none text-[#f47c0f] sm:text-3xl">Salas</p>
+                    <p className="display-font text-[1.85rem] leading-none text-[#f47c0f] sm:text-3xl">Pomodoro Salas</p>
                     <p className="mt-1 text-xs font-bold uppercase tracking-[0.08em] text-[#5b30d9]/80">Estudio guiado</p>
                   </div>
                 </div>
