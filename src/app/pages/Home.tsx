@@ -1,6 +1,6 @@
 ﻿import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
-import { BookOpenText, Building2, Cpu, Database, Glasses, GraduationCap, Lightbulb, MessageSquareQuote, Monitor, Sparkles, Trophy, WandSparkles, X } from "lucide-react";
+import { BookOpenText, Building2, Cpu, Database, Glasses, GraduationCap, Lightbulb, MessageSquareQuote, Monitor, Trophy, WandSparkles, X } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "../components/ui/carousel";
@@ -62,6 +62,19 @@ const libraryResourceHighlights = [
   { value: "", label: "Cursos formativos", Icon: GraduationCap },
   { value: "", label: "Realidad virtual", Icon: Glasses },
   { value: "", label: "Bases de datos académicos", Icon: Database },
+];
+
+const technicalLogos = [
+  { name: "React", logo: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/react.svg" },
+  { name: "TypeScript", logo: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/typescript.svg" },
+  { name: "Vite", logo: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/vite.svg" },
+  { name: "React Router", logo: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/reactrouter.svg" },
+  { name: "Tailwind CSS", logo: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/tailwindcss.svg" },
+  { name: "Supabase", logo: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/supabase.svg" },
+  { name: "PostgreSQL", logo: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/postgresql.svg" },
+  { name: "Node.js API", logo: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/nodedotjs.svg" },
+  { name: "Vercel", logo: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/vercel.svg" },
+  { name: "OpenRouter", logo: "https://openrouter.ai/favicon.ico" },
 ];
 
 const relatedNews = [
@@ -301,8 +314,8 @@ export default function Home() {
               </div>
             </div>
 
-            <Card className="focus-campaign-cream focus-heavy focus-reveal focus-reveal-delay-2 flex h-full flex-col rounded-[1.2rem] bg-[#fff0df] p-5 md:p-7">
-              <div className="mb-4 flex items-center gap-2 text-[#5b30d9]">
+            <Card className="focus-campaign-card focus-heavy focus-reveal focus-reveal-delay-2 flex h-full flex-col rounded-[1.2rem] border-[#7d4cd8]/70 bg-[#5a2dca] p-5 md:p-7">
+              <div className="mb-4 flex items-center gap-2 text-white">
                 <Trophy className="size-5 text-[#f47c0f]" />
                 <h3 className="display-font text-3xl md:text-4xl">Ranking en vivo</h3>
               </div>
@@ -316,13 +329,13 @@ export default function Home() {
                       key={entry?.userId ?? `empty-${index}`}
                       className={`${podiumHeight} rounded-[0.7rem] border px-2 py-3 text-center md:px-3 ${
                         isCenter
-                          ? "border-[#f47c0f]/55 bg-[#ffe8cf] shadow-[0_12px_20px_-18px_rgba(244,124,15,0.75)]"
-                          : "border-[#5b30d9]/20 bg-white"
+                          ? "border-[#7aa048]/60 bg-[#dff5b8] shadow-[0_12px_20px_-18px_rgba(122,160,72,0.75)]"
+                          : "border-white/35 bg-white/95"
                       }`}
                     >
                       {entry ? (
                         <>
-                          <p className={`mb-1 text-xs font-bold uppercase tracking-wide ${isCenter ? "text-[#5b30d9]" : "text-[#5b30d9]/70"}`}>
+                          <p className={`mb-1 text-xs font-bold uppercase tracking-wide ${isCenter ? "text-[#5b30d9]" : "text-[#5b30d9]/75"}`}>
                             {isCenter ? "#1" : index === 0 ? "#2" : "#3"}
                           </p>
                           <p className="line-clamp-2 font-bold text-[#5b30d9]">{entry.displayName}</p>
@@ -337,11 +350,11 @@ export default function Home() {
                   );
                 })}
               </div>
-              {topFiveRanking.length === 0 ? <p className="mt-3 text-sm font-bold text-[#5b30d9]/70">Aún no hay datos de ranking.</p> : null}
+              {topFiveRanking.length === 0 ? <p className="mt-3 text-sm font-bold text-white/80">Aún no hay datos de ranking.</p> : null}
               {topFiveRanking.length > 3 && (
                 <div className="mt-3 space-y-2">
                   {topFiveRanking.slice(3, 5).map((entry, index) => (
-                    <div key={entry.userId} className="flex items-center justify-between rounded-[0.55rem] border border-[#5b30d9]/15 bg-white p-2 text-sm">
+                    <div key={entry.userId} className="flex items-center justify-between rounded-[0.55rem] border border-white/30 bg-white/95 p-2 text-sm">
                       <span className="font-bold text-[#5b30d9]">#{index + 4} {entry.displayName}</span>
                       <span className="font-bold text-[#f47c0f]">{entry.totalPoints} pts</span>
                     </div>
@@ -510,11 +523,27 @@ export default function Home() {
           </Card>
 
           <section className="focus-reveal focus-reveal-delay-2">
-            <Card className="focus-campaign-card p-5 md:p-7">
-              <h3 className="display-font text-3xl text-[#5b30d9] md:text-4xl">Sobre el proyecto</h3>
-              <p className="mt-3 text-base text-[#5b30d9] md:text-lg">
+            <Card className="focus-campaign-card border-[#7d4cd8]/70 bg-[#5a2dca] p-5 md:p-7">
+              <h3 className="display-font text-3xl text-white md:text-4xl">Sobre el proyecto</h3>
+              <p className="mt-3 text-base text-white md:text-lg">
                 Es una campaña transmedia de concientización que invita a los estudiantes a reflexionar sobre sus hábitos digitales, posicionando la biblioteca como un espacio de pausa, concentración y aprendizaje, y promoviendo un uso más consciente de la tecnología.
               </p>
+            </Card>
+          </section>
+
+          <section className="focus-reveal focus-reveal-delay-2">
+            <Card className="focus-campaign-card p-5 md:p-7">
+              <h3 className="display-font text-3xl text-[#5b30d9] md:text-4xl">Desarrollo técnico</h3>
+              <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+                {technicalLogos.map((item) => (
+                  <div key={item.name} className="flex items-center gap-2 rounded-[0.8rem] border border-[#d1d5db] bg-white p-2.5">
+                    <span className="grid size-9 place-items-center rounded-[0.65rem] border border-[#d1d5db] bg-[#f9fafb]">
+                      <img src={item.logo} alt={item.name} className="size-5 object-contain" loading="lazy" />
+                    </span>
+                    <span className="text-sm font-bold text-[#5b30d9]">{item.name}</span>
+                  </div>
+                ))}
+              </div>
             </Card>
           </section>
         </main>
