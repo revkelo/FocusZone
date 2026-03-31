@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { AlertCircle, Eye, EyeOff, Lock, Mail, ShieldCheck, Target, User } from "lucide-react";
+import { AlertCircle, Eye, EyeOff, Lock, Mail, ShieldCheck, User } from "lucide-react";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
@@ -309,13 +309,14 @@ export default function Login() {
         : "Acceso";
 
   return (
-    <div className="focus-shell focus-rings min-h-screen px-4 py-8">
+    <div className="focus-shell focus-rings focus-grain focus-soft-round min-h-screen px-4 py-8">
       <div className="relative z-10 mx-auto max-w-md">
-        <Link to="/" className="mb-8 flex items-center justify-center gap-3">
-          <div className="grid size-12 place-items-center rounded-none bg-[#f47c0f] text-white">
-            <Target className="size-7" />
-          </div>
-          <span className="display-font text-5xl text-[#5b30d9]">Focus Zone</span>
+        <Link to="/" className="mb-8 flex items-center justify-center">
+          <img
+            src="/assets/focuszone/logo.png"
+            alt="Focus Zone"
+            className="h-14 w-auto object-contain sm:h-16"
+          />
         </Link>
 
         <Card className="focus-card rounded-none border-2 border-[#5b30d9]/35 p-8">

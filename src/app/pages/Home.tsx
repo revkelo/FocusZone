@@ -1,6 +1,6 @@
 ﻿import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
-import { BookOpenText, Bot, Building2, Cpu, Database, GraduationCap, Lightbulb, MessageSquareQuote, Monitor, Smartphone, Sparkles, Target, Trophy, WandSparkles, X } from "lucide-react";
+import { BookOpenText, Bot, Building2, Cpu, Database, GraduationCap, Lightbulb, MessageSquareQuote, Monitor, Smartphone, Sparkles, Trophy, WandSparkles, X } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "../components/ui/carousel";
@@ -201,7 +201,7 @@ export default function Home() {
   };
 
   return (
-    <div className="focus-shell focus-grain focus-rings focus-no-stars focus-official-flat min-h-screen overflow-x-hidden">
+    <div className="focus-shell focus-grain focus-rings focus-no-stars focus-soft-round min-h-screen overflow-x-hidden">
       <div className="focus-figure-layer" aria-hidden>
         <div className="focus-figure-arc-left" />
         <div className="focus-figure-arc-right" />
@@ -213,11 +213,12 @@ export default function Home() {
       </div>
       <div className="relative z-10">
         <header className="mx-auto mt-2 flex w-[calc(100%-1rem)] max-w-[calc(72rem-2.5rem)] items-center justify-between gap-2 rounded-[1rem] border-2 border-[#8f74ef]/55 bg-[#ece8f9]/90 px-3 py-3 shadow-[0_12px_22px_-18px_rgba(69,36,179,0.6),0_2px_0_0_rgba(143,116,239,0.55)] md:mt-0 md:w-full md:max-w-[calc(72rem-4rem)] md:gap-3 md:px-8 md:py-5">
-          <div className="flex min-w-0 items-center gap-2.5 md:gap-3">
-            <div className="relative grid size-10 place-items-center rounded-none bg-[#f47c0f] text-white shadow-[0_8px_16px_-10px_rgba(244,124,15,0.85)] md:size-11">
-              <Target className="size-5" />
-            </div>
-            <p className="display-font truncate whitespace-nowrap text-[1.55rem] leading-none text-[#5b30d9] sm:text-[1.7rem] md:text-[2.25rem]">Focus Zone</p>
+          <div className="flex min-w-0 items-center">
+            <img
+              src="/assets/focuszone/logo.png"
+              alt="Focus Zone"
+              className="h-12 w-auto object-contain md:h-16"
+            />
           </div>
           <Link to="/login" className="shrink-0">
             <Button className="focus-cta h-9 rounded-none border-2 border-[#5b30d9] bg-white/60 px-3 text-sm font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white sm:h-10 sm:px-4 sm:text-base md:h-11 md:px-5">
@@ -673,7 +674,7 @@ export default function Home() {
         <footer className="mx-auto w-full max-w-6xl px-5 pb-10 pt-4 md:px-8">
           <div className="border-t border-[#5b30d9]/25 pt-5 text-sm text-[#5b30d9]">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <p>Proyecto de grado Diseño de Comunicación 2026 · Universidad El Bosque - Catalina Barrera</p>
+              <p>Proyecto de grado · Diseño de Comunicación 2026 · Universidad El Bosque - Catalina Barrera</p>
               <p className="font-bold">Focus Zone</p>
             </div>
             <p className="mt-2 text-xs text-[#5b30d9]/75 md:text-sm">
