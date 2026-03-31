@@ -71,12 +71,12 @@ export default async function handler(req, res) {
   }
 
   const apiKey = process.env.OPENROUTER_API_KEY;
-  const model = process.env.OPENROUTER_MODEL || "openai/gpt-4o-mini";
+  const model = process.env.OPENROUTER_MODEL;
   const siteUrl = process.env.OPENROUTER_SITE_URL || "https://focuszone.app";
   const siteName = process.env.OPENROUTER_SITE_NAME || "FocusZone";
 
-  if (!apiKey) {
-    return json(res, 500, { error: "Missing OPENROUTER_API_KEY" });
+  if (!apiKey || !model) {
+    return json(res, 503, { error: "Lumi no puede responder ahorita, intenta mas tarde." });
   }
 
   const message = req.body?.message?.toString().trim();
@@ -104,7 +104,7 @@ export default async function handler(req, res) {
     });
 
     if (!upstream.ok) {
-      const errText = await upstream.text();
+      await upstream.text();
       const retryAfterRaw = upstream.headers.get("retry-after");
       const retryAfterSeconds = Number.parseInt(retryAfterRaw || "", 10);
       const retryAfter = Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0 ? retryAfterSeconds : 20;
@@ -112,15 +112,12 @@ export default async function handler(req, res) {
       if (upstream.status === 429) {
         res.setHeader("Retry-After", String(retryAfter));
         return json(res, 429, {
-          error: "Lumi esta temporalmente saturada. Intenta de nuevo en unos segundos.",
+          error: "Lumi no puede responder ahorita, intenta mas tarde.",
           retryAfter,
         });
       }
 
-      return json(res, upstream.status, {
-        error: "Upstream model request failed",
-        details: errText.slice(0, 500),
-      });
+      return json(res, 503, { error: "Lumi no puede responder ahorita, intenta mas tarde." });
     }
 
     const data = await upstream.json();
@@ -132,9 +129,6 @@ export default async function handler(req, res) {
 
     return json(res, 200, { reply: answer, model: data?.model || model });
   } catch (error) {
-    return json(res, 500, {
-      error: "Unexpected server error",
-      details: error instanceof Error ? error.message : "unknown",
-    });
+    return json(res, 500, { error: "Lumi no puede responder ahorita, intenta mas tarde." });
   }
 }
