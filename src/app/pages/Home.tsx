@@ -212,11 +212,20 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    // Preload speaking frames so mobile doesn't freeze on first loop.
+    for (const frameSrc of LUMI_SPEAKING_FRAMES) {
+      const image = new Image();
+      image.src = frameSrc;
+    }
+  }, []);
+
+  useEffect(() => {
     if (!isLumiSpeaking) {
       setLumiSpeakingFrame(0);
       return;
     }
 
+    setLumiSpeakingFrame((previous) => (previous + 1) % LUMI_SPEAKING_FRAMES.length);
     const interval = window.setInterval(() => {
       setLumiSpeakingFrame((previous) => (previous + 1) % LUMI_SPEAKING_FRAMES.length);
     }, 140);
@@ -482,7 +491,6 @@ export default function Home() {
                           src={activeLumiSpeakingIcon}
                           alt="Lumi speaking"
                           className="size-16 rounded-full object-cover object-top"
-                          loading="lazy"
                         />
                       </div>
                       <div className="space-y-2">
