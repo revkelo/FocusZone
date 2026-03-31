@@ -11,6 +11,7 @@ import {
   Mail,
   MessageCircle,
   Minus,
+  Moon,
   PauseCircle,
   PlayCircle,
   Plus,
@@ -20,6 +21,7 @@ import {
   Trophy,
   User,
   Users,
+  Check,
   X,
 } from "lucide-react";
 import { Button } from "../components/ui/button";
@@ -2416,6 +2418,10 @@ export default function Dashboard() {
                           <Plus className="size-4" />
                         </button>
                       </div>
+                      <div className="mt-2 grid grid-cols-2 gap-0 overflow-hidden rounded-xl border border-white/15 bg-black/10 text-xs font-bold">
+                        <button onClick={() => adjustDuration("focus", -5)} className="py-1 text-white/90 transition hover:bg-black/10">-5 min</button>
+                        <button onClick={() => adjustDuration("focus", 5)} className="border-l border-white/15 py-1 text-white/90 transition hover:bg-black/10">+5 min</button>
+                      </div>
                     </div>
                     <div className="rounded-2xl bg-[#5b30d9] p-3 text-white">
                       <p className="text-xs font-bold uppercase tracking-wide text-white/80">Duración de descanso</p>
@@ -2430,6 +2436,10 @@ export default function Dashboard() {
                           <Plus className="size-4" />
                         </button>
                       </div>
+                      <div className="mt-2 grid grid-cols-2 gap-0 overflow-hidden rounded-xl border border-white/15 bg-black/10 text-xs font-bold">
+                        <button onClick={() => adjustDuration("shortBreak", -5)} className="py-1 text-white/90 transition hover:bg-black/10">-5 min</button>
+                        <button onClick={() => adjustDuration("shortBreak", 5)} className="border-l border-white/15 py-1 text-white/90 transition hover:bg-black/10">+5 min</button>
+                      </div>
                     </div>
                     <div className="rounded-2xl bg-[#5b30d9] p-3 text-white">
                       <p className="text-xs font-bold uppercase tracking-wide text-white/80">Duración de descanso largo</p>
@@ -2443,6 +2453,10 @@ export default function Dashboard() {
                         <button onClick={() => adjustDuration("longBreak", 1)} className="grid size-8 place-items-center rounded-full bg-[#f47c0f] text-white" aria-label="Aumentar descanso largo">
                           <Plus className="size-4" />
                         </button>
+                      </div>
+                      <div className="mt-2 grid grid-cols-2 gap-0 overflow-hidden rounded-xl border border-white/15 bg-black/10 text-xs font-bold">
+                        <button onClick={() => adjustDuration("longBreak", -5)} className="py-1 text-white/90 transition hover:bg-black/10">-5 min</button>
+                        <button onClick={() => adjustDuration("longBreak", 5)} className="border-l border-white/15 py-1 text-white/90 transition hover:bg-black/10">+5 min</button>
                       </div>
                     </div>
                   </div>
@@ -2481,16 +2495,73 @@ export default function Dashboard() {
                       </Button>
                     </div>
 
-                    <div className="flex w-full items-center justify-center gap-2 sm:max-w-[360px]">
-                      {[0, 1, 2, 3].map((index) => (
-                        <span
-                          key={index}
-                          className={`h-2 flex-1 rounded-full ${index < focusStreak % 4 ? "bg-[#f47c0f]" : "bg-[#5b30d9]/25"}`}
-                        />
-                      ))}
-                      <span className="ml-2 grid size-7 place-items-center rounded-full border border-[#5b30d9]/45 text-[#5b30d9]">
-                        <Coffee className="size-4" />
-                      </span>
+                    <div className="grid w-full grid-cols-3 gap-2 sm:max-w-[360px]">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => switchTimerMode("focus")}
+                        className={`rounded-xl border-2 ${timerMode === "focus" ? "border-[#f47c0f] bg-[#fff4ea] text-[#b05a00]" : "border-[#5b30d9]/35 text-[#5b30d9]"}`}
+                      >
+                        <ListTodo className="mr-2 size-4" />
+                        Foco
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => switchTimerMode("shortBreak")}
+                        className={`rounded-xl border-2 ${timerMode === "shortBreak" ? "border-[#f47c0f] bg-[#fff4ea] text-[#b05a00]" : "border-[#5b30d9]/35 text-[#5b30d9]"}`}
+                      >
+                        <Coffee className="mr-2 size-4" />
+                        Descanso
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => switchTimerMode("longBreak")}
+                        className={`rounded-xl border-2 ${timerMode === "longBreak" ? "border-[#f47c0f] bg-[#fff4ea] text-[#b05a00]" : "border-[#5b30d9]/35 text-[#5b30d9]"}`}
+                      >
+                        <Moon className="mr-2 size-4" />
+                        Largo
+                      </Button>
+                    </div>
+
+                    <div className="flex w-full items-center justify-center gap-2 sm:max-w-[520px]">
+                      {(() => {
+                        const completedInCycle = focusStreak % 4;
+                        return (
+                          <>
+                            {[0, 1, 2, 3].map((index) => {
+                              const isCompleted = index < completedInCycle;
+                              const isCurrent = index === completedInCycle;
+                              const connectorActive = index <= completedInCycle;
+
+                              return (
+                                <div key={index} className="flex items-center gap-2">
+                                  <span
+                                    className={`grid size-10 place-items-center rounded-full border-2 ${
+                                      isCompleted || isCurrent
+                                        ? "border-[#f47c0f] bg-[#f47c0f] text-white"
+                                        : "border-[#5b30d9] bg-[#f2f0f3] text-[#5b30d9]"
+                                    }`}
+                                  >
+                                    <ListTodo className="size-4" />
+                                  </span>
+                                  {index < 3 && <span className={`h-1.5 w-14 rounded-full ${connectorActive ? "bg-[#d9793e]" : "bg-[#5b30d9]/45"}`} />}
+                                </div>
+                              );
+                            })}
+                            <span
+                              className={`grid size-10 place-items-center rounded-full border-2 ${
+                                focusStreak > 0 && focusStreak % 4 === 0
+                                  ? "border-[#f47c0f] bg-[#f47c0f] text-white"
+                                  : "border-[#5b30d9] bg-[#f2f0f3] text-[#5b30d9]"
+                              }`}
+                            >
+                              <Check className="size-5" />
+                            </span>
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>
