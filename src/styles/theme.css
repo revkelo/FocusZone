@@ -410,7 +410,7 @@
   }
 
   .focus-sticker {
-    @apply inline-flex items-center border-2 border-[#f28c38]/70 bg-[#f28c38] px-2 py-1 text-[0.65rem] font-black uppercase tracking-[0.12em] text-white;
+    @apply inline-flex items-center rounded-xl border-2 border-[#f28c38]/70 bg-[#f28c38] px-2 py-1 text-[0.65rem] font-black uppercase tracking-[0.12em] text-white;
   }
 
   .focus-poster-title {
