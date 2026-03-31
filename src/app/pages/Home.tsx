@@ -1,6 +1,6 @@
 ﻿import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router";
-import { ArrowUpRight, BookOpenText, Bot, Building2, ChevronLeft, ChevronRight, Cpu, Database, Glasses, GraduationCap, Lightbulb, MessageSquareQuote, Monitor, Newspaper, Trophy, Volume2, WandSparkles, X } from "lucide-react";
+import { ArrowUpRight, BookOpenText, Bot, Building2, ChevronLeft, ChevronRight, Cpu, Database, Glasses, GraduationCap, Lightbulb, MessageSquareQuote, Monitor, Newspaper, Pause, Play, Trophy, Volume2, WandSparkles, X } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "../components/ui/carousel";
@@ -110,6 +110,13 @@ const LUMI_SPEAKING_FRAMES = [
   "/assets/chatbot/lumi-speaking-04.png",
 ];
 
+const formatAudioTime = (seconds: number) => {
+  const safeSeconds = Math.max(0, Math.floor(seconds || 0));
+  const mins = Math.floor(safeSeconds / 60);
+  const secs = safeSeconds % 60;
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
+};
+
 export default function Home() {
   const [ranking, setRanking] = useState<RankItem[]>([]);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
@@ -120,6 +127,8 @@ export default function Home() {
   const [isLumiAlt, setIsLumiAlt] = useState(true);
   const [isLumiSpeaking, setIsLumiSpeaking] = useState(false);
   const [lumiSpeakingFrame, setLumiSpeakingFrame] = useState(0);
+  const [lumiAudioCurrentTime, setLumiAudioCurrentTime] = useState(0);
+  const [lumiAudioDuration, setLumiAudioDuration] = useState(0);
   const lumiAudioRef = useRef<HTMLAudioElement | null>(null);
   const lumiTransitionAudioContextRef = useRef<AudioContext | null>(null);
 
@@ -277,6 +286,25 @@ export default function Home() {
 
     audio.pause();
     setIsLumiSpeaking(false);
+  };
+
+  const syncLumiAudioTiming = () => {
+    const audio = lumiAudioRef.current;
+    if (!audio) {
+      return;
+    }
+    setLumiAudioCurrentTime(audio.currentTime || 0);
+    setLumiAudioDuration(Number.isFinite(audio.duration) ? audio.duration : 0);
+  };
+
+  const handleLumiAudioSeek = (value: string) => {
+    const audio = lumiAudioRef.current;
+    if (!audio) {
+      return;
+    }
+    const nextTime = Math.max(0, Math.min(Number(value) || 0, Number.isFinite(audio.duration) ? audio.duration : 0));
+    audio.currentTime = nextTime;
+    setLumiAudioCurrentTime(nextTime);
   };
 
   const goPrevNews = () => {
@@ -470,24 +498,49 @@ export default function Home() {
                       </div>
                     </div>
                     <div className="mt-3 grid gap-2">
-                      <Button
-                        type="button"
-                        onClick={() => void toggleLumiSpeaking()}
-                        className="focus-cta h-10 w-full rounded-xl border-2 border-[#f47c0f] bg-white px-4 text-sm font-bold text-[#f47c0f] hover:bg-[#f47c0f] hover:text-white"
-                      >
-                        <span className="inline-flex items-center gap-2">
-                          <Volume2 className="size-4" />
-                          {isLumiSpeaking ? "Pausar voz de Lumi" : "Escuchar voz de Lumi"}
-                        </span>
-                      </Button>
+                      <div className="rounded-xl border border-[#d1d5db] bg-white px-3 py-2 shadow-[0_8px_18px_-14px_rgba(31,41,55,0.45)]">
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => void toggleLumiSpeaking()}
+                            className="grid size-9 shrink-0 place-items-center rounded-lg border border-[#f47c0f]/45 bg-[#fff4ea] text-[#f47c0f] transition hover:bg-[#f47c0f] hover:text-white"
+                            aria-label={isLumiSpeaking ? "Pausar voz de Lumi" : "Reproducir voz de Lumi"}
+                          >
+                            {isLumiSpeaking ? <Pause className="size-4" /> : <Play className="size-4" />}
+                          </button>
+                          <div className="flex min-w-0 flex-1 items-center gap-2">
+                            <span className="w-9 shrink-0 text-[11px] font-bold text-[#5b30d9]/75">{formatAudioTime(lumiAudioCurrentTime)}</span>
+                            <input
+                              type="range"
+                              min={0}
+                              max={Math.max(1, Math.floor(lumiAudioDuration || 1))}
+                              step={1}
+                              value={Math.min(lumiAudioCurrentTime, Math.max(1, Math.floor(lumiAudioDuration || 1)))}
+                              onChange={(event) => handleLumiAudioSeek(event.target.value)}
+                              className="focus-volume-slider w-full"
+                            />
+                            <span className="w-9 shrink-0 text-right text-[11px] font-bold text-[#5b30d9]/75">{formatAudioTime(lumiAudioDuration)}</span>
+                          </div>
+                        </div>
+                      </div>
                       <audio
                         ref={lumiAudioRef}
                         preload="metadata"
-                        onPlay={() => setIsLumiSpeaking(true)}
-                        onPause={() => setIsLumiSpeaking(false)}
-                        onEnded={() => setIsLumiSpeaking(false)}
-                        className="h-10 w-full"
-                        controls
+                        onPlay={() => {
+                          setIsLumiSpeaking(true);
+                          syncLumiAudioTiming();
+                        }}
+                        onPause={() => {
+                          setIsLumiSpeaking(false);
+                          syncLumiAudioTiming();
+                        }}
+                        onEnded={() => {
+                          setIsLumiSpeaking(false);
+                          syncLumiAudioTiming();
+                        }}
+                        onTimeUpdate={syncLumiAudioTiming}
+                        onLoadedMetadata={syncLumiAudioTiming}
+                        className="hidden"
                       >
                         <source src="/assets/audio_home_lumi.mp3" type="audio/mpeg" />
                         Tu navegador no soporta audio HTML5.
