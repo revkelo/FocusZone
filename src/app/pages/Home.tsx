@@ -431,19 +431,19 @@ export default function Home() {
               </div>
             </Card>
 
-            <Card className="focus-campaign-card focus-reveal focus-reveal-delay-1 focus-heavy !gap-4 rounded-[1.2rem] bg-white p-5 md:p-7">
-              <h2 className="display-font text-4xl text-[#5b30d9] md:text-5xl">Stop Doomscrolling</h2>
-              <p className="mt-4 text-base text-[#5b30d9] md:text-lg">
+            <Card className="focus-campaign-card focus-reveal focus-reveal-delay-1 focus-heavy !gap-4 rounded-[1.2rem] border-[#7d4cd8]/70 bg-[#5a2dca] p-5 md:p-7">
+              <h2 className="display-font text-4xl text-[#f47c0f] md:text-5xl">Stop Doomscrolling</h2>
+              <p className="mt-4 text-base text-white md:text-lg">
                 Algunas cosas te distraen. Otras te ayudan a enfocarte. Focus Zone convierte lo digital en aliado de tu estudio.
               </p>
-              <p className="text-base text-[#5b30d9] md:text-lg">
+              <p className="text-base text-white md:text-lg">
                 Un nuevo mundo en la biblioteca: menos ruido digital, más sesiones de concentración, progreso real y retos semanales.
               </p>
-              <div className="focus-divider-animated my-5 h-px w-full bg-gradient-to-r from-[#f47c0f] via-[#e5e7eb] to-[#b8ee73]/80" />
-              <div className="mt-6 space-y-3 text-base font-bold text-[#5b30d9] md:text-lg">
-                <p>Educación</p>
-                <p>Concientización</p>
-                <p>Estrategias preventivas</p>
+              <div className="focus-divider-animated my-5 h-px w-full bg-gradient-to-r from-[#f47c0f] via-white/70 to-[#b8ee73]/80" />
+              <div className="mt-6 space-y-3 text-base font-bold text-white md:text-lg">
+                <p className="flex items-center gap-2 text-white"><span className="text-white/90">◉</span>Educación</p>
+                <p className="flex items-center gap-2 text-white"><span className="text-white/90">◉</span>Concientización</p>
+                <p className="flex items-center gap-2 text-white"><span className="text-white/90">◉</span>Estrategias preventivas</p>
               </div>
             </Card>
           </section>
