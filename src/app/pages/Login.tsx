@@ -11,8 +11,8 @@ import { supabase } from "../lib/supabase";
 type AuthView = "login" | "register" | "registerCode" | "recoverRequest" | "recoverCode" | "verifyLoginCode";
 
 type ApiResult = {
-  ok?: boolean;
-  error?: string;
+  ok: boolean;
+  error: string;
 };
 
 const normalizeInput = (value: string) => value.trim();
@@ -77,7 +77,7 @@ export default function Login() {
     resetMessages();
 
     if (!email || !password) {
-      setError("Completa correo/nickname y contraseÃ±a.");
+      setError("Completa correo/nickname y contraseña.");
       return;
     }
 
@@ -110,17 +110,17 @@ export default function Login() {
           await postAuth("/api/request-existing-verification-code", { email: loginEmail });
           setView("verifyLoginCode");
           setEmail(loginEmail);
-          setInfo("Tu correo no estÃ¡ verificado. Te enviamos un cÃ³digo de 4 dÃ­gitos.");
+          setInfo("Tu correo no está verificado. Te enviamos un código de 4 dígitos.");
           setLoading(false);
           return;
         } catch (requestError) {
-          setError(requestError instanceof Error ? requestError.message : "No se pudo enviar cÃ³digo de verificaciÃ³n.");
+          setError(requestError instanceof Error ? requestError.message : "No se pudo enviar código de verificación.");
           setLoading(false);
           return;
         }
       }
 
-      setError("Credenciales invÃ¡lidas.");
+      setError("Credenciales inválidas.");
       setLoading(false);
       return;
     }
@@ -137,11 +137,11 @@ export default function Login() {
     const normalizedNickname = normalizeInput(nickname);
 
     if (!normalizedEmail.includes("@")) {
-      setError("Ingresa un correo vÃ¡lido.");
+      setError("Ingresa un correo válido.");
       return;
     }
     if (normalizedNickname.length < 3) {
-      setError("El nickname debe tener mÃ­nimo 3 caracteres.");
+      setError("El nickname debe tener mínimo 3 caracteres.");
       return;
     }
     if (hasWhitespace(normalizedNickname)) {
@@ -149,11 +149,11 @@ export default function Login() {
       return;
     }
     if (password.length < 6) {
-      setError("La contraseÃ±a debe tener al menos 6 caracteres.");
+      setError("La contraseña debe tener al menos 6 caracteres.");
       return;
     }
     if (password !== confirmPassword) {
-      setError("Las contraseÃ±as no coinciden.");
+      setError("Las contraseñas no coinciden.");
       return;
     }
 
@@ -163,10 +163,10 @@ export default function Login() {
         email: normalizedEmail,
         nickname: normalizedNickname,
       });
-      setInfo("Te enviamos un cÃ³digo de 4 dÃ­gitos a tu correo.");
+      setInfo("Te enviamos un código de 4 dígitos a tu correo.");
       setView("registerCode");
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : "No se pudo enviar el cÃ³digo.");
+      setError(requestError instanceof Error ? requestError.message : "No se pudo enviar el código.");
     } finally {
       setLoading(false);
     }
@@ -178,7 +178,7 @@ export default function Login() {
 
     const normalizedCode = normalizeInput(code);
     if (!/^\d{4}$/.test(normalizedCode)) {
-      setError("Ingresa un cÃ³digo de 4 dÃ­gitos.");
+      setError("Ingresa un código de 4 dígitos.");
       return;
     }
 
@@ -193,9 +193,9 @@ export default function Login() {
       setView("login");
       setCode("");
       setConfirmPassword("");
-      setInfo("Cuenta verificada y creada. Ya puedes iniciar sesiÃ³n.");
+      setInfo("Cuenta verificada y creada. Ya puedes iniciar sesión.");
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : "No se pudo verificar el cÃ³digo.");
+      setError(requestError instanceof Error ? requestError.message : "No se pudo verificar el código.");
     } finally {
       setLoading(false);
     }
@@ -207,7 +207,7 @@ export default function Login() {
 
     const normalizedEmail = normalizeInput(email).toLowerCase();
     if (!normalizedEmail.includes("@")) {
-      setError("Ingresa tu correo para recuperar contraseÃ±a.");
+      setError("Ingresa tu correo para recuperar contraseña.");
       return;
     }
 
@@ -215,9 +215,9 @@ export default function Login() {
     try {
       await postAuth("/api/request-password-reset-code", { email: normalizedEmail });
       setView("recoverCode");
-      setInfo("CÃ³digo enviado. Revisa tu correo para continuar.");
+      setInfo("Código enviado. Revisa tu correo para continuar.");
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : "No se pudo enviar el cÃ³digo.");
+      setError(requestError instanceof Error ? requestError.message : "No se pudo enviar el código.");
     } finally {
       setLoading(false);
     }
@@ -229,15 +229,15 @@ export default function Login() {
 
     const normalizedCode = normalizeInput(code);
     if (!/^\d{4}$/.test(normalizedCode)) {
-      setError("Ingresa un cÃ³digo de 4 dÃ­gitos.");
+      setError("Ingresa un código de 4 dígitos.");
       return;
     }
     if (newPassword.length < 6) {
-      setError("La nueva contraseÃ±a debe tener al menos 6 caracteres.");
+      setError("La nueva contraseña debe tener al menos 6 caracteres.");
       return;
     }
     if (newPassword !== confirmNewPassword) {
-      setError("Las contraseÃ±as no coinciden.");
+      setError("Las contraseñas no coinciden.");
       return;
     }
 
@@ -252,9 +252,9 @@ export default function Login() {
       setCode("");
       setNewPassword("");
       setConfirmNewPassword("");
-      setInfo("ContraseÃ±a actualizada. Inicia sesiÃ³n con la nueva clave.");
+      setInfo("Contraseña actualizada. Inicia sesión con la nueva clave.");
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : "No se pudo actualizar la contraseÃ±a.");
+      setError(requestError instanceof Error ? requestError.message : "No se pudo actualizar la contraseña.");
     } finally {
       setLoading(false);
     }
@@ -266,7 +266,7 @@ export default function Login() {
 
     const normalizedCode = normalizeInput(code);
     if (!/^\d{4}$/.test(normalizedCode)) {
-      setError("Ingresa un cÃ³digo de 4 dÃ­gitos.");
+      setError("Ingresa un código de 4 dígitos.");
       return;
     }
 
@@ -278,7 +278,7 @@ export default function Login() {
       });
       setView("login");
       setCode("");
-      setInfo("Correo verificado. Ahora inicia sesiÃ³n.");
+      setInfo("Correo verificado. Ahora inicia sesión.");
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "No se pudo verificar el correo.");
     } finally {
@@ -291,31 +291,36 @@ export default function Login() {
       ? "Crea cuenta"
       : view === "registerCode"
         ? "Verifica correo"
-            : view === "recoverRequest"
-              ? "Recuperar"
-              : view === "recoverCode"
-                ? "Nuevo acceso"
-                : view === "verifyLoginCode"
-                  ? "Verifica correo"
-                : "Entra";
+        : view === "recoverRequest"
+          ? "Recuperar"
+          : view === "recoverCode"
+            ? "Nuevo acceso"
+            : view === "verifyLoginCode"
+              ? "Verifica correo"
+              : "Entra";
 
   const tag =
     view === "register" || view === "registerCode"
       ? "Registro"
       : view === "recoverRequest" || view === "recoverCode"
-        ? "RecuperaciÃ³n"
+        ? "Recuperación"
         : view === "verifyLoginCode"
-          ? "VerificaciÃ³n"
-        : "Acceso";
+          ? "Verificación"
+          : "Acceso";
 
   return (
-    <div className="focus-shell focus-rings focus-grain focus-soft-round focus-comic-mode min-h-screen px-4 py-8">
+    <div className="focus-shell focus-grain focus-rings focus-no-stars focus-soft-round min-h-screen overflow-x-hidden px-4 py-8">
+      <div className="focus-figure-layer" aria-hidden>
+        <div className="focus-figure-arc-left" />
+        <div className="focus-figure-arc-right" />
+        <div className="focus-figure-dot focus-figure-dot-a" />
+      </div>
       <div className="relative z-10 mx-auto max-w-md">
         <Link to="/" className="mb-8 flex items-center justify-center">
           <img
             src="/assets/focuszone/logo.png"
             alt="Focus Zone"
-            className="h-14 w-auto object-contain sm:h-16"
+            className="h-[4.4rem] w-auto object-contain sm:h-[5rem]"
           />
         </Link>
 
@@ -326,14 +331,14 @@ export default function Login() {
             {view === "register"
               ? "Paso 1 de 2: completa tus datos."
               : view === "registerCode"
-                ? "Paso 2 de 2: ingresa el cÃ³digo de 4 dÃ­gitos."
+                ? "Paso 2 de 2: ingresa el código de 4 dígitos."
                 : view === "recoverRequest"
-                  ? "Te enviaremos un cÃ³digo de recuperaciÃ³n."
+                  ? "Te enviaremos un código de recuperación."
                   : view === "recoverCode"
-                    ? "Ingresa cÃ³digo y define tu nueva contraseÃ±a."
+                    ? "Ingresa código y define tu nueva contraseña."
                     : view === "verifyLoginCode"
-                      ? "Ingresa el cÃ³digo para verificar tu correo."
-                    : "Activa tu enfoque en segundos."}
+                      ? "Ingresa el código para verificar tu correo."
+                      : "Activa tu enfoque en segundos."}
           </p>
 
           {error && (
@@ -367,7 +372,7 @@ export default function Login() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="font-bold text-[#5b30d9]">ContraseÃ±a</Label>
+                <Label htmlFor="password" className="font-bold text-[#5b30d9]">Contraseña</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-[#7d4cd8]/70" />
                   <Input
@@ -382,7 +387,7 @@ export default function Login() {
                     type="button"
                     onClick={() => setShowPassword((value) => !value)}
                     className="absolute right-3 top-2.5 text-[#7d4cd8] hover:text-[#5b30d9]"
-                    aria-label={showPassword ? "Ocultar contraseÃ±a" : "Mostrar contraseÃ±a"}
+                    aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                   >
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
@@ -394,7 +399,7 @@ export default function Login() {
                 disabled={loading}
                 className="h-12 w-full rounded-none bg-[#f47c0f] text-base font-bold text-white hover:bg-[#dd6900] focus-glow-orange"
               >
-                {loading ? "Procesando..." : "Iniciar sesiÃ³n"}
+                {loading ? "Procesando..." : "Iniciar sesión"}
               </Button>
             </form>
           )}
@@ -432,7 +437,7 @@ export default function Login() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="register-password" className="font-bold text-[#5b30d9]">ContraseÃ±a</Label>
+                <Label htmlFor="register-password" className="font-bold text-[#5b30d9]">Contraseña</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-[#7d4cd8]/70" />
                   <Input
@@ -447,7 +452,7 @@ export default function Login() {
                     type="button"
                     onClick={() => setShowPassword((value) => !value)}
                     className="absolute right-3 top-2.5 text-[#7d4cd8] hover:text-[#5b30d9]"
-                    aria-label={showPassword ? "Ocultar contraseÃ±a" : "Mostrar contraseÃ±a"}
+                    aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                   >
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
@@ -455,7 +460,7 @@ export default function Login() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirm-password" className="font-bold text-[#5b30d9]">Repetir contraseÃ±a</Label>
+                <Label htmlFor="confirm-password" className="font-bold text-[#5b30d9]">Repetir contraseña</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-[#7d4cd8]/70" />
                   <Input
@@ -474,7 +479,7 @@ export default function Login() {
                 disabled={loading}
                 className="h-12 w-full rounded-none bg-[#f47c0f] text-base font-bold text-white hover:bg-[#dd6900] focus-glow-orange"
               >
-                {loading ? "Enviando..." : "Enviar cÃ³digo de verificaciÃ³n"}
+                {loading ? "Enviando..." : "Enviar código de verificación"}
               </Button>
             </form>
           )}
@@ -482,7 +487,7 @@ export default function Login() {
           {view === "registerCode" && (
             <form onSubmit={handleCompleteSignup} className="mt-6 space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="signup-code" className="font-bold text-[#5b30d9]">CÃ³digo de 4 dÃ­gitos</Label>
+                <Label htmlFor="signup-code" className="font-bold text-[#5b30d9]">Código de 4 dígitos</Label>
                 <div className="relative">
                   <ShieldCheck className="absolute left-3 top-3 h-4 w-4 text-[#7d4cd8]/70" />
                   <Input
@@ -538,7 +543,7 @@ export default function Login() {
                 disabled={loading}
                 className="h-12 w-full rounded-none bg-[#f47c0f] text-base font-bold text-white hover:bg-[#dd6900] focus-glow-orange"
               >
-                {loading ? "Enviando..." : "Enviar cÃ³digo"}
+                {loading ? "Enviando..." : "Enviar código"}
               </Button>
             </form>
           )}
@@ -546,7 +551,7 @@ export default function Login() {
           {view === "recoverCode" && (
             <form onSubmit={handleResetPasswordWithCode} className="mt-6 space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="recover-code" className="font-bold text-[#5b30d9]">CÃ³digo de 4 dÃ­gitos</Label>
+                <Label htmlFor="recover-code" className="font-bold text-[#5b30d9]">Código de 4 dígitos</Label>
                 <div className="relative">
                   <ShieldCheck className="absolute left-3 top-3 h-4 w-4 text-[#7d4cd8]/70" />
                   <Input
@@ -562,7 +567,7 @@ export default function Login() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="new-password" className="font-bold text-[#5b30d9]">Nueva contraseÃ±a</Label>
+                <Label htmlFor="new-password" className="font-bold text-[#5b30d9]">Nueva contraseña</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-[#7d4cd8]/70" />
                   <Input
@@ -577,7 +582,7 @@ export default function Login() {
                     type="button"
                     onClick={() => setShowNewPassword((value) => !value)}
                     className="absolute right-3 top-2.5 text-[#7d4cd8] hover:text-[#5b30d9]"
-                    aria-label={showNewPassword ? "Ocultar contraseÃ±a" : "Mostrar contraseÃ±a"}
+                    aria-label={showNewPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                   >
                     {showNewPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
@@ -585,7 +590,7 @@ export default function Login() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirm-new-password" className="font-bold text-[#5b30d9]">Repetir nueva contraseÃ±a</Label>
+                <Label htmlFor="confirm-new-password" className="font-bold text-[#5b30d9]">Repetir nueva contraseña</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-[#7d4cd8]/70" />
                   <Input
@@ -604,7 +609,7 @@ export default function Login() {
                 disabled={loading}
                 className="h-12 w-full rounded-none bg-[#f47c0f] text-base font-bold text-white hover:bg-[#dd6900] focus-glow-orange"
               >
-                {loading ? "Actualizando..." : "Cambiar contraseÃ±a"}
+                {loading ? "Actualizando..." : "Cambiar contraseña"}
               </Button>
             </form>
           )}
@@ -612,7 +617,7 @@ export default function Login() {
           {view === "verifyLoginCode" && (
             <form onSubmit={handleVerifyLoginEmailCode} className="mt-6 space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="verify-login-code" className="font-bold text-[#5b30d9]">CÃ³digo de 4 dÃ­gitos</Label>
+                <Label htmlFor="verify-login-code" className="font-bold text-[#5b30d9]">Código de 4 dígitos</Label>
                 <div className="relative">
                   <ShieldCheck className="absolute left-3 top-3 h-4 w-4 text-[#7d4cd8]/70" />
                   <Input
@@ -645,7 +650,7 @@ export default function Login() {
                 }}
                 className="font-bold text-[#5b30d9] hover:underline"
               >
-                Volver a iniciar sesiÃ³n
+                Volver a iniciar sesión
               </button>
             )}
 
@@ -658,7 +663,7 @@ export default function Login() {
                   }}
                   className="block w-full font-bold text-[#5b30d9] hover:underline"
                 >
-                  Â¿No tienes cuenta? RegÃ­strate
+                  ¿No tienes cuenta? Regístrate
                 </button>
                 <button
                   onClick={() => {
@@ -667,7 +672,7 @@ export default function Login() {
                   }}
                   className="block w-full font-bold text-[#5b30d9] hover:underline"
                 >
-                  Â¿Olvidaste tu contraseÃ±a?
+                  ¿Olvidaste tu contraseña?
                 </button>
               </>
             )}
@@ -683,4 +688,7 @@ export default function Login() {
     </div>
   );
 }
+
+
+
 

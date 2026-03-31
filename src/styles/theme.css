@@ -255,7 +255,7 @@
   }
 
   .focus-campaign-purple {
-    @apply rounded-none border-2 border-[#111111]/25 bg-[#5a2dca] text-white shadow-[0_18px_34px_-20px_rgba(17,17,17,0.6)];
+    @apply rounded-none border-2 border-[#5a2dca]/55 bg-[#5a2dca] text-white shadow-[0_18px_34px_-20px_rgba(17,17,17,0.6)];
     transition: transform 240ms ease, box-shadow 240ms ease;
   }
 
@@ -271,7 +271,7 @@
       radial-gradient(78% 65% at 18% 15%, rgba(182, 227, 107, 0.94) 0 36%, transparent 38%),
       radial-gradient(45% 26% at 86% 74%, rgba(242, 140, 56, 0.85) 0 32%, transparent 34%),
       linear-gradient(145deg, #5a2dca 0%, #4d25b8 100%);
-    border: 2px solid rgba(17, 17, 17, 0.22);
+    border: 2px solid rgba(90, 45, 202, 0.38);
     box-shadow: 0 20px 32px -24px rgba(17, 17, 17, 0.7);
   }
 
@@ -289,7 +289,7 @@
   .focus-comic-panel {
     position: relative;
     overflow: hidden;
-    border: 1.5px solid rgba(17, 17, 17, 0.42) !important;
+    border: 1.5px solid rgba(90, 45, 202, 0.5) !important;
     background:
       radial-gradient(72% 58% at 20% 14%, rgba(182, 227, 107, 0.95) 0 34%, transparent 36%),
       radial-gradient(44% 24% at 86% 74%, rgba(242, 140, 56, 0.88) 0 28%, transparent 30%),
@@ -311,7 +311,7 @@
   .focus-stop-panel {
     position: relative;
     overflow: hidden;
-    border: 1.5px solid rgba(17, 17, 17, 0.42) !important;
+    border: 1.5px solid rgba(90, 45, 202, 0.5) !important;
     background: linear-gradient(150deg, #5a2dca 0%, #4a22b5 100%) !important;
     box-shadow: 0 14px 24px -18px rgba(0, 0, 0, 0.45), 2px 2px 0 rgba(17, 17, 17, 0.32);
   }
@@ -339,7 +339,7 @@
   .focus-comic-mode .focus-campaign-purple,
   .focus-comic-mode .focus-campaign-green,
   .focus-comic-mode .focus-campaign-cream {
-    border-color: rgba(17, 17, 17, 0.35) !important;
+    border-color: rgba(90, 45, 202, 0.42) !important;
     border-width: 1.5px !important;
     box-shadow: 0 12px 22px -18px rgba(17, 17, 17, 0.4), 1px 1px 0 rgba(17, 17, 17, 0.22);
     transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
@@ -351,12 +351,12 @@
   .focus-comic-mode .focus-campaign-green:hover,
   .focus-comic-mode .focus-campaign-cream:hover {
     transform: translateY(-2px);
-    border-color: rgba(17, 17, 17, 0.5) !important;
+    border-color: rgba(90, 45, 202, 0.58) !important;
     box-shadow: 0 16px 24px -18px rgba(17, 17, 17, 0.45), 2px 2px 0 rgba(17, 17, 17, 0.28);
   }
 
   .focus-comic-mode .focus-cta {
-    border: 2px solid rgba(17, 17, 17, 0.55) !important;
+    border: 2px solid rgba(90, 45, 202, 0.65) !important;
     box-shadow: 4px 4px 0 rgba(17, 17, 17, 0.55);
   }
 
@@ -367,7 +367,7 @@
 
   .focus-comic-mode [data-slot="tabs-list"],
   .focus-comic-mode [data-slot="tabs-trigger"] {
-    border: 2px solid rgba(17, 17, 17, 0.55);
+    border: 2px solid rgba(90, 45, 202, 0.65);
   }
 
   .focus-comic-mode [data-slot="card"] {
@@ -375,7 +375,7 @@
   }
 
   .focus-campaign-green {
-    @apply rounded-none border-2 border-[#111111]/20 bg-[#b6e36b] text-[#111111] shadow-[0_18px_34px_-20px_rgba(17,17,17,0.45)];
+    @apply rounded-none border-2 border-[#5a2dca]/25 bg-[#b6e36b] text-[#5a2dca] shadow-[0_18px_34px_-20px_rgba(17,17,17,0.45)];
   }
 
   .focus-campaign-cream {
@@ -389,7 +389,7 @@
   }
 
   .focus-kicker {
-    @apply inline-flex items-center border-2 border-[#5a2dca]/60 bg-[#b6e36b] px-2 py-1 text-[0.68rem] font-black uppercase tracking-[0.14em] text-[#111111];
+    @apply inline-flex items-center border-2 border-[#5a2dca]/60 bg-[#b6e36b] px-2 py-1 text-[0.68rem] font-black uppercase tracking-[0.14em] text-[#5a2dca];
   }
 
   .focus-sticker {
