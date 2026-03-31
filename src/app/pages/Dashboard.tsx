@@ -2305,9 +2305,9 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="focus-shell focus-rings focus-grain focus-soft-round min-h-screen">
+    <div className="focus-shell focus-rings focus-grain focus-soft-round focus-comic-mode min-h-screen">
       <div className="relative z-10">
-        <header className="mx-auto mt-2 flex w-[calc(100%-1rem)] max-w-[calc(88rem-2.5rem)] items-center justify-between gap-2 rounded-[1rem] border-2 border-[#8f74ef]/55 bg-[#ece8f9]/90 px-3 py-3 shadow-[0_12px_22px_-18px_rgba(69,36,179,0.6),0_2px_0_0_rgba(143,116,239,0.55)] md:mt-0 md:w-full md:max-w-[calc(88rem-4rem)] md:gap-3 md:px-8 md:py-5">
+        <header className="mx-auto mt-3 flex w-[calc(100%-1rem)] max-w-[calc(88rem-2.5rem)] items-center justify-between gap-2 rounded-[1rem] border-2 border-[#8f74ef]/55 bg-[#ece8f9]/90 px-3 py-3 shadow-[0_12px_22px_-18px_rgba(69,36,179,0.6),0_2px_0_0_rgba(143,116,239,0.55)] md:mt-3 md:w-full md:max-w-[calc(88rem-4rem)] md:gap-3 md:px-8 md:py-5">
           <div className="flex min-w-0 items-center">
             <img
               src="/assets/focuszone/logo.png"
@@ -3193,6 +3193,7 @@ export default function Dashboard() {
     </div>
   );
 }
+
 
 
 
