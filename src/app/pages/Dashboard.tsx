@@ -148,6 +148,8 @@ const MAX_NUMERIC_INPUT_LENGTH = 4;
 const ROOM_PRESENCE_STALE_MS = 3_000;
 const DEFAULT_DAILY_REMINDER_HOUR = 18;
 const DEFAULT_POMODORO_REMINDER_MINUTES = 10;
+const DEFAULT_NOTIFICATION_VOLUME_UI = 100;
+const NOTIFICATION_VOLUME_BOOST_FACTOR = 3;
 const STREAK_WEEK_BONUS: Record<number, number> = {
   1: 5,
   2: 10,
@@ -192,7 +194,7 @@ const getLocalDateKey = (value: Date | string) => {
 const playEventSound = (event: "pomodoro" | "reward" | "notification" | "error", volumeScale = 1) => {
   try {
     const audioContext = new window.AudioContext();
-    const safeVolumeScale = Math.max(0, Math.min(1, Number(volumeScale) || 0));
+    const safeVolumeScale = Math.max(0, Math.min(3, Number(volumeScale) || 0));
     const peakGain = Math.max(0.0001, 0.16 * safeVolumeScale);
     const patterns: Record<"pomodoro" | "reward" | "notification" | "error", { freq: number; duration: number; delay: number }[]> = {
       pomodoro: [
@@ -288,8 +290,8 @@ export default function Dashboard() {
   const [dailyReminderHour, setDailyReminderHour] = useState(String(DEFAULT_DAILY_REMINDER_HOUR));
   const [pomodoroReminderEnabled, setPomodoroReminderEnabled] = useState(true);
   const [pomodoroReminderMinutes, setPomodoroReminderMinutes] = useState(String(DEFAULT_POMODORO_REMINDER_MINUTES));
-  const [notificationVolume, setNotificationVolume] = useState("100");
-  const [lastNonZeroNotificationVolume, setLastNonZeroNotificationVolume] = useState("100");
+  const [notificationVolume, setNotificationVolume] = useState(String(DEFAULT_NOTIFICATION_VOLUME_UI));
+  const [lastNonZeroNotificationVolume, setLastNonZeroNotificationVolume] = useState(String(DEFAULT_NOTIFICATION_VOLUME_UI));
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
       id: 1,
@@ -359,11 +361,11 @@ export default function Dashboard() {
   const parseNotificationVolume = (value: unknown) => {
     const parsed = Number(value);
     if (!Number.isFinite(parsed)) {
-      return 100;
+      return DEFAULT_NOTIFICATION_VOLUME_UI;
     }
     return Math.max(0, Math.min(100, parsed));
   };
-  const notificationVolumeScale = parseNotificationVolume(notificationVolume) / 100;
+  const notificationVolumeScale = (parseNotificationVolume(notificationVolume) / 100) * NOTIFICATION_VOLUME_BOOST_FACTOR;
   const isSoundEnabled = parseNotificationVolume(notificationVolume) > 0;
   const ALLOWED_TEXT_PATTERN = /^[\p{L}\p{N}\s.,:;!'"()\-_/+#&]+$/u;
   const selectedGuidedCategory = useMemo(() => (guidedCategoryId ? getGuidedCategoryById(guidedCategoryId) : null), [guidedCategoryId]);
@@ -776,7 +778,7 @@ export default function Dashboard() {
       setNotificationVolume("0");
       return;
     }
-    setNotificationVolume(lastNonZeroNotificationVolume || "100");
+    setNotificationVolume(lastNonZeroNotificationVolume || String(DEFAULT_NOTIFICATION_VOLUME_UI));
   };
 
   const pushToast = (type: ToastType, title: string, description: string) => {
@@ -3195,7 +3197,7 @@ export default function Dashboard() {
                         <div className="flex items-center gap-3">
                           <Input
                             type="range"
-                            min={0}
+                            min={1}
                             max={100}
                             step={5}
                             value={notificationVolume}
