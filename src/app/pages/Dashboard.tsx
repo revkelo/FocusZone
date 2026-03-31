@@ -989,7 +989,7 @@ export default function Dashboard() {
       window.localStorage.setItem(reminderKey, "1");
       void notifyUser(
         "FocusZone | Reto diario pendiente",
-        `${name || "Usuario"}, an tienes un reto diario por completar hoy.`,
+        `${name || "Usuario"}, aún tienes un reto diario por completar hoy.`,
         `focuszone-daily-challenge-${todayKey}`,
       );
     };
@@ -2378,7 +2378,7 @@ export default function Dashboard() {
                   <button
                     onClick={() => removeToast(toast.id)}
                     className="rounded p-1 text-[#5b30d9]/60 transition hover:bg-[#5b30d9]/10 hover:text-[#5b30d9]"
-                    aria-label="Cerrar notificacion"
+                    aria-label="Cerrar notificación"
                   >
                     <X className="size-4" />
                   </button>
@@ -2433,7 +2433,7 @@ export default function Dashboard() {
                       </div>
                     </div>
                     <div className="rounded-2xl bg-[#5b30d9] p-3 text-white">
-                      <p className="text-xs font-bold uppercase tracking-wide text-white/80">Duracion de descanso</p>
+                      <p className="text-xs font-bold uppercase tracking-wide text-white/80">Duración de descanso</p>
                       <div className="mt-2 flex items-center justify-between">
                         <button onClick={() => adjustDuration("shortBreak", -1)} className="grid size-8 place-items-center rounded-full bg-[#f47c0f] text-white" aria-label="Reducir descanso corto">
                           <Minus className="size-4" />
@@ -2447,7 +2447,7 @@ export default function Dashboard() {
                       </div>
                     </div>
                     <div className="rounded-2xl bg-[#5b30d9] p-3 text-white">
-                      <p className="text-xs font-bold uppercase tracking-wide text-white/80">Duracion de descanso largo</p>
+                      <p className="text-xs font-bold uppercase tracking-wide text-white/80">Duración de descanso largo</p>
                       <div className="mt-2 flex items-center justify-between">
                         <button onClick={() => adjustDuration("longBreak", -1)} className="grid size-8 place-items-center rounded-full bg-[#f47c0f] text-white" aria-label="Reducir descanso largo">
                           <Minus className="size-4" />
@@ -3057,7 +3057,7 @@ export default function Dashboard() {
                           disabled={notificationPermission === "unsupported"}
                           className="rounded-none bg-[#f47c0f] text-white hover:bg-[#dd6900]"
                         >
-                          Probar notificacion
+                          Probar notificación
                         </Button>
                       </div>
                       <div className="mt-3 grid gap-3 sm:grid-cols-2">
