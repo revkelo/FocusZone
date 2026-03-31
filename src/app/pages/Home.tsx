@@ -345,7 +345,7 @@ export default function Home() {
             />
           </div>
           <Link to="/login" className="shrink-0">
-            <Button className="focus-cta h-10 rounded-none border-2 border-[#5b30d9] bg-white/60 px-3 text-base font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white sm:h-10 sm:px-4 sm:text-base md:h-11 md:px-5">
+            <Button className="focus-cta h-10 rounded-xl border-2 border-[#5b30d9] bg-white/60 px-3 text-base font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white sm:h-10 sm:px-4 sm:text-base md:h-11 md:px-5">
               Iniciar sesión
             </Button>
           </Link>

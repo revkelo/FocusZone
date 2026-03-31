@@ -2369,7 +2369,7 @@ export default function Dashboard() {
           <Button
             variant="outline"
             onClick={handleLogout}
-            className="focus-cta h-9 shrink-0 rounded-none border-2 border-[#5b30d9] bg-white/60 px-3 text-sm font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white sm:h-10 sm:px-4 sm:text-base md:h-11 md:px-5"
+            className="focus-cta h-9 shrink-0 rounded-xl border-2 border-[#5b30d9] bg-white/60 px-3 text-sm font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white sm:h-10 sm:px-4 sm:text-base md:h-11 md:px-5"
           >
             <LogOut className="mr-2 size-4" />
             Cerrar sesión
@@ -2431,7 +2431,7 @@ export default function Dashboard() {
             </TabsList>
 
             <TabsContent value="pomodoro" className="focus-reveal space-y-5">
-              <Card className="focus-card rounded-none p-5 md:p-7">
+              <Card className="focus-card rounded-[1.2rem] p-5 md:p-7">
                 <div className="flex items-center gap-2">
                   <Clock className="size-5 text-[#f47c0f]" />
                   <h2 className="display-font text-5xl text-[#5b30d9]">Pomodoro</h2>
@@ -2541,12 +2541,12 @@ export default function Dashboard() {
               </Card>
 
               <section className="grid gap-4">
-                <Card className="focus-card rounded-none p-4 sm:p-6">
+                <Card className="focus-card rounded-[1.2rem] p-4 sm:p-6">
                   <div className="mb-3 flex items-center gap-2 text-[#5b30d9]">
                     <Users className="size-5" />
                     <h3 className="display-font text-3xl sm:text-4xl">Salas Pomodoro</h3>
                   </div>
-                  <div className="mb-4 space-y-3 border border-[#5b30d9]/20 bg-white/70 p-3 sm:p-4">
+                  <div className="mb-4 space-y-3 rounded-xl border border-[#5b30d9]/20 bg-white/70 p-3 sm:p-4">
                     <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Crear sala</p>
                     {ownedRoom && (
                       <p className="text-xs font-bold text-[#6b7280]">
@@ -2559,12 +2559,12 @@ export default function Dashboard() {
                       onChange={(event) => setNewRoomName(event.target.value.slice(0, MAX_ROOM_NAME_LENGTH))}
                       placeholder="Ej: Diseño nocturno"
                     />
-                    <Button disabled={isCreatingRoom || Boolean(ownedRoom)} onClick={() => void handleCreateRoom()} className="w-full rounded-none bg-[#5b30d9] text-white hover:bg-[#4a22be] sm:w-auto">
+                    <Button disabled={isCreatingRoom || Boolean(ownedRoom)} onClick={() => void handleCreateRoom()} className="w-full rounded-xl bg-[#5b30d9] text-white hover:bg-[#4a22be] sm:w-auto">
                       {isCreatingRoom ? "Creando..." : "Crear sala"}
                     </Button>
                   </div>
 
-                  <div className="mb-4 space-y-2 border border-[#5b30d9]/20 bg-white/70 p-3 sm:p-4">
+                  <div className="mb-4 space-y-2 rounded-xl border border-[#5b30d9]/20 bg-white/70 p-3 sm:p-4">
                     <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Buscar salas</p>
                     <Input
                       value={roomSearchQuery}
@@ -2587,7 +2587,7 @@ export default function Dashboard() {
                         const isOwner = room.ownerId === userId;
                         const memberCount = roomMemberCounts[room.id] ?? 0;
                         return (
-                          <div key={room.id} className={`border p-3 sm:p-4 ${isSelected ? "border-[#f47c0f] bg-[#fff4ea]" : "border-[#5b30d9]/20 bg-white/70"}`}>
+                          <div key={room.id} className={`rounded-xl border p-3 sm:p-4 ${isSelected ? "border-[#f47c0f] bg-[#fff4ea]" : "border-[#5b30d9]/20 bg-white/70"}`}>
                             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                               <div>
                                 <p className="break-words font-bold text-[#5b30d9]">{room.name}</p>
@@ -2599,15 +2599,15 @@ export default function Dashboard() {
                               <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap">
                                 {isJoined ? (
                                   <>
-                                    <Button size="sm" variant="outline" onClick={() => setSelectedRoomId(room.id)} className="rounded-none border-[#5b30d9] text-[#5b30d9]">
+                                    <Button size="sm" variant="outline" onClick={() => setSelectedRoomId(room.id)} className="rounded-xl border-[#5b30d9] text-[#5b30d9]">
                                       Ver
                                     </Button>
-                                    <Button size="sm" onClick={() => void handleLeaveRoom(room.id)} className="rounded-none bg-[#d4183d] text-white hover:bg-[#b81234]">
+                                    <Button size="sm" onClick={() => void handleLeaveRoom(room.id)} className="rounded-xl bg-[#d4183d] text-white hover:bg-[#b81234]">
                                       Salir
                                     </Button>
                                   </>
                                 ) : (
-                                  <Button size="sm" disabled={joiningRoomId === room.id} onClick={() => void handleJoinRoom(room)} className="rounded-none bg-[#f47c0f] text-white hover:bg-[#dd6900]">
+                                  <Button size="sm" disabled={joiningRoomId === room.id} onClick={() => void handleJoinRoom(room)} className="rounded-xl bg-[#f47c0f] text-white hover:bg-[#dd6900]">
                                     {joiningRoomId === room.id ? "Uniendo..." : "Unirme"}
                                   </Button>
                                 )}
@@ -2616,7 +2616,7 @@ export default function Dashboard() {
                                     size="sm"
                                     disabled={deletingRoomId === room.id}
                                     onClick={() => void handleDeleteRoom(room)}
-                                    className="rounded-none bg-[#5b30d9] text-white hover:bg-[#4a22be] sm:min-w-[92px]"
+                                    className="rounded-xl bg-[#5b30d9] text-white hover:bg-[#4a22be] sm:min-w-[92px]"
                                   >
                                     {deletingRoomId === room.id ? "Eliminando..." : "Eliminar"}
                                   </Button>
@@ -2630,7 +2630,7 @@ export default function Dashboard() {
                   </div>
 
                   {selectedRoomId && (
-                    <div className="mt-4 border border-[#5b30d9]/20 bg-white/70 p-3 sm:p-4">
+                    <div className="mt-4 rounded-xl border border-[#5b30d9]/20 bg-white/70 p-3 sm:p-4">
                       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                         <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Miembros en sala</p>
                         <span className="rounded-full bg-[#5b30d9]/10 px-2 py-1 text-xs font-bold text-[#5b30d9]">Vista en tiempo real</span>
@@ -2648,7 +2648,7 @@ export default function Dashboard() {
                             const memberProgressLabel = Math.round(memberProgressRaw);
 
                             return (
-                            <div key={member.userId} className="border border-[#5b30d9]/20 bg-white p-3">
+                            <div key={member.userId} className="rounded-xl border border-[#5b30d9]/20 bg-white p-3">
                               <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                                 <span className="break-all font-bold text-[#5b30d9]">{member.displayName}</span>
                                 <span
@@ -2691,25 +2691,25 @@ export default function Dashboard() {
 
             <TabsContent value="resumen" className="focus-reveal space-y-5">
               <section className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
-                <Card className="focus-card rounded-none gap-3 border-2 border-[#f47c0f]/40 bg-[#f47c0f] p-4 text-white sm:p-6">
+                <Card className="focus-card rounded-[1.2rem] gap-3 border-2 border-[#f47c0f]/40 bg-[#f47c0f] p-4 text-white sm:p-6">
                   <p className="text-xs font-bold uppercase tracking-wider sm:text-sm">Puntos</p>
                   <p className="display-font mt-1 text-5xl sm:mt-2 sm:text-7xl">{points}</p>
                 </Card>
-                <Card className="focus-card rounded-none gap-3 p-4 sm:p-6">
+                <Card className="focus-card rounded-[1.2rem] gap-3 p-4 sm:p-6">
                   <p className="text-xs font-bold text-[#5b30d9] sm:text-sm">Disponibles</p>
                   <p className="display-font mt-1 text-5xl text-[#5b30d9] sm:mt-2 sm:text-7xl">{availablePoints}</p>
                 </Card>
-                <Card className="focus-card rounded-none gap-3 p-4 sm:p-6">
+                <Card className="focus-card rounded-[1.2rem] gap-3 p-4 sm:p-6">
                   <p className="text-xs font-bold text-[#5b30d9] sm:text-sm">Sesiones</p>
                   <p className="display-font mt-1 text-5xl text-[#5b30d9] sm:mt-2 sm:text-7xl">{sessions.length}</p>
                 </Card>
-                <Card className="focus-card rounded-none gap-3 bg-[#b8ee73]/45 p-4 sm:p-6">
+                <Card className="focus-card rounded-[1.2rem] gap-3 bg-[#b8ee73]/45 p-4 sm:p-6">
                   <p className="text-xs font-bold text-[#325f0b] sm:text-sm">Retos</p>
                   <p className="display-font mt-1 text-5xl text-[#325f0b] sm:mt-2 sm:text-7xl">{completedCount}</p>
                 </Card>
               </section>
 
-              <Card className="focus-card rounded-none p-6">
+              <Card className="focus-card rounded-[1.2rem] p-6">
                 <div className="mb-3 flex items-center gap-2 text-[#5b30d9]">
                   <Trophy className="size-5" />
                   <h3 className="display-font text-4xl">Ranking</h3>
@@ -2740,7 +2740,7 @@ export default function Dashboard() {
             </TabsContent>
 
             <TabsContent value="chatbot" className="focus-reveal flex flex-1 flex-col">
-              <Card className="focus-card flex h-full flex-1 flex-col rounded-none gap-3 px-3 pb-3 pt-3 sm:p-6 md:p-8">
+              <Card className="focus-card flex h-full flex-1 flex-col rounded-xl gap-3 px-3 pb-3 pt-3 sm:p-6 md:p-8">
                 <div className="flex items-center gap-2">
                   <img
                     src={activeLumiIcon}
@@ -2896,7 +2896,7 @@ export default function Dashboard() {
                       aria-label={isSendingChat ? "Enviando mensaje" : "Enviar mensaje"}
                       disabled={isSendingChat || !normalizeInputText(chatInput)}
                       onClick={() => void handleSendChat()}
-                      className="size-8 rounded-none text-[#5b30d9] hover:bg-[#5b30d9]/10 hover:text-[#4a22be]"
+                      className="size-8 rounded-xl text-[#5b30d9] hover:bg-[#5b30d9]/10 hover:text-[#4a22be]"
                     >
                       <SendHorizontal className={`${isSendingChat ? "animate-pulse" : ""} size-4`} />
                     </Button>
@@ -2904,18 +2904,18 @@ export default function Dashboard() {
                 </div>
               </Card>
             </TabsContent>            <TabsContent value="tareas" className="focus-reveal">
-              <Card className="focus-card rounded-none p-7 md:p-8">
+              <Card className="focus-card rounded-[1.2rem] p-7 md:p-8">
                 <div className="mb-5 flex items-center justify-between">
                   <h2 className="display-font text-5xl text-[#5b30d9]">Retos</h2>
                   <div className="focus-tag">{completedCount}/{allChallenges.length || 1}</div>
                 </div>
 
                 <Tabs value={tasksSubTab} onValueChange={setTasksSubTab} className="w-full">
-                  <TabsList className="mb-6 grid h-auto w-full grid-cols-2 rounded-none bg-[#5b30d9] p-1">
-                    <TabsTrigger value="retosGenerales" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">
+                  <TabsList className="mb-6 grid h-auto w-full grid-cols-2 rounded-xl bg-[#5b30d9] p-1">
+                    <TabsTrigger value="retosGenerales" className="rounded-xl font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">
                       Retos generales
                     </TabsTrigger>
-                    <TabsTrigger value="misRetos" className="rounded-none font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">
+                    <TabsTrigger value="misRetos" className="rounded-xl font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">
                       Mis retos
                     </TabsTrigger>
                   </TabsList>
@@ -2963,7 +2963,7 @@ export default function Dashboard() {
                       <Button
                         disabled={isSavingChallenge || remainingCustomCreationsToday === 0}
                         onClick={() => void handleCreateChallenge()}
-                        className="rounded-none bg-[#5b30d9] text-white hover:bg-[#4a22be]"
+                        className="rounded-xl bg-[#5b30d9] text-white hover:bg-[#4a22be]"
                       >
                         {isSavingChallenge ? "Guardando..." : "Crear reto"}
                       </Button>
@@ -2980,7 +2980,7 @@ export default function Dashboard() {
                             <button
                               key={challenge.id}
                               onClick={() => void toggleChallenge(challenge.id)}
-                              className={`flex w-full items-center gap-3 rounded-none border p-4 text-left transition ${
+                              className={`flex w-full items-center gap-3 rounded-xl border p-4 text-left transition ${
                                 done ? "border-[#4f7c0f]/40 bg-[#b8ee73]/35" : "border-[#5b30d9]/20 bg-white/70 hover:bg-white"
                               }`}
                             >
@@ -2996,7 +2996,7 @@ export default function Dashboard() {
 
                   <TabsContent value="retosGenerales" className="space-y-6">
                     <div className="sticky top-0 z-10 space-y-3 bg-[#f2f0f3] pb-2">
-                      <Progress value={progressPercentage} className="h-3 rounded-none bg-[#5b30d9]/20 [&>div]:rounded-none [&>div]:bg-[#f47c0f]" />
+                      <Progress value={progressPercentage} className="h-3 rounded-xl bg-[#5b30d9]/20 [&>div]:rounded-xl [&>div]:bg-[#f47c0f]" />
                       <div className="grid gap-3 sm:grid-cols-3">
                         <div className="border border-[#5b30d9]/25 bg-white/70 p-3">
                           <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/70">Racha actual</p>
@@ -3030,7 +3030,7 @@ export default function Dashboard() {
                             <button
                               key={challenge.id}
                               onClick={() => void toggleChallenge(challenge.id)}
-                              className={`flex w-full items-center gap-3 rounded-none border p-4 text-left transition ${
+                              className={`flex w-full items-center gap-3 rounded-xl border p-4 text-left transition ${
                                 done
                                   ? "border-[#4f7c0f]/40 bg-[#b8ee73]/35"
                                   : challenge.id === nextBaseChallengeId
@@ -3059,7 +3059,7 @@ export default function Dashboard() {
                       <div className="border border-[#f47c0f]/35 bg-[#fff4ea] p-4">
                         <p className="font-bold text-[#b05a00]">Completaste los 21 retos del ciclo.</p>
                         <p className="mt-1 text-sm text-[#b05a00]/85">Puedes reiniciar para empezar un nuevo ciclo de 21 días.</p>
-                        <Button onClick={() => void handleResetChallengeCycle()} className="mt-3 rounded-none bg-[#f47c0f] text-white hover:bg-[#dd6900]">
+                        <Button onClick={() => void handleResetChallengeCycle()} className="mt-3 rounded-xl bg-[#f47c0f] text-white hover:bg-[#dd6900]">
                           Reiniciar ciclo de 21 días
                         </Button>
                       </div>
@@ -3071,7 +3071,7 @@ export default function Dashboard() {
 
             <TabsContent value="cuenta" className="focus-reveal">
               <div className="grid gap-4 md:grid-cols-2">
-                <Card className="focus-card rounded-none p-6">
+                <Card className="focus-card rounded-[1.2rem] p-6">
                   <h2 className="display-font text-5xl text-[#5b30d9]">Cuenta</h2>
                   <div className="mt-5 space-y-4">
                     <div className="flex items-center gap-3 text-[#5b30d9]">
@@ -3092,10 +3092,10 @@ export default function Dashboard() {
                         <span className="font-bold">Sonidos y notificaciones</span>
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        <Button variant="outline" disabled className="rounded-none border-[#5b30d9] text-[#5b30d9]">
+                        <Button variant="outline" disabled className="rounded-xl border-[#5b30d9] text-[#5b30d9]">
                           Sonido: ON
                         </Button>
-                        <Button variant="outline" disabled className="rounded-none border-[#5b30d9] text-[#5b30d9]">
+                        <Button variant="outline" disabled className="rounded-xl border-[#5b30d9] text-[#5b30d9]">
                           {notificationPermission === "granted"
                             ? "Notificaciones activas"
                             : notificationPermission === "unsupported"
@@ -3105,7 +3105,7 @@ export default function Dashboard() {
                         <Button
                           onClick={() => void sendTestNotification()}
                           disabled={notificationPermission === "unsupported"}
-                          className="rounded-none bg-[#f47c0f] text-white hover:bg-[#dd6900]"
+                          className="rounded-xl bg-[#f47c0f] text-white hover:bg-[#dd6900]"
                         >
                           Probar notificación
                         </Button>
@@ -3117,7 +3117,7 @@ export default function Dashboard() {
                             <Button
                               variant={dailyReminderEnabled ? "default" : "outline"}
                               disabled
-                              className={dailyReminderEnabled ? "rounded-none bg-[#5b30d9] text-white hover:bg-[#4a22be]" : "rounded-none border-[#5b30d9] text-[#5b30d9]"}
+                              className={dailyReminderEnabled ? "rounded-xl bg-[#5b30d9] text-white hover:bg-[#4a22be]" : "rounded-xl border-[#5b30d9] text-[#5b30d9]"}
                             >
                               Siempre activo
                             </Button>
@@ -3139,7 +3139,7 @@ export default function Dashboard() {
                             <Button
                               variant={pomodoroReminderEnabled ? "default" : "outline"}
                               disabled
-                              className={pomodoroReminderEnabled ? "rounded-none bg-[#5b30d9] text-white hover:bg-[#4a22be]" : "rounded-none border-[#5b30d9] text-[#5b30d9]"}
+                              className={pomodoroReminderEnabled ? "rounded-xl bg-[#5b30d9] text-white hover:bg-[#4a22be]" : "rounded-xl border-[#5b30d9] text-[#5b30d9]"}
                             >
                               Siempre activo
                             </Button>
@@ -3160,7 +3160,7 @@ export default function Dashboard() {
                   </div>
                 </Card>
 
-                <Card className="focus-card rounded-none p-6">
+                <Card className="focus-card rounded-[1.2rem] p-6">
                   <h3 className="display-font text-4xl text-[#5b30d9]">Resumen</h3>
                   <div className="mt-4 space-y-3 text-[#5b30d9]">
                     <p className="font-bold">Puntos totales: {points}</p>
@@ -3201,7 +3201,7 @@ export default function Dashboard() {
                   <Button
                     variant="outline"
                     onClick={handleLogout}
-                    className="mt-6 rounded-none border-2 border-[#5b30d9] bg-transparent font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white"
+                    className="mt-6 rounded-xl border-2 border-[#5b30d9] bg-transparent font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white"
                   >
                     <LogOut className="mr-2 size-4" />
                     Cerrar sesión
@@ -3265,6 +3265,8 @@ export default function Dashboard() {
     </div>
   );
 }
+
+
 
 
 

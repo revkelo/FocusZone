@@ -319,7 +319,7 @@ export default function Login() {
           />
         </Link>
 
-        <Card className="rounded-none border-2 border-[#5b30d9]/35 bg-white p-8 shadow-none">
+        <Card className="rounded-xl border-2 border-[#5b30d9]/35 bg-white p-8 shadow-none">
           <p className="focus-tag mb-5 w-fit">{tag}</p>
           <h1 className="display-font text-6xl text-[#f47c0f]">{title}</h1>
           <p className="mt-2 text-[#5b30d9]">
@@ -337,14 +337,14 @@ export default function Login() {
           </p>
 
           {error && (
-            <Alert variant="destructive" className="mt-5 rounded-none border-[#d4183d]">
+            <Alert variant="destructive" className="mt-5 rounded-xl border-[#d4183d]">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
 
           {info && (
-            <Alert className="mt-5 rounded-none border-[#5b30d9]/35">
+            <Alert className="mt-5 rounded-xl border-[#5b30d9]/35">
               <AlertDescription>{info}</AlertDescription>
             </Alert>
           )}
@@ -361,7 +361,7 @@ export default function Login() {
                     placeholder="@tu_nickname o tu@email.com"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
-                    className="h-11 rounded-none border-[#5b30d9]/25 pl-10"
+                    className="h-11 rounded-xl border-[#5b30d9]/25 pl-10"
                   />
                 </div>
               </div>
@@ -376,7 +376,7 @@ export default function Login() {
                     placeholder="********"
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
-                    className="h-11 rounded-none border-[#5b30d9]/25 pl-10 pr-11"
+                    className="h-11 rounded-xl border-[#5b30d9]/25 pl-10 pr-11"
                   />
                   <button
                     type="button"
@@ -392,7 +392,7 @@ export default function Login() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="h-12 w-full rounded-none bg-[#f47c0f] text-base font-bold text-white hover:bg-[#dd6900] focus-glow-orange"
+                className="h-12 w-full rounded-xl bg-[#f47c0f] text-base font-bold text-white hover:bg-[#dd6900] focus-glow-orange"
               >
                 {loading ? "Procesando..." : "Iniciar sesión"}
               </Button>
@@ -411,7 +411,7 @@ export default function Login() {
                     placeholder="@tu_nickname"
                     value={nickname}
                     onChange={(event) => setNickname(event.target.value.replace(/\s+/g, ""))}
-                    className="h-11 rounded-none border-[#5b30d9]/25 pl-10"
+                    className="h-11 rounded-xl border-[#5b30d9]/25 pl-10"
                   />
                 </div>
               </div>
@@ -426,7 +426,7 @@ export default function Login() {
                     placeholder="tu@email.com"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
-                    className="h-11 rounded-none border-[#5b30d9]/25 pl-10"
+                    className="h-11 rounded-xl border-[#5b30d9]/25 pl-10"
                   />
                 </div>
               </div>
@@ -441,7 +441,7 @@ export default function Login() {
                     placeholder="********"
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
-                    className="h-11 rounded-none border-[#5b30d9]/25 pl-10 pr-11"
+                    className="h-11 rounded-xl border-[#5b30d9]/25 pl-10 pr-11"
                   />
                   <button
                     type="button"
@@ -464,7 +464,7 @@ export default function Login() {
                     placeholder="********"
                     value={confirmPassword}
                     onChange={(event) => setConfirmPassword(event.target.value)}
-                    className="h-11 rounded-none border-[#5b30d9]/25 pl-10"
+                    className="h-11 rounded-xl border-[#5b30d9]/25 pl-10"
                   />
                 </div>
               </div>
@@ -472,7 +472,7 @@ export default function Login() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="h-12 w-full rounded-none bg-[#f47c0f] text-base font-bold text-white hover:bg-[#dd6900] focus-glow-orange"
+                className="h-12 w-full rounded-xl bg-[#f47c0f] text-base font-bold text-white hover:bg-[#dd6900] focus-glow-orange"
               >
                 {loading ? "Enviando..." : "Enviar código de verificación"}
               </Button>
@@ -492,7 +492,7 @@ export default function Login() {
                     placeholder="1234"
                     value={code}
                     onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 4))}
-                    className="h-11 rounded-none border-[#5b30d9]/25 pl-10 tracking-[0.3em]"
+                    className="h-11 rounded-xl border-[#5b30d9]/25 pl-10 tracking-[0.3em]"
                   />
                 </div>
               </div>
@@ -500,7 +500,7 @@ export default function Login() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="h-12 w-full rounded-none bg-[#f47c0f] text-base font-bold text-white hover:bg-[#dd6900] focus-glow-orange"
+                className="h-12 w-full rounded-xl bg-[#f47c0f] text-base font-bold text-white hover:bg-[#dd6900] focus-glow-orange"
               >
                 {loading ? "Verificando..." : "Verificar y crear cuenta"}
               </Button>
@@ -509,7 +509,7 @@ export default function Login() {
                 type="button"
                 variant="outline"
                 onClick={() => setView("register")}
-                className="h-11 w-full rounded-none border-[#5b30d9]/35 text-[#5b30d9]"
+                className="h-11 w-full rounded-xl border-[#5b30d9]/35 text-[#5b30d9]"
               >
                 Volver al paso 1
               </Button>
@@ -528,7 +528,7 @@ export default function Login() {
                     placeholder="tu@email.com"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
-                    className="h-11 rounded-none border-[#5b30d9]/25 pl-10"
+                    className="h-11 rounded-xl border-[#5b30d9]/25 pl-10"
                   />
                 </div>
               </div>
@@ -536,7 +536,7 @@ export default function Login() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="h-12 w-full rounded-none bg-[#f47c0f] text-base font-bold text-white hover:bg-[#dd6900] focus-glow-orange"
+                className="h-12 w-full rounded-xl bg-[#f47c0f] text-base font-bold text-white hover:bg-[#dd6900] focus-glow-orange"
               >
                 {loading ? "Enviando..." : "Enviar código"}
               </Button>
@@ -556,7 +556,7 @@ export default function Login() {
                     placeholder="1234"
                     value={code}
                     onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 4))}
-                    className="h-11 rounded-none border-[#5b30d9]/25 pl-10 tracking-[0.3em]"
+                    className="h-11 rounded-xl border-[#5b30d9]/25 pl-10 tracking-[0.3em]"
                   />
                 </div>
               </div>
@@ -571,7 +571,7 @@ export default function Login() {
                     placeholder="********"
                     value={newPassword}
                     onChange={(event) => setNewPassword(event.target.value)}
-                    className="h-11 rounded-none border-[#5b30d9]/25 pl-10 pr-11"
+                    className="h-11 rounded-xl border-[#5b30d9]/25 pl-10 pr-11"
                   />
                   <button
                     type="button"
@@ -594,7 +594,7 @@ export default function Login() {
                     placeholder="********"
                     value={confirmNewPassword}
                     onChange={(event) => setConfirmNewPassword(event.target.value)}
-                    className="h-11 rounded-none border-[#5b30d9]/25 pl-10"
+                    className="h-11 rounded-xl border-[#5b30d9]/25 pl-10"
                   />
                 </div>
               </div>
@@ -602,7 +602,7 @@ export default function Login() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="h-12 w-full rounded-none bg-[#f47c0f] text-base font-bold text-white hover:bg-[#dd6900] focus-glow-orange"
+                className="h-12 w-full rounded-xl bg-[#f47c0f] text-base font-bold text-white hover:bg-[#dd6900] focus-glow-orange"
               >
                 {loading ? "Actualizando..." : "Cambiar contraseña"}
               </Button>
@@ -622,14 +622,14 @@ export default function Login() {
                     placeholder="1234"
                     value={code}
                     onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 4))}
-                    className="h-11 rounded-none border-[#5b30d9]/25 pl-10 tracking-[0.3em]"
+                    className="h-11 rounded-xl border-[#5b30d9]/25 pl-10 tracking-[0.3em]"
                   />
                 </div>
               </div>
               <Button
                 type="submit"
                 disabled={loading}
-                className="h-12 w-full rounded-none bg-[#f47c0f] text-base font-bold text-white hover:bg-[#dd6900] focus-glow-orange"
+                className="h-12 w-full rounded-xl bg-[#f47c0f] text-base font-bold text-white hover:bg-[#dd6900] focus-glow-orange"
               >
                 {loading ? "Verificando..." : "Verificar correo"}
               </Button>
@@ -683,6 +683,7 @@ export default function Login() {
     </div>
   );
 }
+
 
 
 
