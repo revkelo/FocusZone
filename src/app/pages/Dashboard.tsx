@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+﻿import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import {
   Bell,
@@ -283,7 +283,7 @@ export default function Dashboard() {
     {
       id: 1,
       role: "assistant",
-      text: "Soy Lumi. Puedes explorar por opciones o escribirme directo. Si eliges varias opciones, te doy una recomendación personalizada.",
+      text: "Soy Lumi. Puedes explorar por opciones o escribirme directo. Si eliges varias opciones, te doy una recomendaciÃ³n personalizada.",
     },
   ]);
   const [chatInput, setChatInput] = useState("");
@@ -404,7 +404,7 @@ export default function Dashboard() {
     );
   };
   const withLumiPresentation = (content: string) => {
-    return `¡Hola! 👋 Soy Lumi.\n\n${content}\n\n¿Quieres que te muestre otra opción o una recomendación personalizada? ✨`;
+    return `Â¡Hola! ðŸ‘‹ Soy Lumi.\n\n${content}\n\nÂ¿Quieres que te muestre otra opciÃ³n o una recomendaciÃ³n personalizada? âœ¨`;
   };
 
   useEffect(() => {
@@ -665,7 +665,7 @@ export default function Dashboard() {
       setIsPaused(recoveredIsPaused);
 
       if (didExpireWhileAway) {
-        setSuccessMessage("El pomodoro terminó mientras estabas fuera. Estado recuperado.");
+        setSuccessMessage("El pomodoro terminÃ³ mientras estabas fuera. Estado recuperado.");
       }
     } catch {
       // Ignore invalid local snapshots.
@@ -773,7 +773,7 @@ export default function Dashboard() {
     }
 
     if (error.includes("Solo puedes completar 1 reto definido por d")) {
-      pushToast("info", "Reto diario completado", "Hoy ya completaste tu reto definido. Mañana puedes continuar.");
+      pushToast("info", "Reto diario completado", "Hoy ya completaste tu reto definido. MaÃ±ana puedes continuar.");
       playEventSound("notification");
       setError("");
       return;
@@ -989,7 +989,7 @@ export default function Dashboard() {
       window.localStorage.setItem(reminderKey, "1");
       void notifyUser(
         "FocusZone | Reto diario pendiente",
-        `${name || "Usuario"}, aún tienes un reto diario por completar hoy.`,
+        `${name || "Usuario"}, aÃºn tienes un reto diario por completar hoy.`,
         `focuszone-daily-challenge-${todayKey}`,
       );
     };
@@ -1445,7 +1445,7 @@ export default function Dashboard() {
         .single();
 
       if (insertError || !data) {
-        setError("No se pudo guardar la sesión.");
+        setError("No se pudo guardar la sesiÃ³n.");
         return;
       }
 
@@ -1464,7 +1464,7 @@ export default function Dashboard() {
       setFocusStreak(nextFocusStreak);
       setTimerMode(nextMode);
       setTimeLeft(nextMode === "longBreak" ? longDurationSeconds : shortDurationSeconds);
-      setSuccessMessage(`Sesión completada. +${SESSION_POINTS} puntos.`);
+      setSuccessMessage(`SesiÃ³n completada. +${SESSION_POINTS} puntos.`);
 
       void notifyUser("FocusZone | Pomodoro completado", `Sumaste +${SESSION_POINTS} puntos. Sigue asi.`, "focuszone-pomodoro-complete");
       return;
@@ -1577,7 +1577,7 @@ export default function Dashboard() {
       );
 
       if (completedBaseToday) {
-        setError("Solo puedes completar 1 reto definido por día.");
+        setError("Solo puedes completar 1 reto definido por dÃ­a.");
         return;
       }
     }
@@ -1635,7 +1635,7 @@ export default function Dashboard() {
     }
 
     if (createdTodayCount >= MAX_CUSTOM_CHALLENGES_PER_DAY) {
-      setError(`Solo puedes crear ${MAX_CUSTOM_CHALLENGES_PER_DAY} retos personalizados por día.`);
+      setError(`Solo puedes crear ${MAX_CUSTOM_CHALLENGES_PER_DAY} retos personalizados por dÃ­a.`);
       setSuccessMessage("");
       return;
     }
@@ -1742,7 +1742,7 @@ export default function Dashboard() {
       }
       return next;
     });
-    setSuccessMessage("Ciclo de 21 días reiniciado.");
+    setSuccessMessage("Ciclo de 21 dÃ­as reiniciado.");
   };
 
   const handleCreateReward = async () => {
@@ -1871,7 +1871,7 @@ export default function Dashboard() {
     }
 
     if (ownedRoom) {
-      setError("Solo puedes ser dueño de 1 sala. Elimina tu sala actual para crear otra.");
+      setError("Solo puedes ser dueÃ±o de 1 sala. Elimina tu sala actual para crear otra.");
       setSuccessMessage("");
       return;
     }
@@ -1911,7 +1911,7 @@ export default function Dashboard() {
     setIsCreatingRoom(false);
 
     if (memberError) {
-      setError("La sala se creó, pero no pudiste entrar automáticamente.");
+      setError("La sala se creÃ³, pero no pudiste entrar automÃ¡ticamente.");
       return;
     }
 
@@ -1967,7 +1967,7 @@ export default function Dashboard() {
 
     setJoinedRoomIds(new Set([room.id]));
     setSelectedRoomId(room.id);
-    setSuccessMessage(`Te uniste a ${room.name}. Se salió de cualquier otra sala previa.`);
+    setSuccessMessage(`Te uniste a ${room.name}. Se saliÃ³ de cualquier otra sala previa.`);
   };
 
   const handleLeaveRoom = async (roomId: number) => {
@@ -1987,7 +1987,7 @@ export default function Dashboard() {
     setJoinedRoomIds(new Set());
 
     setSelectedRoomId((current) => (current === roomId ? null : current));
-    setSuccessMessage("Saliste de la sala. Tu pomodoro quedó en pausa.");
+    setSuccessMessage("Saliste de la sala. Tu pomodoro quedÃ³ en pausa.");
   };
 
   const handleDeleteRoom = async (room: PomodoroRoom) => {
@@ -2025,7 +2025,7 @@ export default function Dashboard() {
 
   const sendTestNotification = async () => {
     if (!userId) {
-      setError("Inicia sesión para activar notificaciones push.");
+      setError("Inicia sesiÃ³n para activar notificaciones push.");
       setSuccessMessage("");
       return;
     }
@@ -2123,7 +2123,7 @@ export default function Dashboard() {
         body: JSON.stringify({
           userId,
           title: "FocusZone | Prueba Push",
-          body: "Push real enviada. Si ves esto, móvil ya está listo.",
+          body: "Push real enviada. Si ves esto, mÃ³vil ya estÃ¡ listo.",
         }),
       });
 
@@ -2149,7 +2149,7 @@ export default function Dashboard() {
     const now = Date.now();
     if (chatRetryAt > now) {
       const waitSeconds = Math.max(1, Math.ceil((chatRetryAt - now) / 1000));
-      setError(`Lumi está ocupada. Espera ${waitSeconds}s e intenta de nuevo.`);
+      setError(`Lumi estÃ¡ ocupada. Espera ${waitSeconds}s e intenta de nuevo.`);
       return false;
     }
 
@@ -2167,7 +2167,7 @@ export default function Dashboard() {
     const pendingAssistantMessage: ChatMessage = {
       id: pendingAssistantId,
       role: "assistant",
-      text: "Lumi está escribiendo...",
+      text: "Lumi estÃ¡ escribiendo...",
       pending: true,
     };
 
@@ -2187,7 +2187,7 @@ export default function Dashboard() {
         if (response.status === 429) {
           const retryAfterSeconds = Number(payload.retryAfter) > 0 ? Number(payload.retryAfter) : 20;
           setChatRetryAt(Date.now() + retryAfterSeconds * 1000);
-          throw new Error(`Lumi está saturada. Intenta de nuevo en ${retryAfterSeconds}s.`);
+          throw new Error(`Lumi estÃ¡ saturada. Intenta de nuevo en ${retryAfterSeconds}s.`);
         }
         throw new Error(payload.error ?? "No se pudo obtener respuesta.");
       }
@@ -2255,7 +2255,7 @@ export default function Dashboard() {
     setGuidedOptionIds([optionId]);
 
     if (!quickReply) {
-      setError("No hay respuesta disponible para esta opción.");
+      setError("No hay respuesta disponible para esta opciÃ³n.");
       return;
     }
 
@@ -2305,27 +2305,24 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="focus-shell focus-rings min-h-screen">
+    <div className="focus-shell focus-rings focus-grain focus-soft-round focus-comic-mode min-h-screen">
       <div className="relative z-10">
-        <header className="border-b border-[#5b30d9]/20 bg-[#dcd2f7]/80 backdrop-blur">
-          <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 md:px-8 md:py-5">
-            <div className="flex items-center gap-3">
-              <div className="grid size-10 place-items-center rounded-none bg-[#f47c0f] text-white md:size-11">
-                <Target className="size-5 md:size-6" />
-              </div>
-              <div>
-                <p className="display-font text-[1.8rem] leading-none text-[#5b30d9] sm:text-[2.1rem] md:text-3xl">Focus Zone</p>
-              </div>
-            </div>
-            <Button
-              variant="outline"
-              onClick={handleLogout}
-              className="shrink-0 rounded-none border-2 border-[#5b30d9] bg-transparent px-3 py-2 text-sm font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white sm:px-4 sm:text-base"
-            >
-              <LogOut className="mr-2 size-4" />
-              Cerrar sesión
-            </Button>
+        <header className="mx-auto mt-3 flex w-[calc(100%-1rem)] max-w-[calc(88rem-2.5rem)] items-center justify-between gap-2 rounded-[1rem] border-2 border-[#8f74ef]/55 bg-[#ece8f9]/90 px-3 py-3 shadow-[0_12px_22px_-18px_rgba(69,36,179,0.6),0_2px_0_0_rgba(143,116,239,0.55)] md:mt-3 md:w-full md:max-w-[calc(88rem-4rem)] md:gap-3 md:px-8 md:py-5">
+          <div className="flex min-w-0 items-center">
+            <img
+              src="/assets/focuszone/logo.png"
+              alt="Focus Zone"
+              className="h-10 w-auto object-contain sm:h-12 md:h-14"
+            />
           </div>
+          <Button
+            variant="outline"
+            onClick={handleLogout}
+            className="focus-cta h-9 shrink-0 rounded-none border-2 border-[#5b30d9] bg-white/60 px-3 text-sm font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white sm:h-10 sm:px-4 sm:text-base md:h-11 md:px-5"
+          >
+            <LogOut className="mr-2 size-4" />
+            Cerrar sesión
+          </Button>
         </header>
 
         <div className="pointer-events-none fixed right-4 top-4 z-50 flex w-[min(92vw,380px)] flex-col gap-3">
@@ -2392,12 +2389,12 @@ export default function Dashboard() {
                 <div className="mt-6 grid gap-5 lg:grid-cols-[300px_1fr]">
                   <div className="space-y-3">
                     <div className="rounded-2xl bg-[#5b30d9] p-3 text-white">
-                      <p className="text-xs font-bold uppercase tracking-wide text-white/80">Duración de sesión</p>
+                      <p className="text-xs font-bold uppercase tracking-wide text-white/80">DuraciÃ³n de sesiÃ³n</p>
                       <div className="mt-2 flex items-center justify-between">
                         <button
                           onClick={() => adjustDuration("focus", -1)}
                           className="grid size-8 place-items-center rounded-full bg-[#f47c0f] text-white"
-                          aria-label="Reducir sesión"
+                          aria-label="Reducir sesiÃ³n"
                         >
                           <Minus className="size-4" />
                         </button>
@@ -2407,7 +2404,7 @@ export default function Dashboard() {
                         <button
                           onClick={() => adjustDuration("focus", 1)}
                           className="grid size-8 place-items-center rounded-full bg-[#f47c0f] text-white"
-                          aria-label="Aumentar sesión"
+                          aria-label="Aumentar sesiÃ³n"
                         >
                           <Plus className="size-4" />
                         </button>
@@ -2502,14 +2499,14 @@ export default function Dashboard() {
                     <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Crear sala</p>
                     {ownedRoom && (
                       <p className="text-xs font-bold text-[#6b7280]">
-                        Ya eres dueño de "{ownedRoom.name}". Solo puedes tener 1 sala propia.
+                        Ya eres dueÃ±o de "{ownedRoom.name}". Solo puedes tener 1 sala propia.
                       </p>
                     )}
                     <Input
                       value={newRoomName}
                       maxLength={MAX_ROOM_NAME_LENGTH}
                       onChange={(event) => setNewRoomName(event.target.value.slice(0, MAX_ROOM_NAME_LENGTH))}
-                      placeholder="Ej: Diseño nocturno"
+                      placeholder="Ej: DiseÃ±o nocturno"
                     />
                     <Button disabled={isCreatingRoom || Boolean(ownedRoom)} onClick={() => void handleCreateRoom()} className="w-full rounded-none bg-[#5b30d9] text-white hover:bg-[#4a22be] sm:w-auto">
                       {isCreatingRoom ? "Creando..." : "Crear sala"}
@@ -2531,7 +2528,7 @@ export default function Dashboard() {
 
                   <div className="space-y-2">
                     {filteredRooms.length === 0 ? (
-                      <p className="text-sm text-[#5b30d9]/75">Aún no hay salas activas.</p>
+                      <p className="text-sm text-[#5b30d9]/75">AÃºn no hay salas activas.</p>
                     ) : (
                       filteredRooms.map((room) => {
                         const isJoined = joinedRoomIds.has(room.id);
@@ -2546,7 +2543,7 @@ export default function Dashboard() {
                                 <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/70">
                                   {memberCount} persona{memberCount === 1 ? "" : "s"}
                                 </p>
-                                {isOwner && <p className="text-xs font-bold uppercase tracking-wide text-[#f47c0f]">Eres dueño</p>}
+                                {isOwner && <p className="text-xs font-bold uppercase tracking-wide text-[#f47c0f]">Eres dueÃ±o</p>}
                               </div>
                               <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap">
                                 {isJoined ? (
@@ -2667,7 +2664,7 @@ export default function Dashboard() {
                   <h3 className="display-font text-4xl">Ranking</h3>
                 </div>
                 {leaderboard.length === 0 ? (
-                  <p className="text-sm text-[#5b30d9]/75">Aún no hay participantes.</p>
+                  <p className="text-sm text-[#5b30d9]/75">AÃºn no hay participantes.</p>
                 ) : (
                   <div className="space-y-2">
                     {leaderboard.map((entry, index) => (
@@ -2681,10 +2678,10 @@ export default function Dashboard() {
                 {leaderboardTotalUsers > 30 && myLeaderboardRank && myLeaderboardRank > 10 ? (
                   <div className="mt-3 border border-[#f47c0f]/35 bg-[#fff4ea] p-3 text-sm">
                     <p className="font-bold text-[#5b30d9]">
-                      Tu posición actual: <span className="text-[#f47c0f]">#{myLeaderboardRank}</span> de {leaderboardTotalUsers}
+                      Tu posiciÃ³n actual: <span className="text-[#f47c0f]">#{myLeaderboardRank}</span> de {leaderboardTotalUsers}
                     </p>
                     <p className="mt-1 text-xs font-semibold text-[#5b30d9]/75">
-                      Se muestran los 10 primeros. Tu puesto global está actualizado.
+                      Se muestran los 10 primeros. Tu puesto global estÃ¡ actualizado.
                     </p>
                   </div>
                 ) : null}
@@ -2722,15 +2719,15 @@ export default function Dashboard() {
                         onClick={() => setIsGuidedMenuOpen((previous) => !previous)}
                         className="rounded-full border border-[#5b30d9]/25 bg-white px-2.5 py-1 text-[11px] font-bold text-[#5b30d9] transition hover:bg-[#f3eeff]"
                       >
-                        {isGuidedMenuOpen ? "Ocultar menú" : "Abrir menú"}
+                        {isGuidedMenuOpen ? "Ocultar menÃº" : "Abrir menÃº"}
                       </button>
                     </div>
 
                     {!isGuidedMenuOpen ? (
-                      <p className="text-sm">Menú rápido listo. Usa el botón de arriba para abrir opciones.</p>
+                      <p className="text-sm">MenÃº rÃ¡pido listo. Usa el botÃ³n de arriba para abrir opciones.</p>
                     ) : !selectedGuidedCategory ? (
                       <div className="space-y-2">
-                        <p>¿Qué quieres explorar hoy?</p>
+                        <p>Â¿QuÃ© quieres explorar hoy?</p>
                         <div className="w-full overflow-hidden rounded-xl border border-[#5b30d9]/20 bg-white/85">
                           <div className="border-b border-[#5b30d9]/15 bg-[#f7f3ff] px-3 py-2 text-center text-xs font-bold uppercase tracking-wide text-[#5b30d9]/70">
                             Opcion
@@ -2761,7 +2758,7 @@ export default function Dashboard() {
                         <p>{selectedGuidedCategory.question}</p>
                         <div className="w-full overflow-hidden rounded-xl border border-[#5b30d9]/20 bg-white/85">
                           <div className="border-b border-[#5b30d9]/15 bg-[#f7f3ff] px-3 py-2 text-center text-xs font-bold uppercase tracking-wide text-[#5b30d9]/70">
-                            Selecciona una opción
+                            Selecciona una opciÃ³n
                           </div>
                           <button
                             type="button"
@@ -2770,8 +2767,8 @@ export default function Dashboard() {
                             className="flex w-full items-start gap-3 border-b border-[#5b30d9]/10 px-3 py-3 text-left transition hover:bg-[#f6f2ff] disabled:cursor-not-allowed disabled:opacity-60"
                           >
                             <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm font-bold text-[#2f1b73]">Cambiar categoría</p>
-                              <p className="line-clamp-2 text-xs text-[#5b30d9]/75">Volver al menú principal de opciones.</p>
+                              <p className="truncate text-sm font-bold text-[#2f1b73]">Cambiar categorÃ­a</p>
+                              <p className="line-clamp-2 text-xs text-[#5b30d9]/75">Volver al menÃº principal de opciones.</p>
                             </div>
                             <span className="mt-0.5 shrink-0 text-[#5b30d9]/50">
                               <RotateCcw className="size-5" />
@@ -2817,7 +2814,7 @@ export default function Dashboard() {
                           void handleSendChat();
                         }
                       }}
-                      placeholder="Escribe tu mensaje o agrega un contexto para la recomendación"
+                      placeholder="Escribe tu mensaje o agrega un contexto para la recomendaciÃ³n"
                       className="h-8 flex-1 bg-transparent text-sm text-[#2a2a2a] outline-none placeholder:text-[#5b30d9]/35"
                     />
                     <Button
@@ -2855,7 +2852,7 @@ export default function Dashboard() {
                     <div className="space-y-3 border border-[#5b30d9]/20 bg-white/70 p-4">
                       <p className="font-bold text-[#5b30d9]">Crear reto personalizado</p>
                       <p className="text-xs font-bold text-[#5b30d9]/75">
-                        Máximo {MAX_CUSTOM_CHALLENGES_PER_DAY} por día. Hoy puedes crear {remainingCustomCreationsToday}.
+                        MÃ¡ximo {MAX_CUSTOM_CHALLENGES_PER_DAY} por dÃ­a. Hoy puedes crear {remainingCustomCreationsToday}.
                       </p>
                       <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Nombre del reto</p>
                       <Input
@@ -2931,7 +2928,7 @@ export default function Dashboard() {
                       <div className="grid gap-3 sm:grid-cols-3">
                         <div className="border border-[#5b30d9]/25 bg-white/70 p-3">
                           <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/70">Racha actual</p>
-                          <p className="display-font mt-1 text-4xl text-[#5b30d9]">{currentChallengeStreak} días</p>
+                          <p className="display-font mt-1 text-4xl text-[#5b30d9]">{currentChallengeStreak} dÃ­as</p>
                         </div>
                         <div className="border border-[#f47c0f]/30 bg-[#fff4ea] p-3">
                           <p className="text-xs font-bold uppercase tracking-wide text-[#f47c0f]/80">Bono por racha</p>
@@ -2989,9 +2986,9 @@ export default function Dashboard() {
                     {allBaseCompleted && (
                       <div className="border border-[#f47c0f]/35 bg-[#fff4ea] p-4">
                         <p className="font-bold text-[#b05a00]">Completaste los 21 retos del ciclo.</p>
-                        <p className="mt-1 text-sm text-[#b05a00]/85">Puedes reiniciar para empezar un nuevo ciclo de 21 días.</p>
+                        <p className="mt-1 text-sm text-[#b05a00]/85">Puedes reiniciar para empezar un nuevo ciclo de 21 dÃ­as.</p>
                         <Button onClick={() => void handleResetChallengeCycle()} className="mt-3 rounded-none bg-[#f47c0f] text-white hover:bg-[#dd6900]">
-                          Reiniciar ciclo de 21 días
+                          Reiniciar ciclo de 21 dÃ­as
                         </Button>
                       </div>
                     )}
@@ -3096,7 +3093,7 @@ export default function Dashboard() {
                   <div className="mt-4 space-y-3 text-[#5b30d9]">
                     <p className="font-bold">Puntos totales: {points}</p>
                     <p className="font-bold">Balance actual: {availablePoints}</p>
-                    <p className="font-bold">Racha actual: {currentChallengeStreak} días</p>
+                    <p className="font-bold">Racha actual: {currentChallengeStreak} dÃ­as</p>
                     <p className="font-bold">Bono acumulado por racha: +{streakBonusPoints}</p>
                     <p className="font-bold">Sesiones: {sessions.length}</p>
                     <p className="font-bold">Retos completados: {completedCount}</p>
@@ -3105,13 +3102,13 @@ export default function Dashboard() {
                   <div className="mt-6">
                     <h4 className="display-font text-3xl text-[#5b30d9]">Historial</h4>
                     {sessions.length === 0 ? (
-                      <p className="mt-2 text-sm text-[#5b30d9]/80">Aún no completas sesiones.</p>
+                      <p className="mt-2 text-sm text-[#5b30d9]/80">AÃºn no completas sesiones.</p>
                     ) : (
                       <div className="mt-3 max-h-72 space-y-2 overflow-y-auto pr-1">
                         {sessions.map((session) => (
                           <div key={session.id} className="flex items-center justify-between border border-[#5b30d9]/15 bg-white/70 p-3 text-sm">
                             <div>
-                              <p className="font-bold text-[#5b30d9]">Sesión de {Math.round(session.durationSeconds / 60)} min</p>
+                              <p className="font-bold text-[#5b30d9]">SesiÃ³n de {Math.round(session.durationSeconds / 60)} min</p>
                               <p className="text-xs text-[#5b30d9]/75">
                                 {new Date(session.completedAt).toLocaleDateString("es-CO", {
                                   day: "numeric",
@@ -3135,7 +3132,7 @@ export default function Dashboard() {
                     className="mt-6 rounded-none border-2 border-[#5b30d9] bg-transparent font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white"
                   >
                     <LogOut className="mr-2 size-4" />
-                    Cerrar sesión
+                    Cerrar sesiÃ³n
                   </Button>
                 </Card>
               </div>
@@ -3196,6 +3193,8 @@ export default function Dashboard() {
     </div>
   );
 }
+
+
 
 
 
