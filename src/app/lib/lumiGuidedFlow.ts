@@ -30,152 +30,221 @@ const E = {
   handshake: "\u{1F91D}",
   trophy: "\u{1F3C6}",
   chart: "\u{1F4C8}",
-  hourglass: "\u231B",
-  puzzle: "\u{1F9E9}",
   mobile: "\u{1F4F1}",
 };
 
 const guidedCategories: GuidedCategory[] = [
   {
-    id: "biblioteca",
-    label: "Que ofrece la biblioteca",
-    question: "Que ofrece la biblioteca?",
+    id: "smart-kits",
+    label: "Smart Kits de biblioteca",
+    question: "¿Qué quieres saber sobre los Smart Kits?",
     options: [
       {
-        id: "bases-datos",
-        label: "Bases de datos",
-        quickReply: `${E.books} La biblioteca ofrece acceso a bases de datos academicas para apoyar busquedas, trabajos, consultas e investigacion.`,
+        id: "smartkits-que-son",
+        label: "Qué son",
+        quickReply: `${E.books} Los Smart Kits son guías digitales por programa académico con libros, artículos, revistas y recursos confiables para apoyar el estudio autónomo.`,
       },
       {
-        id: "cursos-talleres",
-        label: "Cursos y talleres",
-        quickReply: `${E.brain} La biblioteca ofrece cursos y espacios formativos para fortalecer habilidades academicas, digitales y de busqueda de informacion.`,
+        id: "smartkits-programas",
+        label: "Facultades y programas",
+        quickReply: `${E.building} Hay Smart Kits para Medicina, Enfermería, Odontología, Psicología, Creación y Comunicación, Ingeniería, Ciencias, Jurídicas y Políticas, Económicas y Administrativas, Humanidades y Educación.`,
       },
       {
-        id: "software-especializado",
-        label: "Software especializado",
-        quickReply: `${E.laptop} La biblioteca pone a disposicion herramientas y software que apoyan procesos de estudio, creacion e investigacion.`,
+        id: "smartkits-acceso",
+        label: "Cómo acceder",
+        quickReply: `${E.globe} Se consultan en formato digital interactivo con enlaces directos. Te recomiendo pedir el enlace del programa específico en la biblioteca.`,
       },
       {
-        id: "realidad-aumentada",
-        label: "Realidad aumentada",
-        quickReply: `${E.sparkles} La biblioteca cuenta con recursos tecnologicos como realidad aumentada para explorar nuevas formas de aprendizaje.`,
-      },
-      {
-        id: "espacios-estudio",
-        label: "Espacios de estudio",
-        quickReply: `${E.building} La biblioteca ofrece espacios para concentracion, lectura, trabajo individual y actividades academicas.`,
-      },
-      {
-        id: "recursos-digitales",
-        label: "Recursos digitales",
-        quickReply: `${E.globe} La biblioteca ofrece recursos digitales para consultar informacion, fortalecer tareas y apoyar procesos de aprendizaje.`,
-      },
-      {
-        id: "apoyo-investigacion",
-        label: "Apoyo para investigacion",
-        quickReply: `${E.magnify} La biblioteca brinda apoyo para procesos de investigacion con orientacion, recursos y herramientas de consulta.`,
-      },
-      {
-        id: "herramientas-productividad",
-        label: "Herramientas de productividad",
-        quickReply: `${E.check} La biblioteca integra herramientas de productividad para organizar mejor el estudio y sostener sesiones de enfoque.`,
+        id: "smartkits-ubicacion-horario",
+        label: "Ubicación y horario",
+        quickReply: `${E.calendar} Biblioteca Juan Roa Vásquez: Av. Cra. 9 No. 131 A - 02, Bloque O, Piso 3, Bogotá. Horario: L-V 6:00 a.m.-10:00 p.m.; sábados 8:00 a.m.-4:00 p.m.; externos L-V 7:00 a.m.-5:00 p.m.`,
       },
     ],
   },
   {
-    id: "concentracion",
-    label: "Como mejorar mi concentracion",
-    question: "Que necesitas para concentrarte mejor?",
+    id: "bases-2026",
+    label: "Bases de datos 2026",
+    question: "¿Qué base de datos necesitas?",
     options: [
       {
-        id: "distraigo-redes",
-        label: "Me distraigo con redes",
-        quickReply: `${E.noPhone} Si te distraes con redes, empieza con bloques cortos de enfoque y una pausa sin pantalla entre bloques.`,
+        id: "db-mcgraw",
+        label: "McGraw-Hill Ebooks 7-24",
+        quickReply: `${E.books} E-books para Ingenierías y Administración. Ideal para consulta de conceptos, apoyo de clases y proyectos aplicados.`,
       },
       {
-        id: "cuesta-empezar",
-        label: "Me cuesta empezar",
-        quickReply: `${E.rocket} Si te cuesta empezar, usa un objetivo pequeno de 10 minutos y arranca con una sola tarea concreta.`,
+        id: "db-cambridge",
+        label: "Cambridge University Press",
+        quickReply: `${E.books} Journals Complete + Cambridge Ebooks con contenido multidisciplinario en libros y revistas académicas.`,
       },
       {
-        id: "mantener-foco",
-        label: "Me cuesta mantener el foco",
-        quickReply: `${E.target} Para mantener el foco, prueba sesiones pomodoro de 25 minutos y elimina notificaciones durante el bloque.`,
+        id: "db-cochrane",
+        label: "Cochrane Collection Plus",
+        quickReply: `${E.check} Evidencia clínica de alta calidad: revisiones sistemáticas y ensayos para salud e investigación clínica.`,
       },
       {
-        id: "estudiar-acompanado",
-        label: "Quiero estudiar acompanado",
-        quickReply: `${E.people} Puedes usar salas pomodoro para estudiar con otras personas y sostener el ritmo con objetivos compartidos.`,
+        id: "db-enferteca",
+        label: "Enferteca",
+        quickReply: `${E.brain} Biblioteca digital de enfermería en español con contenido especializado para formación y consulta.`,
       },
       {
-        id: "quiero-rutina",
-        label: "Quiero una rutina",
-        quickReply: `${E.calendar} Una rutina efectiva puede combinar horario fijo, sesiones pomodoro y un cierre corto de reflexion diaria.`,
+        id: "db-gale",
+        label: "Gale Research Complete",
+        quickReply: `${E.globe} Incluye e-books, revistas, noticias, literatura, fuentes primarias y negocios. Muy útil para trabajos interdisciplinarios.`,
       },
       {
-        id: "reducir-pantalla",
-        label: "Quiero reducir tiempo en pantalla",
-        quickReply: `${E.meditate} Alterna estudio en espacios de biblioteca, pausas activas y metas breves para reducir el tiempo en pantalla.`,
+        id: "db-gideon",
+        label: "GIDEON",
+        quickReply: `${E.magnify} Plataforma para enfermedades infecciosas, epidemiología y microbiología con enfoque técnico y clínico.`,
+      },
+      {
+        id: "db-iop",
+        label: "IOPscience Extras",
+        quickReply: `${E.rocket} Publicaciones científicas en física y áreas relacionadas para consulta de alto nivel académico.`,
+      },
+    ],
+  },
+  {
+    id: "investigacion-2026",
+    label: "Herramientas de investigación",
+    question: "¿Qué herramienta necesitas para investigar?",
+    options: [
+      {
+        id: "tool-compilatio",
+        label: "Compilatio",
+        quickReply: `${E.check} Analiza originalidad, similitud y posible IA. Restricción: uso disponible solo para docentes.`,
+      },
+      {
+        id: "tool-rayyan",
+        label: "Rayyan Enterprise",
+        quickReply: `${E.magnify} Apoyo con IA para revisiones sistemáticas: filtra y organiza literatura científica de forma más ágil.`,
+      },
+      {
+        id: "tool-sage",
+        label: "Sage Research Methods",
+        quickReply: `${E.brain} Recurso para metodologías de investigación: diseños, métodos y enfoques para proyectos académicos.`,
+      },
+    ],
+  },
+  {
+    id: "ova-2026",
+    label: "Objetos virtuales de aprendizaje",
+    question: "¿Qué OVA quieres explorar?",
+    options: [
+      {
+        id: "ova-clinical-cases",
+        label: "Clinical Cases - Elsevier",
+        quickReply: `${E.brain} Casos clínicos interactivos para fortalecer razonamiento clínico y toma de decisiones en salud.`,
+      },
+      {
+        id: "ova-cloudlabs",
+        label: "CloudLabs",
+        quickReply: `${E.laptop} Simuladores de laboratorio. Restricción: disponible solo en el DataLab.`,
+      },
+      {
+        id: "ova-jaypee",
+        label: "Jaypee Digital",
+        quickReply: `${E.books} Plataforma para Medicina con libros, videos, revistas y bancos de preguntas.`,
+      },
+      {
+        id: "ova-jove-business",
+        label: "JoVE Business",
+        quickReply: `${E.chart} Videos académicos sobre negocios, finanzas y marketing para aprendizaje aplicado.`,
+      },
+      {
+        id: "ova-lectimus",
+        label: "Léctimus",
+        quickReply: `${E.target} Recurso para fortalecer competencias lectoras. Restricción: acceso por solicitud.`,
+      },
+      {
+        id: "ova-mylab-math",
+        label: "MyLab Math",
+        quickReply: `${E.stopwatch} Plataforma de aprendizaje de matemáticas. Restricción: uso exclusivo del departamento de matemáticas.`,
+      },
+      {
+        id: "ova-neurosurgical-atlas",
+        label: "Neurosurgical Atlas",
+        quickReply: `${E.sparkles} Plataforma interactiva especializada en neurocirugía para consulta académica y clínica.`,
+      },
+      {
+        id: "ova-primal-vr",
+        label: "Primal VR",
+        quickReply: `${E.sparkles} Anatomía humana en realidad virtual. Restricción: disponible en la Torre inmersiva de la biblioteca.`,
       },
     ],
   },
   {
     id: "focus-zone",
-    label: "Focus Zone",
-    question: "Que quieres explorar de Focus Zone?",
+    label: "Focus Zone y concentración",
+    question: "¿Qué quieres explorar de Focus Zone?",
     options: [
       {
         id: "pomodoro-individual",
         label: "Pomodoro individual",
-        quickReply: `${E.stopwatch} El pomodoro individual te ayuda a dividir el estudio en ciclos de enfoque y descanso para evitar fatiga.`,
+        quickReply: `${E.stopwatch} El pomodoro individual divide el estudio en bloques de enfoque y descanso para sostener energía y atención.`,
       },
       {
         id: "salas-pomodoro",
         label: "Salas Pomodoro",
-        quickReply: `${E.handshake} Las salas pomodoro permiten estudiar con otros y mantener el compromiso del bloque de concentracion.`,
+        quickReply: `${E.handshake} Las salas pomodoro permiten estudiar con otras personas y mantener el ritmo del bloque de concentración.`,
       },
       {
         id: "retos-semanales",
         label: "Retos semanales",
-        quickReply: `${E.trophy} Los retos semanales convierten el habito de enfoque en objetivos medibles y sostenibles.`,
+        quickReply: `${E.trophy} Los retos semanales convierten hábitos en acciones concretas para reducir distracciones y mejorar constancia.`,
       },
       {
         id: "ranking",
         label: "Ranking",
-        quickReply: `${E.chart} El ranking muestra avance y constancia, ayudando a mantener motivacion con metas de enfoque.`,
+        quickReply: `${E.chart} El ranking muestra avance por puntos y constancia en sesiones y retos de enfoque.`,
       },
       {
-        id: "tiempo-enfoque",
-        label: "Tiempo de enfoque",
-        quickReply: `${E.hourglass} El tiempo de enfoque mide tu practica real de concentracion y te permite mejorar semana a semana.`,
+        id: "reducir-scroll",
+        label: "Salir del doomscrolling",
+        quickReply: `${E.noPhone} Para salir del scroll automático: define 1 tarea, activa un bloque de 25 min y deja notificaciones en silencio.`,
       },
       {
-        id: "reflexion-distracciones",
-        label: "Reflexion de distracciones",
-        quickReply: `${E.puzzle} La reflexion de distracciones te permite detectar patrones y ajustar tu rutina para estudiar mejor.`,
+        id: "rutina",
+        label: "Crear rutina de foco",
+        quickReply: `${E.calendar} Una rutina base: 2 bloques pomodoro, pausa activa breve y cierre de 3 minutos para planear el siguiente bloque.`,
       },
     ],
   },
 ];
 
 const quickRepliesByQuestion: Record<string, string> = {
-  "que ofrece la biblioteca": `${E.books} La biblioteca ofrece recursos academicos, digitales y espacios de estudio para apoyar concentracion, investigacion y bienestar academico.`,
-  "que recursos digitales tiene": `${E.globe} La biblioteca ofrece bases de datos, recursos digitales y herramientas para apoyar consultas, tareas e investigacion.`,
-  "que espacios hay para estudiar": `${E.building} La biblioteca ofrece espacios de estudio para trabajo individual, lectura, concentracion y actividades academicas.`,
-  "que herramientas me ayudan a investigar": `${E.magnify} Puedes apoyarte en bases de datos, software especializado y acompanamiento para investigacion academica.`,
-  "que puedo usar si quiero concentrarme": `${E.target} Puedes combinar espacios de estudio, pomodoro y herramientas de productividad para sostener el enfoque.`,
-  "que es focus zone": `${E.sparkles} Focus Zone es una propuesta para usar tecnologia de forma consciente y convertir la biblioteca en un espacio de pausa digital y concentracion.`,
-  "como funciona el pomodoro": `${E.stopwatch} El pomodoro divide el estudio en bloques de enfoque con pausas cortas para sostener energia y atencion.`,
-  "que son las salas pomodoro": `${E.people} Las salas pomodoro son espacios de estudio acompanado donde varias personas sincronizan sesiones de enfoque.`,
-  "como funcionan los retos semanales": `${E.trophy} Los retos semanales proponen metas concretas de enfoque para construir habitos de estudio sostenibles.`,
-  "como se consiguen puntos": `${E.check} Los puntos se consiguen al completar sesiones de enfoque y retos dentro de Focus Zone.`,
-  "como funciona el ranking": `${E.chart} El ranking organiza el progreso por puntos para mostrar constancia y avance en los habitos de enfoque.`,
-  "que es doomscrolling": `${E.mobile} Doomscrolling es consumir contenido en redes por largos periodos sin un objetivo claro, lo que afecta energia y concentracion.`,
-  "por que me distraigo tanto": `${E.brain} La distraccion suele aumentar por notificaciones, multitarea y ausencia de pausas. Reducir estimulos ayuda a recuperar foco.`,
-  "como recuperar el foco": `${E.rocket} Para recuperar foco, define una tarea concreta, inicia con un bloque corto y elimina distractores durante ese tiempo.`,
-  "que alternativas tengo al scroll": `${E.meditate} Puedes usar pomodoro, lectura en biblioteca, estudio acompanado o retos breves para reemplazar el scroll automatico.`,
+  "que son los smart kits": `${E.books} Los Smart Kits son guías digitales por programa con recursos académicos confiables para estudio e investigación.`,
+  "que facultades tienen smart kits": `${E.building} Los Smart Kits cubren programas de Medicina, Enfermería, Odontología, Psicología, Ingeniería, Ciencias, Educación y otras facultades.`,
+  "donde esta la biblioteca": `${E.building} Biblioteca Juan Roa Vásquez: Av. Cra. 9 No. 131 A - 02, Bloque O, Piso 3, Bogotá.`,
+  "cual es el horario de la biblioteca": `${E.calendar} Horario: L-V 6:00 a.m.-10:00 p.m.; sábados 8:00 a.m.-4:00 p.m.; usuarios externos L-V 7:00 a.m.-5:00 p.m.`,
+  "que bases de datos nuevas tienen": `${E.globe} En 2026 destacan McGraw-Hill 7-24, Cambridge, Cochrane Plus, Enferteca, Gale Research Complete, GIDEON e IOPscience Extras.`,
+  "que herramienta sirve para revision sistematica": `${E.magnify} Para revisiones sistemáticas puedes usar Rayyan Enterprise y complementar con Cochrane Collection Plus.`,
+  "compilatio quien lo puede usar": `${E.check} Compilatio analiza originalidad, similitud y posible IA. Su uso está habilitado solo para docentes.`,
+  "cloudlabs donde se usa": `${E.laptop} CloudLabs está disponible solo en el DataLab de la biblioteca.`,
+  "primal vr donde se usa": `${E.sparkles} Primal VR se usa en la Torre inmersiva de la biblioteca.`,
+  "mylab math quien lo usa": `${E.brain} MyLab Math es de uso exclusivo del departamento de matemáticas.`,
+  "que es focus zone": `${E.target} Focus Zone promueve uso consciente de tecnología y hábitos de concentración conectados con recursos de biblioteca.`,
+  "como salir del doomscrolling": `${E.noPhone} Inicia con un bloque de 25 minutos, silencia notificaciones y cambia redes por una tarea académica concreta.`,
 };
+
+const keywordQuickReplies: Array<{ keywords: string[]; reply: string }> = [
+  { keywords: ["smart", "kit"], reply: `${E.books} Puedo ayudarte con Smart Kits: qué son, programas y acceso. Abre el menú rápido y entra a "Smart Kits de biblioteca".` },
+  { keywords: ["mcgraw"], reply: `${E.books} McGraw-Hill Ebooks 7-24 ofrece e-books para Ingenierías y Administración.` },
+  { keywords: ["cambridge"], reply: `${E.books} Cambridge incluye Journals Complete y Cambridge Ebooks con cobertura multidisciplinaria.` },
+  { keywords: ["cochrane"], reply: `${E.check} Cochrane Collection Plus ofrece revisiones sistemáticas y ensayos de evidencia clínica.` },
+  { keywords: ["enferteca"], reply: `${E.brain} Enferteca es una biblioteca digital especializada en enfermería en español.` },
+  { keywords: ["gale"], reply: `${E.globe} Gale Research Complete integra libros, revistas, noticias y fuentes primarias.` },
+  { keywords: ["gideon"], reply: `${E.magnify} GIDEON se enfoca en enfermedades infecciosas, epidemiología y microbiología.` },
+  { keywords: ["iopscience"], reply: `${E.rocket} IOPscience Extras ofrece publicaciones científicas en física y áreas afines.` },
+  { keywords: ["rayyan"], reply: `${E.magnify} Rayyan Enterprise ayuda con IA en revisiones sistemáticas.` },
+  { keywords: ["compilatio"], reply: `${E.check} Compilatio: originalidad, similitud y posible IA. Disponible para docentes.` },
+  { keywords: ["sage", "methods"], reply: `${E.brain} Sage Research Methods apoya el diseño metodológico de proyectos de investigación.` },
+  { keywords: ["cloudlabs"], reply: `${E.laptop} CloudLabs es un simulador de laboratorio disponible solo en el DataLab.` },
+  { keywords: ["jove"], reply: `${E.chart} JoVE Business ofrece videos sobre negocios, finanzas y marketing.` },
+  { keywords: ["lectimus"], reply: `${E.target} Léctimus fortalece competencias lectoras y se habilita por solicitud.` },
+  { keywords: ["primal", "vr"], reply: `${E.sparkles} Primal VR ofrece anatomía en realidad virtual en la Torre inmersiva.` },
+  { keywords: ["horario"], reply: `${E.calendar} Horario biblioteca: L-V 6:00 a.m.-10:00 p.m.; sábados 8:00 a.m.-4:00 p.m.; externos L-V 7:00 a.m.-5:00 p.m.` },
+  { keywords: ["ubicacion"], reply: `${E.building} Ubicación: Av. Cra. 9 No. 131 A - 02, Bloque O, Piso 3, Bogotá.` },
+];
 
 const normalizeKey = (value: string) =>
   value
@@ -207,6 +276,11 @@ export const getQuickReplyForQuestion = (question: string) => {
     return quickRepliesByQuestion[normalized];
   }
 
+  const matchedByKeywords = keywordQuickReplies.find(({ keywords }) => keywords.every((keyword) => normalized.includes(keyword)));
+  if (matchedByKeywords) {
+    return matchedByKeywords.reply;
+  }
+
   return null;
 };
 
@@ -224,14 +298,14 @@ export const buildGuidedRecommendationPrompt = ({ categoryId, selectedOptionIds,
 
   const optionLabels = selectedOptions.map((option) => option.label);
   const noteText = userNote?.trim() ? userNote.trim() : "Sin nota adicional";
-  const categoryLabel = category?.label ?? "Sin categoria";
+  const categoryLabel = category?.label ?? "Sin categoría";
 
   return [
-    "Genera una recomendacion personalizada para Zone Focus en espanol.",
-    "Manten un tono cercano, claro y accionable en maximo 120 palabras.",
-    `Categoria principal: ${categoryLabel}`,
+    "Genera una recomendación personalizada para Zone Focus en español.",
+    "Mantén un tono cercano, claro y accionable en máximo 120 palabras.",
+    `Categoría principal: ${categoryLabel}`,
     `Opciones seleccionadas: ${optionLabels.length > 0 ? optionLabels.join(", ") : "Ninguna"}`,
     `Contexto adicional del usuario: ${noteText}`,
-    "Incluye un plan corto de 2 o 3 pasos y una siguiente accion concreta dentro de biblioteca o Focus Zone.",
+    "Incluye un plan corto de 2 o 3 pasos y una siguiente acción concreta dentro de biblioteca o Focus Zone.",
   ].join("\n");
 };

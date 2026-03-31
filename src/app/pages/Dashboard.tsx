@@ -2244,8 +2244,21 @@ export default function Dashboard() {
       return;
     }
 
+    const baseId = Date.now();
+    setChatMessages((previous) => [
+      ...previous,
+      { id: baseId, role: "user", text: message },
+      {
+        id: baseId + 1,
+        role: "assistant",
+        text: withLumiPresentation(
+          "Puedo orientarte mejor desde el menú de selección. Abre 'Menú rápido' y elige Smart Kits, bases de datos 2026, herramientas de investigación u objetos virtuales.",
+        ),
+      },
+    ]);
     setChatInput("");
-    await sendMessageToLumi(message);
+    setIsGuidedMenuOpen(true);
+    playEventSound("notification");
   };
 
   const handleGuidedOptionSelect = (optionId: string) => {
@@ -2789,7 +2802,7 @@ export default function Dashboard() {
                             className="flex w-full items-start gap-3 border-b border-[#5b30d9]/10 px-3 py-3 text-left transition hover:bg-[#f6f2ff] disabled:cursor-not-allowed disabled:opacity-60"
                           >
                             <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm font-bold text-[#2f1b73]">Cambiar categora</p>
+                              <p className="truncate text-sm font-bold text-[#2f1b73]">Cambiar categoría</p>
                               <p className="line-clamp-2 text-xs text-[#5b30d9]/75">Volver al menú principal de opciones.</p>
                             </div>
                             <span className="mt-0.5 shrink-0 text-[#5b30d9]/50">

@@ -309,7 +309,7 @@ export default function Login() {
           : "Acceso";
 
   return (
-    <div className="min-h-screen bg-[#f2f0f3] px-4 py-8">
+    <div className="focus-login-shell min-h-screen overflow-x-hidden px-4 py-8">
       <div className="relative z-10 mx-auto max-w-md">
         <Link to="/" className="mb-8 flex items-center justify-center">
           <img

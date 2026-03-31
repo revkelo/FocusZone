@@ -143,6 +143,23 @@
       linear-gradient(160deg, #f2f1ec 0%, #f7f5ef 58%, #f9fafb 100%);
   }
 
+  .focus-login-shell {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(160deg, #f2f1ec 0%, #f7f5ef 58%, #f9fafb 100%);
+  }
+
+  .focus-login-shell::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at -8% 72%, transparent 0 21%, rgba(158, 255, 58, 0.42) 21% 23.5%, transparent 23.5% 35%, rgba(90, 45, 202, 0.2) 35% 37.5%, transparent 37.5% 100%),
+      radial-gradient(circle at 108% 24%, transparent 0 25%, rgba(90, 45, 202, 0.22) 25% 27.5%, transparent 27.5% 40%, rgba(182, 227, 107, 0.34) 40% 42.5%, transparent 42.5% 100%);
+    z-index: 0;
+  }
+
   .focus-shell::before {
     content: "";
     position: absolute;
