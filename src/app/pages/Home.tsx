@@ -38,7 +38,7 @@ const researchStats = [
   { value: "89%", label: "Dedica más de 3 horas al día a redes sociales", icon: "●" },
   { value: "64%", label: "Nota afiches físicos en la biblioteca", icon: "◆" },
   { value: "74%", label: "Ve pantallas digitales de biblioteca y universidad", icon: "◼" },
-  { value: "21", label: "Días del reto de enfoque digital", icon: "▲" },
+  { value: "56%", label: "Se sienten poco o nada informados sobre los recursos tecnológicos que la biblioteca ofrece.", icon: "" },
 ];
 
 const manifestoLines = [

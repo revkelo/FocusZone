@@ -309,12 +309,7 @@ export default function Login() {
           : "Acceso";
 
   return (
-    <div className="focus-shell focus-grain focus-rings focus-no-stars focus-soft-round min-h-screen overflow-x-hidden px-4 py-8">
-      <div className="focus-figure-layer" aria-hidden>
-        <div className="focus-figure-arc-left" />
-        <div className="focus-figure-arc-right" />
-        <div className="focus-figure-dot focus-figure-dot-a" />
-      </div>
+    <div className="focus-shell focus-soft-round min-h-screen overflow-x-hidden px-4 py-8">
       <div className="relative z-10 mx-auto max-w-md">
         <Link to="/" className="mb-8 flex items-center justify-center">
           <img
