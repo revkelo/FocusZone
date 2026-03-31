@@ -123,6 +123,7 @@ export default function Home() {
   const [horizontalCarouselApi, setHorizontalCarouselApi] = useState<CarouselApi | null>(null);
   const [activeHorizontalSlide, setActiveHorizontalSlide] = useState(0);
   const [activeNewsIndex, setActiveNewsIndex] = useState(0);
+  const [isNewsAutoplayEnabled, setIsNewsAutoplayEnabled] = useState(true);
   const [isViewerTransitioning, setIsViewerTransitioning] = useState(false);
   const [isLumiAlt, setIsLumiAlt] = useState(true);
   const [isLumiSpeaking, setIsLumiSpeaking] = useState(false);
@@ -201,6 +202,10 @@ export default function Home() {
   }, [horizontalCarouselApi]);
 
   useEffect(() => {
+    if (!isNewsAutoplayEnabled || relatedNews.length < 2) {
+      return;
+    }
+
     const autoplayNews = window.setInterval(() => {
       setActiveNewsIndex((previous) => (previous + 1) % relatedNews.length);
     }, 5000);
@@ -208,7 +213,7 @@ export default function Home() {
     return () => {
       window.clearInterval(autoplayNews);
     };
-  }, []);
+  }, [isNewsAutoplayEnabled]);
 
   useEffect(() => {
     return () => {
@@ -327,10 +332,12 @@ export default function Home() {
   };
 
   const goPrevNews = () => {
+    setIsNewsAutoplayEnabled(false);
     setActiveNewsIndex((previous) => (previous - 1 + relatedNews.length) % relatedNews.length);
   };
 
   const goNextNews = () => {
+    setIsNewsAutoplayEnabled(false);
     setActiveNewsIndex((previous) => (previous + 1) % relatedNews.length);
   };
 
