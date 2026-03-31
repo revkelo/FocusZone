@@ -1,6 +1,6 @@
 ﻿import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router";
-import { BookOpenText, Bot, Building2, Cpu, Database, Glasses, GraduationCap, Lightbulb, MessageSquareQuote, Monitor, Trophy, Volume2, WandSparkles, X } from "lucide-react";
+import { ArrowUpRight, BookOpenText, Bot, Building2, Cpu, Database, Glasses, GraduationCap, Lightbulb, MessageSquareQuote, Monitor, Newspaper, Trophy, Volume2, WandSparkles, X } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "../components/ui/carousel";
@@ -83,6 +83,8 @@ const relatedNews = [
     title: "Declaran a Meta y Google responsables en un juicio histórico sobre la adicción a las redes sociales",
     summary: "Cobertura sobre un fallo clave que vincula plataformas digitales con riesgos de adicción y salud mental en jóvenes.",
     sourceUrl: "https://www.bbc.com/mundo/articles/c62j769d2xpo",
+    sourceDomain: "bbc.com/mundo",
+    topic: "Salud digital",
   },
 ];
 
@@ -102,6 +104,7 @@ export default function Home() {
   const [isLumiSpeaking, setIsLumiSpeaking] = useState(false);
   const [lumiSpeakingFrame, setLumiSpeakingFrame] = useState(0);
   const lumiAudioRef = useRef<HTMLAudioElement | null>(null);
+  const lumiTransitionAudioContextRef = useRef<AudioContext | null>(null);
 
   const viewerItem = useMemo(() => (viewerIndex !== null ? artGallery[viewerIndex] : null), [viewerIndex]);
   const horizontalDesigns = useMemo(() => artGallery.filter((item) => item.orientation === "landscape"), []);
@@ -169,6 +172,17 @@ export default function Home() {
       horizontalCarouselApi.off("select", onSelect);
     };
   }, [horizontalCarouselApi]);
+
+  useEffect(() => {
+    return () => {
+      const context = lumiTransitionAudioContextRef.current;
+      if (!context) {
+        return;
+      }
+      void context.close();
+      lumiTransitionAudioContextRef.current = null;
+    };
+  }, []);
 
   useEffect(() => {
     if (!isLumiSpeaking) {
@@ -247,28 +261,65 @@ export default function Home() {
     setIsLumiSpeaking(false);
   };
 
+  const playLumiTransitionSound = () => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const AudioContextConstructor = window.AudioContext ?? (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AudioContextConstructor) {
+      return;
+    }
+
+    const context = lumiTransitionAudioContextRef.current ?? new AudioContextConstructor();
+    lumiTransitionAudioContextRef.current = context;
+
+    if (context.state === "suspended") {
+      void context.resume();
+    }
+
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    const now = context.currentTime;
+
+    oscillator.type = "triangle";
+    oscillator.frequency.setValueAtTime(760, now);
+    oscillator.frequency.exponentialRampToValueAtTime(540, now + 0.16);
+
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.08, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.16);
+
+    oscillator.connect(gain);
+    gain.connect(context.destination);
+
+    oscillator.start(now);
+    oscillator.stop(now + 0.16);
+  };
+
+  const updateLumiAlt = (nextValue: boolean | ((previous: boolean) => boolean)) => {
+    setIsLumiAlt((previous) => {
+      const next = typeof nextValue === "function" ? nextValue(previous) : nextValue;
+      if (previous && !next) {
+        playLumiTransitionSound();
+      }
+      return next;
+    });
+  };
+
   return (
-    <div className="focus-shell focus-grain focus-rings focus-no-stars focus-soft-round min-h-screen overflow-x-hidden">
-      <div className="focus-figure-layer" aria-hidden>
-        <div className="focus-figure-arc-left" />
-        <div className="focus-figure-arc-right" />
-        <div className="focus-figure-arc-right-2" />
-        <div className="focus-figure-right-pill" />
-        <div className="focus-figure-right-square" />
-        <div className="focus-figure-dot focus-figure-dot-a" />
-        <div className="focus-figure-dot focus-figure-dot-b" />
-      </div>
+    <div className="focus-login-shell min-h-screen overflow-x-hidden">
       <div className="relative z-10">
-        <header className="mx-auto mt-3 flex w-[calc(100%-1rem)] max-w-[calc(72rem-2.5rem)] items-center justify-between gap-2 rounded-[1rem] border-2 border-[#9fd45a] bg-[#dff5b8]/90 px-3 py-3 shadow-[0_10px_20px_-18px_rgba(76,107,31,0.35),0_1px_0_0_rgba(159,212,90,0.9)] md:mt-3 md:w-full md:max-w-[calc(72rem-4rem)] md:gap-3 md:px-8 md:py-5">
+        <header className="mx-auto mt-3 flex w-[calc(100%-1rem)] max-w-[calc(72rem-2.5rem)] items-center justify-between gap-3 rounded-[1rem] border-2 border-[#9fd45a] bg-[#dff5b8]/90 px-4 py-3 shadow-[0_10px_20px_-18px_rgba(76,107,31,0.35),0_1px_0_0_rgba(159,212,90,0.9)] md:mt-3 md:w-full md:max-w-[calc(72rem-4rem)] md:gap-3 md:px-8 md:py-5">
           <div className="flex min-w-0 items-center">
             <img
               src="/assets/focuszone/logo.png"
               alt="Focus Zone"
-              className="h-16 w-auto object-contain md:h-[5rem]"
+              className="h-14 w-auto object-contain sm:h-16 md:h-[5rem]"
             />
           </div>
           <Link to="/login" className="shrink-0">
-            <Button className="focus-cta h-9 rounded-none border-2 border-[#5b30d9] bg-white/60 px-3 text-sm font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white sm:h-10 sm:px-4 sm:text-base md:h-11 md:px-5">
+            <Button className="focus-cta h-10 rounded-none border-2 border-[#5b30d9] bg-white/60 px-3 text-base font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white sm:h-10 sm:px-4 sm:text-base md:h-11 md:px-5">
               Iniciar sesión
             </Button>
           </Link>
@@ -277,17 +328,17 @@ export default function Home() {
         <main className="mx-auto w-full max-w-6xl space-y-3 px-3 pb-8 pt-3 md:px-5 md:space-y-5 lg:px-8 lg:space-y-6">
           <section className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
             <Card className="focus-campaign-card focus-reveal !gap-4 rounded-[1.2rem] p-5 md:p-7 lg:h-full">
-              <p className="mt-3 text-base italic text-[#5b30d9] md:text-lg">La biblioteca como espacio de pausa digital.</p>
+              <p className="mt-1 text-center text-[1.35rem] italic leading-tight text-[#5b30d9] sm:mt-3 sm:text-left sm:text-base md:text-lg">La biblioteca como espacio de pausa digital.</p>
               <div className="focus-divider focus-divider-animated mt-4 max-w-xl" />
-              <div className="mt-4 grid items-center gap-4 md:grid-cols-[0.42fr_0.58fr]">
+              <div className="mt-3 grid items-center gap-3 sm:mt-4 sm:gap-4 md:grid-cols-[0.42fr_0.58fr]">
                 <button
                   type="button"
-                  onClick={() => setIsLumiAlt((previous) => !previous)}
-                  onMouseEnter={() => setIsLumiAlt(false)}
-                  onMouseLeave={() => setIsLumiAlt(true)}
-                  onFocus={() => setIsLumiAlt(false)}
-                  onBlur={() => setIsLumiAlt(true)}
-                  className="mx-auto w-full max-w-[40%] md:max-w-[88%]"
+                  onClick={() => updateLumiAlt((previous) => !previous)}
+                  onMouseEnter={() => updateLumiAlt(false)}
+                  onMouseLeave={() => updateLumiAlt(true)}
+                  onFocus={() => updateLumiAlt(false)}
+                  onBlur={() => updateLumiAlt(true)}
+                  className="mx-auto w-full max-w-[52%] sm:max-w-[44%] md:max-w-[88%]"
                   aria-label="Cambiar expresión de Lumi"
                 >
                   <img
@@ -297,29 +348,29 @@ export default function Home() {
                     loading="lazy"
                   />
                 </button>
-                <div className="grid gap-2 sm:grid-cols-3 md:grid-cols-1">
-                  <div className="rounded-[0.8rem] border border-[#d1d5db] bg-white/95 p-3">
-                    <p className="display-font text-3xl leading-none text-[#f47c0f]">Foco</p>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 md:grid-cols-1">
+                  <div className="rounded-[0.8rem] border border-[#d1d5db] bg-white/95 p-2.5 sm:p-3">
+                    <p className="display-font text-[1.85rem] leading-none text-[#f47c0f] sm:text-3xl">Foco</p>
                     <p className="mt-1 text-xs font-bold uppercase tracking-[0.08em] text-[#5b30d9]/80">Sesiones guiadas</p>
                   </div>
-                  <div className="rounded-[0.8rem] border border-[#d1d5db] bg-white/95 p-3">
-                    <p className="display-font text-3xl leading-none text-[#f47c0f]">+pts</p>
+                  <div className="rounded-[0.8rem] border border-[#d1d5db] bg-white/95 p-2.5 sm:p-3">
+                    <p className="display-font text-[1.85rem] leading-none text-[#f47c0f] sm:text-3xl">+pts</p>
                     <p className="mt-1 text-xs font-bold uppercase tracking-[0.08em] text-[#5b30d9]/80">Progreso visible</p>
                   </div>
-                  <div className="rounded-[0.8rem] border border-[#d1d5db] bg-white/95 p-3">
-                    <p className="display-font text-3xl leading-none text-[#f47c0f]">Salas</p>
+                  <div className="rounded-[0.8rem] border border-[#d1d5db] bg-white/95 p-2.5 sm:p-3">
+                    <p className="display-font text-[1.85rem] leading-none text-[#f47c0f] sm:text-3xl">Salas</p>
                     <p className="mt-1 text-xs font-bold uppercase tracking-[0.08em] text-[#5b30d9]/80">Estudio guiado</p>
                   </div>
                 </div>
               </div>
-              <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+              <div className="mt-4 grid grid-cols-1 gap-2.5 sm:mt-5 sm:grid-cols-2 sm:gap-4">
                 <Link to="/login" className="w-full">
-                  <Button className="focus-cta h-12 w-full rounded-none bg-[#f47c0f] px-4 text-base font-bold text-white hover:bg-[#dd6900] md:h-14 md:px-8 md:text-lg">
+                  <Button className="focus-cta h-11 w-full rounded-none bg-[#f47c0f] px-4 text-base font-bold text-white hover:bg-[#dd6900] md:h-14 md:px-8 md:text-lg">
                     Entrar ahora
                   </Button>
                 </Link>
                 <Link to="/login" className="w-full">
-                  <Button className="focus-cta h-12 w-full rounded-none border-2 border-[#5b30d9] bg-[#f2f0f3] px-4 text-base font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white md:h-14 md:px-8 md:text-lg">
+                  <Button className="focus-cta h-11 w-full rounded-none border-2 border-[#5b30d9] bg-[#f2f0f3] px-4 text-base font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white md:h-14 md:px-8 md:text-lg">
                     Crear cuenta
                   </Button>
                 </Link>
@@ -548,28 +599,52 @@ export default function Home() {
                 <MessageSquareQuote className="size-5 text-[#f47c0f]" />
                 <h3 className="display-font text-3xl text-[#5b30d9] md:text-4xl">Noticias relacionadas</h3>
               </div>
-              <p className="mt-3 text-sm font-semibold text-[#5b30d9]/85 md:text-base">Novedades sobre enfoque, bienestar digital y estrategias de estudio.</p>
-              <p className="mt-1 text-xs font-medium text-[#5b30d9]/65 md:text-sm">Resumen rápido de temas que conectan con la propuesta de Focus Zone.</p>
+              <p className="mt-3 text-sm font-semibold text-[#5b30d9]/85 md:text-base">Feed de noticias externas sobre enfoque, bienestar digital y hábitos de estudio.</p>
+              <p className="mt-1 text-xs font-medium text-[#5b30d9]/65 md:text-sm">Vista previa de titulares y resumen para leer el artículo completo en su medio original.</p>
               <div className="mt-4 space-y-3">
-                <article className="rounded-[0.9rem] border-2 border-[#d1d5db] bg-[linear-gradient(135deg,#ffffff_0%,#f9fafb_100%)] p-4 shadow-[0_12px_24px_-20px_rgba(17,24,39,0.45)]">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="inline-flex items-center rounded-full border border-[#f47c0f]/40 bg-[#fff4e8] px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.1em] text-[#f47c0f]">
-                      {relatedNews[0].category}
-                    </p>
-                    <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#5b30d9]/65">Noticia destacada</p>
+                <div className="flex items-center justify-between rounded-[0.75rem] border border-[#d1d5db] bg-white/75 px-3 py-2">
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.1em] text-[#5b30d9]/80">
+                    <Newspaper className="size-3.5 text-[#f47c0f]" />
+                    Preview de noticias
+                  </span>
+                  <span className="rounded-full border border-[#5b30d9]/25 bg-[#f7f5ff] px-2 py-0.5 text-[11px] font-bold text-[#5b30d9]/80">
+                    {relatedNews.length} artículo
+                  </span>
+                </div>
+                <article className="overflow-hidden rounded-[1rem] border-2 border-[#d1d5db] bg-[linear-gradient(145deg,#ffffff_0%,#f8faff_100%)] shadow-[0_14px_24px_-20px_rgba(17,24,39,0.45)]">
+                  <div className="grid gap-0 sm:grid-cols-[170px_1fr]">
+                    <div className="relative border-b border-[#d1d5db] bg-[linear-gradient(160deg,#f2f0ff_0%,#eef7ff_100%)] p-4 sm:border-b-0 sm:border-r">
+                      <span className="absolute right-2 top-2 rounded-full bg-[#f47c0f] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.08em] text-white">
+                        Noticia
+                      </span>
+                      <div className="mt-3 inline-flex size-11 items-center justify-center rounded-[0.8rem] border border-[#5b30d9]/25 bg-white text-[#5b30d9]">
+                        <Newspaper className="size-5" />
+                      </div>
+                      <p className="mt-3 text-xs font-black uppercase tracking-[0.1em] text-[#f47c0f]">{relatedNews[0].category}</p>
+                      <p className="mt-1 text-xs font-semibold text-[#5b30d9]/75">{relatedNews[0].sourceDomain}</p>
+                    </div>
+                    <div className="p-4">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="rounded-full border border-[#5b30d9]/25 bg-[#f7f5ff] px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.1em] text-[#5b30d9]/80">
+                          {relatedNews[0].topic}
+                        </p>
+                        <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#5b30d9]/65">Fuente externa</p>
+                      </div>
+                      <p className="mt-2 text-[1.12rem] font-extrabold leading-[1.2] text-[#5b30d9]">{relatedNews[0].title}</p>
+                      <p className="mt-2 text-sm font-medium leading-[1.45] text-[#5b30d9]/80">{relatedNews[0].summary}</p>
+                      {relatedNews[0].sourceUrl ? (
+                        <a
+                          href={relatedNews[0].sourceUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-[#5b30d9]/35 bg-white px-3 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#5b30d9] hover:bg-[#f2f0f3]"
+                        >
+                          Leer noticia completa
+                          <ArrowUpRight className="size-3.5" />
+                        </a>
+                      ) : null}
+                    </div>
                   </div>
-                  <p className="mt-2 text-[1.08rem] font-bold leading-[1.25] text-[#5b30d9]">{relatedNews[0].title}</p>
-                  <p className="mt-2 text-sm font-medium leading-[1.4] text-[#5b30d9]/80">{relatedNews[0].summary}</p>
-                  {relatedNews[0].sourceUrl ? (
-                    <a
-                      href={relatedNews[0].sourceUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-3 inline-flex rounded-full border border-[#5b30d9]/35 bg-white px-3 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#5b30d9] hover:bg-[#f2f0f3]"
-                    >
-                      Leer en BBC Mundo
-                    </a>
-                  ) : null}
                 </article>
 
               </div>
