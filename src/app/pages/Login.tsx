@@ -309,7 +309,7 @@ export default function Login() {
           : "Acceso";
 
   return (
-    <div className="focus-shell focus-soft-round min-h-screen overflow-x-hidden px-4 py-8">
+    <div className="min-h-screen bg-[#f2f0f3] px-4 py-8">
       <div className="relative z-10 mx-auto max-w-md">
         <Link to="/" className="mb-8 flex items-center justify-center">
           <img
@@ -319,7 +319,7 @@ export default function Login() {
           />
         </Link>
 
-        <Card className="focus-card rounded-none border-2 border-[#5b30d9]/35 p-8">
+        <Card className="rounded-none border-2 border-[#5b30d9]/35 bg-white p-8 shadow-none">
           <p className="focus-tag mb-5 w-fit">{tag}</p>
           <h1 className="display-font text-6xl text-[#f47c0f]">{title}</h1>
           <p className="mt-2 text-[#5b30d9]">

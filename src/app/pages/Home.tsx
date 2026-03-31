@@ -58,7 +58,7 @@ const libraryPillars = [
 ];
 
 const libraryResourceHighlights = [
-  { value: "+50", label: "Software especializado", Icon: Monitor },
+  { value: "+50", label: "Softwares especializados", Icon: Monitor },
   { value: "", label: "Cursos formativos", Icon: GraduationCap },
   { value: "", label: "Realidad virtual", Icon: Glasses },
   { value: "", label: "Bases de datos académicas", Icon: Database },
