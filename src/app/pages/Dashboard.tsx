@@ -2766,7 +2766,7 @@ export default function Dashboard() {
                           <img
                             src={activeLumiIcon}
                             alt="Lumi hablando"
-                            className="size-7 rounded-full border border-[#5b30d9]/25 object-cover object-top"
+                            className="size-8 rounded-full border border-[#5b30d9]/25 object-cover object-top"
                             loading="lazy"
                           />
                         ) : null}
@@ -2781,7 +2781,7 @@ export default function Dashboard() {
                         <img
                           src={activeLumiIcon}
                           alt="Lumi hablando"
-                          className="size-7 rounded-full border border-[#5b30d9]/25 object-cover object-top"
+                          className="size-8 rounded-full border border-[#5b30d9]/25 object-cover object-top"
                           loading="lazy"
                         />
                         <p className="text-[11px] font-black uppercase tracking-wide opacity-80">Lumi</p>
