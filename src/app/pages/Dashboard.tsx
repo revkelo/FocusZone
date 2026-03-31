@@ -404,7 +404,7 @@ export default function Dashboard() {
     );
   };
   const withLumiPresentation = (content: string) => {
-    return `¡Hola! 👋 Soy Lumi.\n\n${content}\n\n¿Quieres que te muestre otra opción o una recomendación personalizada? ✨`;
+    return content;
   };
 
   useEffect(() => {
@@ -2244,21 +2244,8 @@ export default function Dashboard() {
       return;
     }
 
-    const baseId = Date.now();
-    setChatMessages((previous) => [
-      ...previous,
-      { id: baseId, role: "user", text: message },
-      {
-        id: baseId + 1,
-        role: "assistant",
-        text: withLumiPresentation(
-          "Puedo orientarte mejor desde el menú de selección. Abre 'Menú rápido' y elige Smart Kits, bases de datos 2026, herramientas de investigación u objetos virtuales.",
-        ),
-      },
-    ]);
     setChatInput("");
-    setIsGuidedMenuOpen(true);
-    playEventSound("notification");
+    await sendMessageToLumi(message, message);
   };
 
   const handleGuidedOptionSelect = (optionId: string) => {
@@ -2319,28 +2306,14 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="focus-shell focus-grain focus-rings focus-no-stars focus-soft-round min-h-screen overflow-x-hidden">
-        <div className="focus-figure-layer" aria-hidden>
-          <div className="focus-figure-arc-left" />
-          <div className="focus-figure-arc-right" />
-          <div className="focus-figure-dot focus-figure-dot-a" />
-        </div>
+      <div className="focus-login-shell min-h-screen overflow-x-hidden">
         <div className="relative z-10 grid min-h-screen place-items-center text-xl font-bold">Cargando...</div>
       </div>
     );
   }
 
   return (
-    <div className="focus-shell focus-grain focus-rings focus-no-stars focus-soft-round min-h-screen overflow-x-hidden">
-      <div className="focus-figure-layer" aria-hidden>
-        <div className="focus-figure-arc-left" />
-        <div className="focus-figure-arc-right" />
-        <div className="focus-figure-arc-right-2" />
-        <div className="focus-figure-right-pill" />
-        <div className="focus-figure-right-square" />
-        <div className="focus-figure-dot focus-figure-dot-a" />
-        <div className="focus-figure-dot focus-figure-dot-b" />
-      </div>
+    <div className="focus-login-shell min-h-screen overflow-x-hidden">
       <div className="relative z-10">
         <header className="mx-auto mt-3 flex w-[calc(100%-1rem)] max-w-[calc(72rem-2.5rem)] items-center justify-between gap-2 rounded-[1rem] border-2 border-[#9fd45a] bg-[#dff5b8]/90 px-3 py-3 shadow-[0_10px_20px_-18px_rgba(76,107,31,0.35),0_1px_0_0_rgba(159,212,90,0.9)] md:mt-3 md:w-full md:max-w-[calc(72rem-4rem)] md:gap-3 md:px-8 md:py-5">
           <div className="flex min-w-0 items-center">
