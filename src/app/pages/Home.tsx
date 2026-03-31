@@ -65,16 +65,16 @@ const libraryResourceHighlights = [
 ];
 
 const technicalLogos = [
-  { name: "React", logo: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/react.svg" },
-  { name: "TypeScript", logo: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/typescript.svg" },
-  { name: "Vite", logo: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/vite.svg" },
-  { name: "React Router", logo: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/reactrouter.svg" },
-  { name: "Tailwind CSS", logo: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/tailwindcss.svg" },
-  { name: "Supabase", logo: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/supabase.svg" },
-  { name: "PostgreSQL", logo: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/postgresql.svg" },
-  { name: "Node.js API", logo: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/nodedotjs.svg" },
-  { name: "Vercel", logo: "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/vercel.svg" },
-  { name: "OpenRouter", logo: "https://openrouter.ai/favicon.ico" },
+  { name: "React", logo: "/assets/tech/react.svg" },
+  { name: "TypeScript", logo: "/assets/tech/typescript.svg" },
+  { name: "Vite", logo: "/assets/tech/vite.svg" },
+  { name: "React Router", logo: "/assets/tech/reactrouter.svg" },
+  { name: "Tailwind CSS", logo: "/assets/tech/tailwindcss.svg" },
+  { name: "Supabase", logo: "/assets/tech/supabase.svg" },
+  { name: "PostgreSQL", logo: "/assets/tech/postgresql.svg" },
+  { name: "Node.js API", logo: "/assets/tech/nodedotjs.svg" },
+  { name: "Vercel", logo: "/assets/tech/vercel.svg" },
+  { name: "OpenRouter", logo: "/assets/tech/openrouter.ico" },
 ];
 
 const relatedNews = [
