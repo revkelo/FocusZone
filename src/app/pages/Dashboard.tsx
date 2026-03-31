@@ -294,6 +294,7 @@ export default function Dashboard() {
   ]);
   const [chatInput, setChatInput] = useState("");
   const [isSendingChat, setIsSendingChat] = useState(false);
+  const [lumiSpeakingFrame, setLumiSpeakingFrame] = useState(0);
   const [chatRetryAt, setChatRetryAt] = useState<number>(0);
   const [guidedCategoryId, setGuidedCategoryId] = useState<string | null>(null);
   const [guidedOptionIds, setGuidedOptionIds] = useState<string[]>([]);
@@ -412,10 +413,22 @@ export default function Dashboard() {
   const withLumiPresentation = (content: string) => {
     return content;
   };
-  const getLumiPresetByMessage = (messageId: number) => {
-    const safeIndex = Math.abs(messageId) % LUMI_CHAT_PRESETS.length;
-    return LUMI_CHAT_PRESETS[safeIndex];
-  };
+  const activeLumiIcon = LUMI_CHAT_PRESETS[lumiSpeakingFrame] ?? LUMI_CHAT_PRESETS[0];
+
+  useEffect(() => {
+    if (activeTab !== "chatbot" || !isSendingChat) {
+      setLumiSpeakingFrame(0);
+      return;
+    }
+
+    const interval = window.setInterval(() => {
+      setLumiSpeakingFrame((previous) => (previous + 1) % LUMI_CHAT_PRESETS.length);
+    }, 260);
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [activeTab, isSendingChat]);
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -2729,15 +2742,13 @@ export default function Dashboard() {
             <TabsContent value="chatbot" className="focus-reveal flex flex-1 flex-col">
               <Card className="focus-card flex h-full flex-1 flex-col rounded-none gap-3 px-3 pb-3 pt-3 sm:p-6 md:p-8">
                 <div className="flex items-center gap-2">
-                  <MessageCircle className="size-5 text-[#f47c0f]" />
+                  <img
+                    src={activeLumiIcon}
+                    alt="Lumi hablando"
+                    className="size-12 rounded-full border border-[#5b30d9]/30 object-cover object-top sm:size-14"
+                    loading="lazy"
+                  />
                   <h2 className="display-font text-4xl text-[#5b30d9] sm:text-5xl">Chatbot Lumi</h2>
-                </div>
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  {LUMI_CHAT_PRESETS.map((preset, index) => (
-                    <div key={preset} className="overflow-hidden rounded-xl border border-[#5b30d9]/20 bg-white/90 p-1.5">
-                      <img src={preset} alt={`Preset Lumi ${index + 1}`} className="h-16 w-full rounded-lg object-cover object-top sm:h-20" loading="lazy" />
-                    </div>
-                  ))}
                 </div>
 
                 <div ref={chatScrollContainerRef} className="min-h-[320px] flex-1 space-y-3 overflow-y-auto border border-[#5b30d9]/20 bg-white/70 p-3 sm:min-h-[380px] sm:p-4 lg:min-h-[460px]">
@@ -2753,9 +2764,9 @@ export default function Dashboard() {
                       <div className="mb-1 flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wide opacity-80">
                         {message.role === "assistant" ? (
                           <img
-                            src={getLumiPresetByMessage(message.id)}
-                            alt="Lumi preset"
-                            className="size-5 rounded-full border border-[#5b30d9]/25 object-cover object-top"
+                            src={activeLumiIcon}
+                            alt="Lumi hablando"
+                            className="size-7 rounded-full border border-[#5b30d9]/25 object-cover object-top"
                             loading="lazy"
                           />
                         ) : null}
@@ -2768,9 +2779,9 @@ export default function Dashboard() {
                     <div className="mb-1 flex items-center justify-between gap-2">
                       <div className="flex items-center gap-1.5">
                         <img
-                          src={LUMI_CHAT_PRESETS[0]}
-                          alt="Lumi preset activo"
-                          className="size-5 rounded-full border border-[#5b30d9]/25 object-cover object-top"
+                          src={activeLumiIcon}
+                          alt="Lumi hablando"
+                          className="size-7 rounded-full border border-[#5b30d9]/25 object-cover object-top"
                           loading="lazy"
                         />
                         <p className="text-[11px] font-black uppercase tracking-wide opacity-80">Lumi</p>

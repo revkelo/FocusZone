@@ -92,17 +92,13 @@ const lumiPrompts = [
   "Ayúdame a salir del scroll y volver al foco.",
 ];
 
-const homeLumiShowcase = [
-  { label: "Lumi 1", src: "/assets/focuszone/lumi-home-01.png" },
-  { label: "Lumi 2", src: "/assets/focuszone/lumi-home-02.png" },
-];
-
 export default function Home() {
   const [ranking, setRanking] = useState<RankItem[]>([]);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
   const [horizontalCarouselApi, setHorizontalCarouselApi] = useState<CarouselApi | null>(null);
   const [activeHorizontalSlide, setActiveHorizontalSlide] = useState(0);
   const [isViewerTransitioning, setIsViewerTransitioning] = useState(false);
+  const [isLumiAlt, setIsLumiAlt] = useState(false);
 
   const viewerItem = useMemo(() => (viewerIndex !== null ? artGallery[viewerIndex] : null), [viewerIndex]);
   const horizontalDesigns = useMemo(() => artGallery.filter((item) => item.orientation === "landscape"), []);
@@ -244,9 +240,25 @@ export default function Home() {
             <Card className="focus-campaign-card focus-reveal !gap-4 rounded-[1.2rem] p-5 md:p-7 lg:h-full">
               <p className="mt-3 text-base italic text-[#5b30d9] md:text-lg">La biblioteca como espacio de pausa digital.</p>
               <div className="focus-divider focus-divider-animated mt-4 max-w-xl" />
-              <p className="mt-4 max-w-xl text-[1.05rem] text-[#5b30d9] md:text-lg">
-                Un nuevo mundo en la biblioteca: menos ruido digital, más sesiones de concentración, progreso real y retos semanales.
-              </p>
+              <div className="mt-4">
+                <button
+                  type="button"
+                  onClick={() => setIsLumiAlt((previous) => !previous)}
+                  onMouseEnter={() => setIsLumiAlt(true)}
+                  onMouseLeave={() => setIsLumiAlt(false)}
+                  onFocus={() => setIsLumiAlt(true)}
+                  onBlur={() => setIsLumiAlt(false)}
+                  className="w-full"
+                  aria-label="Cambiar expresión de Lumi"
+                >
+                  <img
+                    src={isLumiAlt ? "/assets/focuszone/lumi-home-02.png" : "/assets/focuszone/lumi-home-01.png"}
+                    alt={isLumiAlt ? "Lumi 2" : "Lumi 1"}
+                    className="h-auto w-full object-contain transition-opacity duration-200"
+                    loading="lazy"
+                  />
+                </button>
+              </div>
               <div className="mt-4 grid gap-2 sm:grid-cols-3">
                 <div className="rounded-[0.8rem] border border-[#d1d5db] bg-white/95 p-3">
                   <p className="display-font text-3xl leading-none text-[#f47c0f]">Foco</p>
@@ -279,6 +291,9 @@ export default function Home() {
               <h2 className="display-font text-4xl text-[#5b30d9] md:text-5xl">Stop Doomscrolling</h2>
               <p className="mt-4 text-base text-[#5b30d9] md:text-lg">
                 Algunas cosas te distraen. Otras te ayudan a enfocarte. Focus Zone convierte lo digital en aliado de tu estudio.
+              </p>
+              <p className="text-base text-[#5b30d9] md:text-lg">
+                Un nuevo mundo en la biblioteca: menos ruido digital, más sesiones de concentración, progreso real y retos semanales.
               </p>
               <div className="focus-divider-animated my-5 h-px w-full bg-gradient-to-r from-[#f47c0f] via-[#e5e7eb] to-[#b8ee73]/80" />
               <div className="mt-6 space-y-3 text-base font-bold text-[#5b30d9] md:text-lg">
@@ -316,14 +331,6 @@ export default function Home() {
                   <p className="mt-3 text-base text-[#5b30d9] md:text-lg">
                     Lumi te acompaña con orientación rápida para enfoque, pausas conscientes y uso estratégico de recursos de biblioteca.
                   </p>
-                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                    {homeLumiShowcase.map((item) => (
-                      <div key={item.label} className="rounded-[0.75rem] border border-[#d1d5db] bg-white p-2.5">
-                        <img src={item.src} alt={item.label} className="h-36 w-full rounded-[0.5rem] object-cover object-top sm:h-40" loading="lazy" />
-                        <p className="mt-2 text-center text-xs font-black uppercase tracking-[0.1em] text-[#5b30d9]/75">{item.label}</p>
-                      </div>
-                    ))}
-                  </div>
                   <div className="mt-4 grid gap-3 sm:grid-cols-2">
                     <div className="rounded-[0.75rem] border border-[#d1d5db] bg-white p-3">
                       <p className="text-xs font-black uppercase tracking-[0.1em] text-[#f47c0f]">Te ayuda con</p>
