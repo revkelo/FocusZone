@@ -149,7 +149,7 @@ const ROOM_PRESENCE_STALE_MS = 3_000;
 const DEFAULT_DAILY_REMINDER_HOUR = 18;
 const DEFAULT_POMODORO_REMINDER_MINUTES = 10;
 const DEFAULT_NOTIFICATION_VOLUME_UI = 100;
-const NOTIFICATION_VOLUME_BOOST_FACTOR = 3;
+const NOTIFICATION_VOLUME_BOOST_FACTOR = 4;
 const STREAK_WEEK_BONUS: Record<number, number> = {
   1: 5,
   2: 10,
@@ -2454,9 +2454,9 @@ export default function Dashboard() {
                           <Plus className="size-4" />
                         </button>
                       </div>
-                      <div className="mt-2 grid grid-cols-2 gap-0 overflow-hidden rounded-xl border border-white/15 bg-black/10 text-xs font-bold">
-                        <button onClick={() => adjustDuration("focus", -5)} className="py-1 text-white/90 transition hover:bg-black/10">-5 min</button>
-                        <button onClick={() => adjustDuration("focus", 5)} className="border-l border-white/15 py-1 text-white/90 transition hover:bg-black/10">+5 min</button>
+                      <div className="mt-2 grid grid-cols-2 gap-0 overflow-hidden rounded-xl border border-[#a88df3]/45 bg-white/70 text-xs font-bold">
+                        <button onClick={() => adjustDuration("focus", -5)} className="py-1 text-[#6a46d9] transition hover:bg-[#f6f2ff]">-5 min</button>
+                        <button onClick={() => adjustDuration("focus", 5)} className="border-l border-[#a88df3]/60 py-1 text-[#6a46d9] transition hover:bg-[#f6f2ff]">+5 min</button>
                       </div>
                     </div>
                     <div className="rounded-2xl bg-[#5b30d9] p-3 text-white">
@@ -2472,9 +2472,9 @@ export default function Dashboard() {
                           <Plus className="size-4" />
                         </button>
                       </div>
-                      <div className="mt-2 grid grid-cols-2 gap-0 overflow-hidden rounded-xl border border-white/15 bg-black/10 text-xs font-bold">
-                        <button onClick={() => adjustDuration("shortBreak", -5)} className="py-1 text-white/90 transition hover:bg-black/10">-5 min</button>
-                        <button onClick={() => adjustDuration("shortBreak", 5)} className="border-l border-white/15 py-1 text-white/90 transition hover:bg-black/10">+5 min</button>
+                      <div className="mt-2 grid grid-cols-2 gap-0 overflow-hidden rounded-xl border border-[#a88df3]/45 bg-white/70 text-xs font-bold">
+                        <button onClick={() => adjustDuration("shortBreak", -5)} className="py-1 text-[#6a46d9] transition hover:bg-[#f6f2ff]">-5 min</button>
+                        <button onClick={() => adjustDuration("shortBreak", 5)} className="border-l border-[#a88df3]/60 py-1 text-[#6a46d9] transition hover:bg-[#f6f2ff]">+5 min</button>
                       </div>
                     </div>
                     <div className="rounded-2xl bg-[#5b30d9] p-3 text-white">
@@ -2490,9 +2490,9 @@ export default function Dashboard() {
                           <Plus className="size-4" />
                         </button>
                       </div>
-                      <div className="mt-2 grid grid-cols-2 gap-0 overflow-hidden rounded-xl border border-white/15 bg-black/10 text-xs font-bold">
-                        <button onClick={() => adjustDuration("longBreak", -5)} className="py-1 text-white/90 transition hover:bg-black/10">-5 min</button>
-                        <button onClick={() => adjustDuration("longBreak", 5)} className="border-l border-white/15 py-1 text-white/90 transition hover:bg-black/10">+5 min</button>
+                      <div className="mt-2 grid grid-cols-2 gap-0 overflow-hidden rounded-xl border border-[#a88df3]/45 bg-white/70 text-xs font-bold">
+                        <button onClick={() => adjustDuration("longBreak", -5)} className="py-1 text-[#6a46d9] transition hover:bg-[#f6f2ff]">-5 min</button>
+                        <button onClick={() => adjustDuration("longBreak", 5)} className="border-l border-[#a88df3]/60 py-1 text-[#6a46d9] transition hover:bg-[#f6f2ff]">+5 min</button>
                       </div>
                     </div>
                   </div>
@@ -3195,14 +3195,14 @@ export default function Dashboard() {
                       <div className="mt-3 space-y-2">
                         <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Volumen notificación</p>
                         <div className="flex items-center gap-3">
-                          <Input
+                          <input
                             type="range"
                             min={1}
                             max={100}
-                            step={5}
+                            step={1}
                             value={notificationVolume}
                             onChange={(event) => setNotificationVolume(String(parseNotificationVolume(event.target.value)))}
-                            className="h-10"
+                            className="focus-volume-slider w-full"
                           />
                           <span className="w-12 text-right text-sm font-bold text-[#5b30d9]">{parseNotificationVolume(notificationVolume)}%</span>
                         </div>
