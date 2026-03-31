@@ -632,7 +632,7 @@
   }
 
   .focus-pill {
-    @apply inline-flex items-center gap-2 rounded-none border-2 border-[#5a2dca]/45 bg-[#fcfbf6]/90 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-[#5a2dca];
+    @apply inline-flex items-center gap-2 rounded-xl border-2 border-[#5a2dca]/45 bg-[#fcfbf6]/90 px-3 py-2 text-xs font-bold uppercase tracking-[0.14em] text-[#5a2dca];
   }
 
   .focus-divider {

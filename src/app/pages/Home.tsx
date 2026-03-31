@@ -391,12 +391,12 @@ export default function Home() {
               </div>
               <div className="mt-4 grid grid-cols-1 gap-2.5 sm:mt-5 sm:grid-cols-2 sm:gap-4">
                 <Link to="/login" className="w-full">
-                  <Button className="focus-cta h-11 w-full rounded-none bg-[#f47c0f] px-4 text-base font-bold text-white hover:bg-[#dd6900] md:h-14 md:px-8 md:text-lg">
+                  <Button className="focus-cta h-11 w-full rounded-xl bg-[#f47c0f] px-4 text-base font-bold text-white hover:bg-[#dd6900] md:h-14 md:px-8 md:text-lg">
                     Entrar ahora
                   </Button>
                 </Link>
                 <Link to="/login" className="w-full">
-                  <Button className="focus-cta h-11 w-full rounded-none border-2 border-[#5b30d9] bg-[#f2f0f3] px-4 text-base font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white md:h-14 md:px-8 md:text-lg">
+                  <Button className="focus-cta h-11 w-full rounded-xl border-2 border-[#5b30d9] bg-[#f2f0f3] px-4 text-base font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white md:h-14 md:px-8 md:text-lg">
                     Crear cuenta
                   </Button>
                 </Link>
@@ -473,7 +473,7 @@ export default function Home() {
                       <Button
                         type="button"
                         onClick={() => void toggleLumiSpeaking()}
-                        className="focus-cta h-10 w-full rounded-none border-2 border-[#f47c0f] bg-white px-4 text-sm font-bold text-[#f47c0f] hover:bg-[#f47c0f] hover:text-white"
+                        className="focus-cta h-10 w-full rounded-xl border-2 border-[#f47c0f] bg-white px-4 text-sm font-bold text-[#f47c0f] hover:bg-[#f47c0f] hover:text-white"
                       >
                         <span className="inline-flex items-center gap-2">
                           <Volume2 className="size-4" />
@@ -505,7 +505,7 @@ export default function Home() {
                     </div>
                   </div>
                   <Link to="/login" className="mt-4 inline-block w-full sm:w-auto">
-                    <Button className="focus-cta h-11 w-full rounded-none border-2 border-[#5b30d9] bg-white px-5 text-base font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white sm:w-auto">
+                    <Button className="focus-cta h-11 w-full rounded-xl border-2 border-[#5b30d9] bg-white px-5 text-base font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white sm:w-auto">
                       Abrir chat con Lumi
                     </Button>
                   </Link>
@@ -552,7 +552,7 @@ export default function Home() {
 
             <Card className="focus-campaign-card focus-heavy focus-reveal focus-reveal-delay-2 flex h-full flex-col rounded-[1.2rem] border-[#7d4cd8]/70 bg-[#5a2dca] p-5 md:p-7">
               <div className="mb-4 flex items-center gap-2 text-white">
-                <Trophy className="size-5 text-[#f47c0f]" />
+                <Trophy className="size-5 text-white" />
                 <h3 className="display-font text-3xl md:text-4xl">Ranking en vivo</h3>
               </div>
 
@@ -627,12 +627,12 @@ export default function Home() {
               </div>
               <div className="mt-4 space-y-3">
                 <div className="flex items-center justify-between rounded-[0.75rem] border border-[#d1d5db] bg-white/75 px-3 py-2">
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.1em] text-[#4f8a2d]">
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.1em] text-[#f47c0f]">
                     <Newspaper className="size-3.5 text-[#f47c0f]" />
                     Preview de noticias
                   </span>
                   <div className="flex items-center gap-2">
-                    <span className="rounded-full border border-[#9fd45a]/45 bg-[#eff8de] px-2 py-0.5 text-[11px] font-bold text-[#4f8a2d]">
+                    <span className="rounded-full border border-[#5b30d9]/25 bg-[#f7f5ff] px-2 py-0.5 text-[11px] font-bold text-[#5b30d9]/80">
                       {activeNewsIndex + 1}/{relatedNews.length}
                     </span>
                     <div className="flex items-center gap-1">
@@ -640,7 +640,7 @@ export default function Home() {
                         type="button"
                         onClick={goPrevNews}
                         aria-label="Noticia anterior"
-                        className="inline-flex size-7 items-center justify-center rounded-full border border-[#9fd45a]/55 bg-white text-[#4f8a2d] hover:bg-[#eff8de]"
+                        className="inline-flex size-7 items-center justify-center rounded-full border border-[#f47c0f]/45 bg-white text-[#f47c0f] hover:bg-[#fff1e5]"
                       >
                         <ChevronLeft className="size-4" />
                       </button>
@@ -648,7 +648,7 @@ export default function Home() {
                         type="button"
                         onClick={goNextNews}
                         aria-label="Siguiente noticia"
-                        className="inline-flex size-7 items-center justify-center rounded-full border border-[#9fd45a]/55 bg-white text-[#4f8a2d] hover:bg-[#eff8de]"
+                        className="inline-flex size-7 items-center justify-center rounded-full border border-[#f47c0f]/45 bg-white text-[#f47c0f] hover:bg-[#fff1e5]"
                       >
                         <ChevronRight className="size-4" />
                       </button>
@@ -681,7 +681,7 @@ export default function Home() {
                           href={activeNews.sourceUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-[#9fd45a]/55 bg-[#f7fbe9] px-3 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#4f8a2d] hover:bg-[#eff8de]"
+                          className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-[#f47c0f]/45 bg-[#fff4e8] px-3 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#f47c0f] hover:bg-[#ffe6d1]"
                         >
                           Leer noticia completa
                           <ArrowUpRight className="size-3.5" />
@@ -714,15 +714,15 @@ export default function Home() {
 
             <Card className="focus-campaign-card focus-reveal focus-reveal-delay-1 rounded-[1.2rem] border-[#7d4cd8]/70 bg-[#5a2dca] p-5 md:p-7 lg:col-span-2">
               <div className="flex items-center gap-2">
-                <BookOpenText className="size-5 text-[#f47c0f]" />
+                <BookOpenText className="size-5 text-white" />
                 <h3 className="display-font text-3xl text-white md:text-4xl">Biblioteca como alternativa</h3>
               </div>
               <p className="mt-3 text-[1.02rem] leading-relaxed text-white md:text-lg">
                 Focus Zone no es solo una app de pomodoro: Conecta hábitos saludables con recursos reales de la biblioteca como espacio de exploración tecnológica y bienestar académico.
               </p>
-              <div className="mt-5 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+              <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:flex lg:flex-wrap">
                 {libraryPillars.map(({ label, Icon }) => (
-                  <span key={label} className="focus-pill w-full justify-center border-white/35 bg-white/95 text-[#5a2dca] sm:w-auto sm:justify-start">
+                  <span key={label} className="focus-pill w-full justify-start border-white/35 bg-white/95 text-[#5a2dca] sm:w-auto">
                     <Icon className="size-3.5 text-[#f47c0f]" />
                     {label}
                   </span>
