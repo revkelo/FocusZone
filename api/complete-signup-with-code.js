@@ -1,4 +1,13 @@
-import { createAdminClient, json, listUserByEmail, listUserByNickname, normalizeEmail, normalizeNickname, verifyCodeRecord } from "./_auth-code-utils.js";
+import {
+  createAdminClient,
+  getNicknameValidationError,
+  json,
+  listUserByEmail,
+  listUserByNickname,
+  normalizeEmail,
+  normalizeNickname,
+  verifyCodeRecord,
+} from "./_auth-code-utils.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -11,19 +20,17 @@ export default async function handler(req, res) {
   const code = String(req.body?.code || "").trim();
 
   if (!email || !email.includes("@")) {
-    return json(res, 400, { error: "Correo inválido." });
+    return json(res, 400, { error: "Correo invalido." });
   }
-  if (nickname.length < 3) {
-    return json(res, 400, { error: "Nickname inválido." });
-  }
-  if (/\s/.test(nickname)) {
-    return json(res, 400, { error: "El nickname no puede tener espacios." });
+  const nicknameError = getNicknameValidationError(nickname);
+  if (nicknameError) {
+    return json(res, 400, { error: nicknameError });
   }
   if (password.length < 6) {
-    return json(res, 400, { error: "La contraseña debe tener mínimo 6 caracteres." });
+    return json(res, 400, { error: "La contrasena debe tener minimo 6 caracteres." });
   }
   if (!/^\d{4}$/.test(code)) {
-    return json(res, 400, { error: "Código inválido." });
+    return json(res, 400, { error: "Codigo invalido." });
   }
 
   try {
@@ -31,28 +38,30 @@ export default async function handler(req, res) {
     const verification = await verifyCodeRecord(admin, { email, purpose: "signup", code });
     if (!verification.ok) {
       if (verification.reason === "expired") {
-        return json(res, 400, { error: "El código expiró. Solicita uno nuevo." });
+        return json(res, 400, { error: "El codigo expiro. Solicita uno nuevo." });
       }
       if (verification.reason === "invalid") {
-        return json(res, 400, { error: `Código incorrecto. Intentos restantes: ${verification.attemptsLeft}` });
+        return json(res, 400, { error: `Codigo incorrecto. Intentos restantes: ${verification.attemptsLeft}` });
       }
-      return json(res, 400, { error: "No hay código activo para este correo." });
+      return json(res, 400, { error: "No hay codigo activo para este correo." });
     }
 
     const existing = await listUserByEmail(admin, email);
     if (existing) {
-      return json(res, 409, { error: "Este correo ya está registrado." });
+      return json(res, 409, { error: "Este correo ya esta registrado." });
     }
 
     const finalNickname = normalizeNickname(verification.metadata?.nickname || nickname);
-    if (finalNickname.length < 3 || /\s/.test(finalNickname)) {
-      return json(res, 400, { error: "Nickname inválido." });
+    const finalNicknameError = getNicknameValidationError(finalNickname);
+    if (finalNicknameError) {
+      return json(res, 400, { error: finalNicknameError });
     }
 
     const existingNickname = await listUserByNickname(admin, finalNickname);
     if (existingNickname) {
-      return json(res, 409, { error: "Ese nickname ya está en uso." });
+      return json(res, 409, { error: "Ese nickname ya esta en uso." });
     }
+
     const { data, error } = await admin.auth.admin.createUser({
       email,
       password,

@@ -6,6 +6,7 @@ import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
+import { getNicknameValidationError, MAX_NICKNAME_LENGTH } from "../lib/nicknamePolicy";
 import { supabase } from "../lib/supabase";
 
 type AuthView = "login" | "register" | "registerCode" | "recoverRequest" | "recoverCode" | "verifyLoginCode";
@@ -16,7 +17,6 @@ type ApiResult = {
 };
 
 const normalizeInput = (value: string) => value.trim();
-const hasWhitespace = (value: string) => /\s/.test(value);
 
 export default function Login() {
   const navigate = useNavigate();
@@ -140,12 +140,9 @@ export default function Login() {
       setError("Ingresa un correo válido.");
       return;
     }
-    if (normalizedNickname.length < 3) {
-      setError("El nickname debe tener mínimo 3 caracteres.");
-      return;
-    }
-    if (hasWhitespace(normalizedNickname)) {
-      setError("El nickname no puede tener espacios.");
+    const nicknameError = getNicknameValidationError(normalizedNickname);
+    if (nicknameError) {
+      setError(nicknameError);
       return;
     }
     if (password.length < 6) {
@@ -159,6 +156,19 @@ export default function Login() {
 
     setLoading(true);
     try {
+      const { data: existingNicknameEmail, error: existingNicknameError } = await supabase.rpc("get_email_by_nickname", {
+        nickname_input: normalizedNickname,
+      });
+
+      if (existingNicknameError) {
+        setError("No se pudo validar el nickname. Intenta de nuevo.");
+        return;
+      }
+      if (existingNicknameEmail) {
+        setError("Ese nickname ya está en uso.");
+        return;
+      }
+
       await postAuth("/api/request-signup-code", {
         email: normalizedEmail,
         nickname: normalizedNickname,
@@ -410,6 +420,7 @@ export default function Login() {
                     type="text"
                     placeholder="@tu_nickname"
                     value={nickname}
+                    maxLength={MAX_NICKNAME_LENGTH}
                     onChange={(event) => setNickname(event.target.value.replace(/\s+/g, ""))}
                     className="h-11 rounded-xl border-[#5b30d9]/25 pl-10"
                   />
@@ -602,7 +613,7 @@ export default function Login() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="h-12 w-full rounded-xl bg-[#f47c0f] text-base font-bold text-white hover:bg-[#dd6900] focus-glow-orange"
+                className="h-12 w-full rounded-xl bg-[#9adf45] text-base font-bold text-[#1f3c0d] hover:bg-[#87cc39] focus-glow-green"
               >
                 {loading ? "Actualizando..." : "Cambiar contraseña"}
               </Button>
@@ -629,7 +640,7 @@ export default function Login() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="h-12 w-full rounded-xl bg-[#f47c0f] text-base font-bold text-white hover:bg-[#dd6900] focus-glow-orange"
+                className="h-12 w-full rounded-xl bg-[#9adf45] text-base font-bold text-[#1f3c0d] hover:bg-[#87cc39] focus-glow-green"
               >
                 {loading ? "Verificando..." : "Verificar correo"}
               </Button>

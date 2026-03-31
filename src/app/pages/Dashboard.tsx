@@ -34,6 +34,7 @@ import {
   getQuickReplyForOption,
   getQuickReplyForQuestion,
 } from "../lib/lumiGuidedFlow";
+import { getNicknameValidationError } from "../lib/nicknamePolicy";
 import { supabase } from "../lib/supabase";
 
 interface Session {
@@ -186,13 +187,6 @@ const getLocalDateKey = (value: Date | string) => {
   return `${year}-${month}-${day}`;
 };
 
-const urlBase64ToUint8Array = (base64String: string) => {
-  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-  const normalizedBase64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
-  const rawData = window.atob(normalizedBase64);
-  return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
-};
-
 const playEventSound = (event: "pomodoro" | "reward" | "notification" | "error") => {
   try {
     const audioContext = new window.AudioContext();
@@ -277,6 +271,11 @@ export default function Dashboard() {
   const [newRewardCost, setNewRewardCost] = useState("60");
   const [newRoomName, setNewRoomName] = useState("");
   const [isCreatingRoom, setIsCreatingRoom] = useState(false);
+  const [nicknameInput, setNicknameInput] = useState("");
+  const [isUpdatingNickname, setIsUpdatingNickname] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [confirmPasswordInput, setConfirmPasswordInput] = useState("");
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [joiningRoomId, setJoiningRoomId] = useState<number | null>(null);
   const [deletingRoomId, setDeletingRoomId] = useState<number | null>(null);
   const [roomSearchQuery, setRoomSearchQuery] = useState("");
@@ -447,7 +446,9 @@ export default function Dashboard() {
 
       setUserId(user.id);
       setEmail(user.email || "");
-      setName((user.user_metadata.full_name as string) || (user.email || "Usuario"));
+      const userNickname = (user.user_metadata.nickname as string) || (user.user_metadata.full_name as string) || user.email || "Usuario";
+      setName(userNickname);
+      setNicknameInput(userNickname);
 
       const [sessionsResult, challengesResult, catalogChallengesResult, customChallengesResult, roomsResult, membershipsResult, membersByRoomResult] = await Promise.all([
         supabase
@@ -2066,121 +2067,76 @@ export default function Dashboard() {
     setSuccessMessage(`Sala "${room.name}" eliminada.`);
   };
 
-  const sendTestNotification = async () => {
-    if (!userId) {
-      setError("Inicia sesión para activar notificaciones push.");
+  const handleUpdateNickname = async () => {
+    const nextNickname = normalizeInputText(nicknameInput).replace(/\s+/g, "");
+    const nicknameError = getNicknameValidationError(nextNickname);
+    if (nicknameError) {
+      setError(nicknameError);
       setSuccessMessage("");
       return;
     }
 
-    if (typeof window === "undefined" || !("Notification" in window)) {
-      setError("Este navegador no soporta notificaciones.");
-      setSuccessMessage("");
-      return;
-    }
-
-    if (!window.isSecureContext) {
-      setError("Las notificaciones requieren HTTPS (o localhost).");
-      setSuccessMessage("");
-      return;
-    }
-
-    const isIOS = /iPad|iPhone|iPod/i.test(navigator.userAgent);
-    const isStandalone =
-      window.matchMedia("(display-mode: standalone)").matches ||
-      (typeof navigator !== "undefined" && "standalone" in navigator && Boolean((navigator as Navigator & { standalone: boolean }).standalone));
-    if (isIOS && !isStandalone) {
-      setError("En iPhone/iPad las notificaciones web requieren instalar la app en pantalla de inicio.");
-      setSuccessMessage("");
-      return;
-    }
-
-    if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
-      setError("Tu navegador no soporta Push API en este modo.");
-      setSuccessMessage("");
-      return;
-    }
-
-    const vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undefined;
-    if (!vapidPublicKey) {
-      setError("Falta configurar VITE_VAPID_PUBLIC_KEY.");
-      setSuccessMessage("");
-      return;
-    }
-
-    let permission = window.Notification.permission;
-    if (permission === "default") {
-      permission = await window.Notification.requestPermission();
-      setNotificationPermission(permission);
-    }
-
-    if (permission !== "granted") {
-      setError("Permiso bloqueado. Habilitalo en la configuracion del navegador para este sitio.");
-      setSuccessMessage("");
-      return;
-    }
-
+    setIsUpdatingNickname(true);
+    setError("");
+    setSuccessMessage("");
     try {
-      const registration = await navigator.serviceWorker.register("/sw.js");
-      const readyRegistration = await navigator.serviceWorker.ready;
-
-      let subscription = await readyRegistration.pushManager.getSubscription();
-      if (!subscription) {
-        subscription = await readyRegistration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
-        });
-      }
-
-      const serialized = subscription.toJSON();
-      const p256dh = serialized.keys.p256dh || "";
-      const auth = serialized.keys.auth || "";
-      if (!subscription.endpoint || !p256dh || !auth) {
-        setError("No se pudo obtener una suscripcion push valida.");
-        setSuccessMessage("");
-        return;
-      }
-
-      const { error: subscriptionError } = await supabase.from("push_subscriptions").upsert(
-        {
-          user_id: userId,
-          endpoint: subscription.endpoint,
-          p256dh,
-          auth,
-          subscription: serialized,
-          user_agent: navigator.userAgent,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "endpoint" },
-      );
-
-      if (subscriptionError) {
-        setError("No se pudo guardar la suscripcion push.");
-        setSuccessMessage("");
-        return;
-      }
-
-      const response = await fetch("/api/push-test", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId,
-          title: "FocusZone | Prueba Push",
-          body: "Push real enviada. Si ves esto, móvil ya está listo.",
-        }),
+      const { data: existingNicknameEmail, error: existingNicknameError } = await supabase.rpc("get_email_by_nickname", {
+        nickname_input: nextNickname,
       });
-
-      if (!response.ok) {
-        const payload = (await response.json().catch(() => ({}))) as { error: string };
-        throw new Error(payload.error || "No se pudo enviar el push de prueba");
+      if (existingNicknameError) {
+        setError("No se pudo validar el nickname.");
+        return;
+      }
+      if (existingNicknameEmail && existingNicknameEmail !== email) {
+        setError("Ese nickname ya está en uso.");
+        return;
       }
 
-      void registration.update();
-      setError("");
-      setSuccessMessage("Push de prueba enviada.");
-    } catch {
-      setError("No se pudo enviar push en este dispositivo. Verifica permisos, PWA instalada (iOS) y configuracion VAPID.");
+      const { data, error: updateError } = await supabase.auth.updateUser({
+        data: {
+          nickname: nextNickname,
+          full_name: nextNickname,
+        },
+      });
+      if (updateError) {
+        setError("No se pudo actualizar el nickname.");
+        return;
+      }
+      const updatedName = (data.user?.user_metadata.nickname as string) || nextNickname;
+      setName(updatedName);
+      setNicknameInput(updatedName);
+      setSuccessMessage("Nickname actualizado correctamente.");
+    } finally {
+      setIsUpdatingNickname(false);
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    if (passwordInput.length < 6) {
+      setError("La nueva contraseña debe tener al menos 6 caracteres.");
       setSuccessMessage("");
+      return;
+    }
+    if (passwordInput !== confirmPasswordInput) {
+      setError("Las contraseñas no coinciden.");
+      setSuccessMessage("");
+      return;
+    }
+
+    setIsUpdatingPassword(true);
+    setError("");
+    setSuccessMessage("");
+    try {
+      const { error: updateError } = await supabase.auth.updateUser({ password: passwordInput });
+      if (updateError) {
+        setError("No se pudo actualizar la contraseña.");
+        return;
+      }
+      setPasswordInput("");
+      setConfirmPasswordInput("");
+      setSuccessMessage("Contraseña actualizada correctamente.");
+    } finally {
+      setIsUpdatingPassword(false);
     }
   };
   const resetGuidedSelection = () => {
@@ -2998,15 +2954,15 @@ export default function Dashboard() {
                     <div className="sticky top-0 z-10 space-y-3 bg-[#f2f0f3] pb-2">
                       <Progress value={progressPercentage} className="h-3 rounded-xl bg-[#5b30d9]/20 [&>div]:rounded-xl [&>div]:bg-[#f47c0f]" />
                       <div className="grid gap-3 sm:grid-cols-3">
-                        <div className="border border-[#5b30d9]/25 bg-white/70 p-3">
+                        <div className="rounded-xl border border-[#5b30d9]/25 bg-white/70 p-3">
                           <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/70">Racha actual</p>
                           <p className="display-font mt-1 text-4xl text-[#5b30d9]">{currentChallengeStreak} días</p>
                         </div>
-                        <div className="border border-[#f47c0f]/30 bg-[#fff4ea] p-3">
+                        <div className="rounded-xl border border-[#f47c0f]/30 bg-[#fff4ea] p-3">
                           <p className="text-xs font-bold uppercase tracking-wide text-[#f47c0f]/80">Bono por racha</p>
                           <p className="display-font mt-1 text-4xl text-[#f47c0f]">+{streakBonusPoints}</p>
                         </div>
-                        <div className="border border-[#4f7c0f]/25 bg-[#eff9db] p-3">
+                        <div className="rounded-xl border border-[#4f7c0f]/25 bg-[#eff9db] p-3">
                           <p className="text-xs font-bold uppercase tracking-wide text-[#4f7c0f]/80">Estado</p>
                           <p className="mt-2 font-bold text-[#325f0b]">{currentChallengeStreak > 0 ? "Vas en racha" : "Inicia tu racha"}</p>
                         </div>
@@ -3102,13 +3058,6 @@ export default function Dashboard() {
                               ? "Notificaciones no soportadas"
                               : "Notificaciones limitadas"}
                         </Button>
-                        <Button
-                          onClick={() => void sendTestNotification()}
-                          disabled={notificationPermission === "unsupported"}
-                          className="rounded-xl bg-[#f47c0f] text-white hover:bg-[#dd6900]"
-                        >
-                          Probar notificación
-                        </Button>
                       </div>
                       <div className="mt-3 grid gap-3 sm:grid-cols-2">
                         <div className="space-y-2">
@@ -3155,6 +3104,53 @@ export default function Dashboard() {
                           </div>
                           <p className="text-[11px] font-bold text-[#5b30d9]/70">Cada N minutos (1-60)</p>
                         </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4 rounded-xl border border-[#5b30d9]/20 bg-white/70 p-4">
+                      <h3 className="font-bold uppercase tracking-wide text-[#5b30d9]">Perfil</h3>
+                      <div className="space-y-2">
+                        <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Cambiar nickname</p>
+                        <div className="flex flex-col gap-2 sm:flex-row">
+                          <Input
+                            type="text"
+                            value={nicknameInput}
+                            maxLength={30}
+                            onChange={(event) => setNicknameInput(event.target.value.replace(/\s+/g, ""))}
+                            placeholder="tu_nickname"
+                            className="sm:flex-1"
+                          />
+                          <Button
+                            onClick={() => void handleUpdateNickname()}
+                            disabled={isUpdatingNickname}
+                            className="rounded-xl bg-[#5b30d9] text-white hover:bg-[#4a22be]"
+                          >
+                            {isUpdatingNickname ? "Guardando..." : "Actualizar"}
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Cambiar contraseña</p>
+                        <Input
+                          type="password"
+                          value={passwordInput}
+                          onChange={(event) => setPasswordInput(event.target.value)}
+                          placeholder="Nueva contraseña"
+                        />
+                        <Input
+                          type="password"
+                          value={confirmPasswordInput}
+                          onChange={(event) => setConfirmPasswordInput(event.target.value)}
+                          placeholder="Repite la nueva contraseña"
+                        />
+                        <Button
+                          onClick={() => void handleUpdatePassword()}
+                          disabled={isUpdatingPassword}
+                          className="rounded-xl bg-[#f47c0f] text-white hover:bg-[#dd6900]"
+                        >
+                          {isUpdatingPassword ? "Actualizando..." : "Actualizar contraseña"}
+                        </Button>
                       </div>
                     </div>
                   </div>

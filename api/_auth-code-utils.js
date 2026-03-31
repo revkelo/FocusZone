@@ -6,6 +6,36 @@ import { createClient } from "@supabase/supabase-js";
 
 const CODE_TTL_MINUTES = 10;
 const MAX_ATTEMPTS = 5;
+const MAX_NICKNAME_LENGTH = 30;
+const BLOCKED_NICKNAME_TERMS = [
+  "hpta",
+  "hp",
+  "gonorrea",
+  "marica",
+  "idiota",
+  "imbecil",
+  "estupido",
+  "pendejo",
+  "mierda",
+  "puta",
+  "puto",
+  "sexo",
+  "sexual",
+  "porn",
+  "porno",
+  "xxx",
+  "onlyfans",
+  "nudes",
+  "nude",
+  "tet",
+  "teta",
+  "pene",
+  "vagina",
+  "culo",
+  "verga",
+  "pito",
+  "monda",
+];
 
 export const json = (res, status, body) => {
   res.statusCode = status;
@@ -15,6 +45,43 @@ export const json = (res, status, body) => {
 
 export const normalizeEmail = (value) => String(value || "").trim().toLowerCase();
 export const normalizeNickname = (value) => String(value || "").trim();
+export const toNicknameModerationForm = (value) =>
+  normalizeNickname(value)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[013457@$]/g, (char) => {
+      if (char === "0") return "o";
+      if (char === "1") return "i";
+      if (char === "3") return "e";
+      if (char === "4") return "a";
+      if (char === "5" || char === "$") return "s";
+      if (char === "7") return "t";
+      if (char === "@") return "a";
+      return char;
+    })
+    .replace(/[^a-z0-9]/g, "");
+
+export const getNicknameValidationError = (value) => {
+  const nickname = normalizeNickname(value);
+  if (nickname.length < 3) {
+    return "Nickname inválido.";
+  }
+  if (nickname.length > MAX_NICKNAME_LENGTH) {
+    return `El nickname no puede superar ${MAX_NICKNAME_LENGTH} caracteres.`;
+  }
+  if (/\s/.test(nickname)) {
+    return "El nickname no puede tener espacios.";
+  }
+
+  const normalized = toNicknameModerationForm(nickname);
+  const blocked = BLOCKED_NICKNAME_TERMS.some((term) => normalized.includes(term));
+  if (blocked) {
+    return "Ese nickname no está permitido por contenido ofensivo o sexual.";
+  }
+
+  return "";
+};
 
 export const generate4DigitCode = () => String(Math.floor(1000 + Math.random() * 9000));
 

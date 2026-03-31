@@ -1,6 +1,7 @@
 import {
   createAdminClient,
   generate4DigitCode,
+  getNicknameValidationError,
   json,
   listUserByEmail,
   listUserByNickname,
@@ -19,25 +20,24 @@ export default async function handler(req, res) {
   const nickname = normalizeNickname(req.body?.nickname);
 
   if (!email || !email.includes("@")) {
-    return json(res, 400, { error: "Correo inválido." });
+    return json(res, 400, { error: "Correo invalido." });
   }
-  if (nickname.length < 3) {
-    return json(res, 400, { error: "Nickname inválido." });
-  }
-  if (/\s/.test(nickname)) {
-    return json(res, 400, { error: "El nickname no puede tener espacios." });
+
+  const nicknameError = getNicknameValidationError(nickname);
+  if (nicknameError) {
+    return json(res, 400, { error: nicknameError });
   }
 
   try {
     const admin = createAdminClient();
     const existing = await listUserByEmail(admin, email);
     if (existing) {
-      return json(res, 409, { error: "Este correo ya está registrado." });
+      return json(res, 409, { error: "Este correo ya esta registrado." });
     }
 
     const existingNickname = await listUserByNickname(admin, nickname);
     if (existingNickname) {
-      return json(res, 409, { error: "Ese nickname ya está en uso." });
+      return json(res, 409, { error: "Ese nickname ya esta en uso." });
     }
 
     const code = generate4DigitCode();
@@ -50,10 +50,10 @@ export default async function handler(req, res) {
 
     await sendCodeEmail({
       to: email,
-      subject: "Focus Zone | Código de verificación",
+      subject: "Focus Zone | Codigo de verificacion",
       heading: "Verifica tu correo",
       code,
-      description: "Usa este código para terminar tu registro en Focus Zone.",
+      description: "Usa este codigo para terminar tu registro en Focus Zone.",
     });
 
     return json(res, 200, { ok: true });

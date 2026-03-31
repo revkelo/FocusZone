@@ -24,7 +24,7 @@
   --switch-background: #d5d5d5;
   --font-weight-medium: 600;
   --font-weight-normal: 400;
-  --ring: #9eff3a;
+  --ring: #f47c0f;
   --chart-1: #f28c38;
   --chart-2: #5a2dca;
   --chart-3: #9eff3a;
@@ -58,7 +58,7 @@
   --accent-foreground: #ffffff;
   --border: rgba(255, 255, 255, 0.2);
   --input: #252525;
-  --ring: #9eff3a;
+  --ring: #f47c0f;
 }
 
 @theme inline {
