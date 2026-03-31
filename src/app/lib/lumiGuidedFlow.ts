@@ -1,4 +1,4 @@
-export interface GuidedOption {
+﻿export interface GuidedOption {
   id: string;
   label: string;
   quickReply: string;
@@ -37,108 +37,108 @@ const guidedCategories: GuidedCategory[] = [
   {
     id: "smart-kits",
     label: "Smart Kits de biblioteca",
-    question: "¿Qué quieres saber sobre los Smart Kits?",
+    question: "Que quieres saber sobre los Smart Kits?",
     options: [
       {
         id: "smartkits-que-son",
-        label: "Qué son",
-        quickReply: `${E.books} Los Smart Kits son guías digitales por programa académico con libros, artículos, revistas y recursos confiables para apoyar el estudio autónomo.`,
+        label: "Que son",
+        quickReply: `${E.books} Los Smart Kits son guias digitales por programa academico con libros, articulos, revistas y recursos confiables para apoyar el estudio autonomo.`,
       },
       {
         id: "smartkits-programas",
         label: "Facultades y programas",
-        quickReply: `${E.building} Hay Smart Kits para Medicina, Enfermería, Odontología, Psicología, Creación y Comunicación, Ingeniería, Ciencias, Jurídicas y Políticas, Económicas y Administrativas, Humanidades y Educación.`,
+        quickReply: `${E.building} Hay Smart Kits para Medicina, Enfermeria, Odontologia, Psicologia, Creacion y Comunicacion, Ingenieria, Ciencias, Juridicas y Politicas, Economicas y Administrativas, Humanidades y Educacion.`,
       },
       {
         id: "smartkits-acceso",
-        label: "Cómo acceder",
-        quickReply: `${E.globe} Se consultan en formato digital interactivo con enlaces directos. Te recomiendo pedir el enlace del programa específico en la biblioteca.`,
+        label: "Como acceder",
+        quickReply: `${E.globe} Se consultan en formato digital interactivo con enlaces directos. Te recomiendo pedir el enlace del programa especifico en la biblioteca.`,
       },
       {
         id: "smartkits-ubicacion-horario",
-        label: "Ubicación y horario",
-        quickReply: `${E.calendar} Biblioteca Juan Roa Vásquez: Av. Cra. 9 No. 131 A - 02, Bloque O, Piso 3, Bogotá. Horario: L-V 6:00 a.m.-10:00 p.m.; sábados 8:00 a.m.-4:00 p.m.; externos L-V 7:00 a.m.-5:00 p.m.`,
+        label: "Ubicacion y horario",
+        quickReply: `${E.calendar} Biblioteca Juan Roa Vasquez: Av. Cra. 9 No. 131 A - 02, Bloque O, Piso 3, Bogota. Horario: L-V 6:00 a.m.-10:00 p.m.; sabados 8:00 a.m.-4:00 p.m.; externos L-V 7:00 a.m.-5:00 p.m.`,
       },
     ],
   },
   {
     id: "bases-2026",
     label: "Bases de datos 2026",
-    question: "¿Qué base de datos necesitas?",
+    question: "Que base de datos necesitas?",
     options: [
       {
         id: "db-mcgraw",
         label: "McGraw-Hill Ebooks 7-24",
-        quickReply: `${E.books} E-books para Ingenierías y Administración. Ideal para consulta de conceptos, apoyo de clases y proyectos aplicados.`,
+        quickReply: `${E.books} E-books para Ingenierias y Administracion. Ideal para consulta de conceptos, apoyo de clases y proyectos aplicados.`,
       },
       {
         id: "db-cambridge",
         label: "Cambridge University Press",
-        quickReply: `${E.books} Journals Complete + Cambridge Ebooks con contenido multidisciplinario en libros y revistas académicas.`,
+        quickReply: `${E.books} Journals Complete + Cambridge Ebooks con contenido multidisciplinario en libros y revistas academicas.`,
       },
       {
         id: "db-cochrane",
         label: "Cochrane Collection Plus",
-        quickReply: `${E.check} Evidencia clínica de alta calidad: revisiones sistemáticas y ensayos para salud e investigación clínica.`,
+        quickReply: `${E.check} Evidencia clinica de alta calidad: revisiones sistematicas y ensayos para salud e investigacion clinica.`,
       },
       {
         id: "db-enferteca",
         label: "Enferteca",
-        quickReply: `${E.brain} Biblioteca digital de enfermería en español con contenido especializado para formación y consulta.`,
+        quickReply: `${E.brain} Biblioteca digital de enfermeria en espanol con contenido especializado para formacion y consulta.`,
       },
       {
         id: "db-gale",
         label: "Gale Research Complete",
-        quickReply: `${E.globe} Incluye e-books, revistas, noticias, literatura, fuentes primarias y negocios. Muy útil para trabajos interdisciplinarios.`,
+        quickReply: `${E.globe} Incluye e-books, revistas, noticias, literatura, fuentes primarias y negocios. Muy util para trabajos interdisciplinarios.`,
       },
       {
         id: "db-gideon",
         label: "GIDEON",
-        quickReply: `${E.magnify} Plataforma para enfermedades infecciosas, epidemiología y microbiología con enfoque técnico y clínico.`,
+        quickReply: `${E.magnify} Plataforma para enfermedades infecciosas, epidemiologia y microbiologia con enfoque tecnico y clinico.`,
       },
       {
         id: "db-iop",
         label: "IOPscience Extras",
-        quickReply: `${E.rocket} Publicaciones científicas en física y áreas relacionadas para consulta de alto nivel académico.`,
+        quickReply: `${E.rocket} Publicaciones cientificas en fisica y areas relacionadas para consulta de alto nivel academico.`,
       },
     ],
   },
   {
     id: "investigacion-2026",
-    label: "Herramientas de investigación",
-    question: "¿Qué herramienta necesitas para investigar?",
+    label: "Herramientas de investigacion",
+    question: "Que herramienta necesitas para investigar?",
     options: [
       {
         id: "tool-compilatio",
         label: "Compilatio",
-        quickReply: `${E.check} Analiza originalidad, similitud y posible IA. Restricción: uso disponible solo para docentes.`,
+        quickReply: `${E.check} Analiza originalidad, similitud y posible IA. Restriccion: uso disponible solo para docentes.`,
       },
       {
         id: "tool-rayyan",
         label: "Rayyan Enterprise",
-        quickReply: `${E.magnify} Apoyo con IA para revisiones sistemáticas: filtra y organiza literatura científica de forma más ágil.`,
+        quickReply: `${E.magnify} Apoyo con IA para revisiones sistematicas: filtra y organiza literatura cientifica de forma mas agil.`,
       },
       {
         id: "tool-sage",
         label: "Sage Research Methods",
-        quickReply: `${E.brain} Recurso para metodologías de investigación: diseños, métodos y enfoques para proyectos académicos.`,
+        quickReply: `${E.brain} Recurso para metodologias de investigacion: disenos, metodos y enfoques para proyectos academicos.`,
       },
     ],
   },
   {
     id: "ova-2026",
     label: "Objetos virtuales de aprendizaje",
-    question: "¿Qué OVA quieres explorar?",
+    question: "Que OVA quieres explorar?",
     options: [
       {
         id: "ova-clinical-cases",
         label: "Clinical Cases - Elsevier",
-        quickReply: `${E.brain} Casos clínicos interactivos para fortalecer razonamiento clínico y toma de decisiones en salud.`,
+        quickReply: `${E.brain} Casos clinicos interactivos para fortalecer razonamiento clinico y toma de decisiones en salud.`,
       },
       {
         id: "ova-cloudlabs",
         label: "CloudLabs",
-        quickReply: `${E.laptop} Simuladores de laboratorio. Restricción: disponible solo en el DataLab.`,
+        quickReply: `${E.laptop} Simuladores de laboratorio. Restriccion: disponible solo en el DataLab.`,
       },
       {
         id: "ova-jaypee",
@@ -148,49 +148,49 @@ const guidedCategories: GuidedCategory[] = [
       {
         id: "ova-jove-business",
         label: "JoVE Business",
-        quickReply: `${E.chart} Videos académicos sobre negocios, finanzas y marketing para aprendizaje aplicado.`,
+        quickReply: `${E.chart} Videos academicos sobre negocios, finanzas y marketing para aprendizaje aplicado.`,
       },
       {
         id: "ova-lectimus",
-        label: "Léctimus",
-        quickReply: `${E.target} Recurso para fortalecer competencias lectoras. Restricción: acceso por solicitud.`,
+        label: "Lectimus",
+        quickReply: `${E.target} Recurso para fortalecer competencias lectoras. Restriccion: acceso por solicitud.`,
       },
       {
         id: "ova-mylab-math",
         label: "MyLab Math",
-        quickReply: `${E.stopwatch} Plataforma de aprendizaje de matemáticas. Restricción: uso exclusivo del departamento de matemáticas.`,
+        quickReply: `${E.stopwatch} Plataforma de aprendizaje de matematicas. Restriccion: uso exclusivo del departamento de matematicas.`,
       },
       {
         id: "ova-neurosurgical-atlas",
         label: "Neurosurgical Atlas",
-        quickReply: `${E.sparkles} Plataforma interactiva especializada en neurocirugía para consulta académica y clínica.`,
+        quickReply: `${E.sparkles} Plataforma interactiva especializada en neurocirugia para consulta academica y clinica.`,
       },
       {
         id: "ova-primal-vr",
         label: "Primal VR",
-        quickReply: `${E.sparkles} Anatomía humana en realidad virtual. Restricción: disponible en la Torre inmersiva de la biblioteca.`,
+        quickReply: `${E.sparkles} Anatomia humana en realidad virtual. Restriccion: disponible en la Torre inmersiva de la biblioteca.`,
       },
     ],
   },
   {
     id: "focus-zone",
-    label: "Focus Zone y concentración",
-    question: "¿Qué quieres explorar de Focus Zone?",
+    label: "Focus Zone y concentracion",
+    question: "Que quieres explorar de Focus Zone?",
     options: [
       {
         id: "pomodoro-individual",
         label: "Pomodoro individual",
-        quickReply: `${E.stopwatch} El pomodoro individual divide el estudio en bloques de enfoque y descanso para sostener energía y atención.`,
+        quickReply: `${E.stopwatch} El pomodoro individual divide el estudio en bloques de enfoque y descanso para sostener energia y atencion.`,
       },
       {
         id: "salas-pomodoro",
         label: "Salas Pomodoro",
-        quickReply: `${E.handshake} Las salas pomodoro permiten estudiar con otras personas y mantener el ritmo del bloque de concentración.`,
+        quickReply: `${E.handshake} Las salas pomodoro permiten estudiar con otras personas y mantener el ritmo del bloque de concentracion.`,
       },
       {
         id: "retos-semanales",
         label: "Retos semanales",
-        quickReply: `${E.trophy} Los retos semanales convierten hábitos en acciones concretas para reducir distracciones y mejorar constancia.`,
+        quickReply: `${E.trophy} Los retos semanales convierten habitos en acciones concretas para reducir distracciones y mejorar constancia.`,
       },
       {
         id: "ranking",
@@ -200,7 +200,7 @@ const guidedCategories: GuidedCategory[] = [
       {
         id: "reducir-scroll",
         label: "Salir del doomscrolling",
-        quickReply: `${E.noPhone} Para salir del scroll automático: define 1 tarea, activa un bloque de 25 min y deja notificaciones en silencio.`,
+        quickReply: `${E.noPhone} Para salir del scroll automatico: define 1 tarea, activa un bloque de 25 min y deja notificaciones en silencio.`,
       },
       {
         id: "rutina",
@@ -212,38 +212,38 @@ const guidedCategories: GuidedCategory[] = [
 ];
 
 const quickRepliesByQuestion: Record<string, string> = {
-  "que son los smart kits": `${E.books} Los Smart Kits son guías digitales por programa con recursos académicos confiables para estudio e investigación.`,
-  "que facultades tienen smart kits": `${E.building} Los Smart Kits cubren programas de Medicina, Enfermería, Odontología, Psicología, Ingeniería, Ciencias, Educación y otras facultades.`,
-  "donde esta la biblioteca": `${E.building} Biblioteca Juan Roa Vásquez: Av. Cra. 9 No. 131 A - 02, Bloque O, Piso 3, Bogotá.`,
-  "cual es el horario de la biblioteca": `${E.calendar} Horario: L-V 6:00 a.m.-10:00 p.m.; sábados 8:00 a.m.-4:00 p.m.; usuarios externos L-V 7:00 a.m.-5:00 p.m.`,
+  "que son los smart kits": `${E.books} Los Smart Kits son guias digitales por programa con recursos academicos confiables para estudio e investigacion.`,
+  "que facultades tienen smart kits": `${E.building} Los Smart Kits cubren programas de Medicina, Enfermeria, Odontologia, Psicologia, Ingenieria, Ciencias, Educacion y otras facultades.`,
+  "donde esta la biblioteca": `${E.building} Biblioteca Juan Roa Vasquez: Av. Cra. 9 No. 131 A - 02, Bloque O, Piso 3, Bogota.`,
+  "cual es el horario de la biblioteca": `${E.calendar} Horario: L-V 6:00 a.m.-10:00 p.m.; sabados 8:00 a.m.-4:00 p.m.; usuarios externos L-V 7:00 a.m.-5:00 p.m.`,
   "que bases de datos nuevas tienen": `${E.globe} En 2026 destacan McGraw-Hill 7-24, Cambridge, Cochrane Plus, Enferteca, Gale Research Complete, GIDEON e IOPscience Extras.`,
-  "que herramienta sirve para revision sistematica": `${E.magnify} Para revisiones sistemáticas puedes usar Rayyan Enterprise y complementar con Cochrane Collection Plus.`,
-  "compilatio quien lo puede usar": `${E.check} Compilatio analiza originalidad, similitud y posible IA. Su uso está habilitado solo para docentes.`,
-  "cloudlabs donde se usa": `${E.laptop} CloudLabs está disponible solo en el DataLab de la biblioteca.`,
+  "que herramienta sirve para revision sistematica": `${E.magnify} Para revisiones sistematicas puedes usar Rayyan Enterprise y complementar con Cochrane Collection Plus.`,
+  "compilatio quien lo puede usar": `${E.check} Compilatio analiza originalidad, similitud y posible IA. Su uso esta habilitado solo para docentes.`,
+  "cloudlabs donde se usa": `${E.laptop} CloudLabs esta disponible solo en el DataLab de la biblioteca.`,
   "primal vr donde se usa": `${E.sparkles} Primal VR se usa en la Torre inmersiva de la biblioteca.`,
-  "mylab math quien lo usa": `${E.brain} MyLab Math es de uso exclusivo del departamento de matemáticas.`,
-  "que es focus zone": `${E.target} Focus Zone promueve uso consciente de tecnología y hábitos de concentración conectados con recursos de biblioteca.`,
-  "como salir del doomscrolling": `${E.noPhone} Inicia con un bloque de 25 minutos, silencia notificaciones y cambia redes por una tarea académica concreta.`,
+  "mylab math quien lo usa": `${E.brain} MyLab Math es de uso exclusivo del departamento de matematicas.`,
+  "que es focus zone": `${E.target} Focus Zone promueve uso consciente de tecnologia y habitos de concentracion conectados con recursos de biblioteca.`,
+  "como salir del doomscrolling": `${E.noPhone} Inicia con un bloque de 25 minutos, silencia notificaciones y cambia redes por una tarea academica concreta.`,
 };
 
 const keywordQuickReplies: Array<{ keywords: string[]; reply: string }> = [
-  { keywords: ["smart", "kit"], reply: `${E.books} Puedo ayudarte con Smart Kits: qué son, programas y acceso. Abre el menú rápido y entra a "Smart Kits de biblioteca".` },
-  { keywords: ["mcgraw"], reply: `${E.books} McGraw-Hill Ebooks 7-24 ofrece e-books para Ingenierías y Administración.` },
+  { keywords: ["smart", "kit"], reply: `${E.books} Puedo ayudarte con Smart Kits: que son, programas y acceso. Abre el menu rapido y entra a \"Smart Kits de biblioteca\".` },
+  { keywords: ["mcgraw"], reply: `${E.books} McGraw-Hill Ebooks 7-24 ofrece e-books para Ingenierias y Administracion.` },
   { keywords: ["cambridge"], reply: `${E.books} Cambridge incluye Journals Complete y Cambridge Ebooks con cobertura multidisciplinaria.` },
-  { keywords: ["cochrane"], reply: `${E.check} Cochrane Collection Plus ofrece revisiones sistemáticas y ensayos de evidencia clínica.` },
-  { keywords: ["enferteca"], reply: `${E.brain} Enferteca es una biblioteca digital especializada en enfermería en español.` },
+  { keywords: ["cochrane"], reply: `${E.check} Cochrane Collection Plus ofrece revisiones sistematicas y ensayos de evidencia clinica.` },
+  { keywords: ["enferteca"], reply: `${E.brain} Enferteca es una biblioteca digital especializada en enfermeria en espanol.` },
   { keywords: ["gale"], reply: `${E.globe} Gale Research Complete integra libros, revistas, noticias y fuentes primarias.` },
-  { keywords: ["gideon"], reply: `${E.magnify} GIDEON se enfoca en enfermedades infecciosas, epidemiología y microbiología.` },
-  { keywords: ["iopscience"], reply: `${E.rocket} IOPscience Extras ofrece publicaciones científicas en física y áreas afines.` },
-  { keywords: ["rayyan"], reply: `${E.magnify} Rayyan Enterprise ayuda con IA en revisiones sistemáticas.` },
+  { keywords: ["gideon"], reply: `${E.magnify} GIDEON se enfoca en enfermedades infecciosas, epidemiologia y microbiologia.` },
+  { keywords: ["iopscience"], reply: `${E.rocket} IOPscience Extras ofrece publicaciones cientificas en fisica y areas afines.` },
+  { keywords: ["rayyan"], reply: `${E.magnify} Rayyan Enterprise ayuda con IA en revisiones sistematicas.` },
   { keywords: ["compilatio"], reply: `${E.check} Compilatio: originalidad, similitud y posible IA. Disponible para docentes.` },
-  { keywords: ["sage", "methods"], reply: `${E.brain} Sage Research Methods apoya el diseño metodológico de proyectos de investigación.` },
+  { keywords: ["sage", "methods"], reply: `${E.brain} Sage Research Methods apoya el diseno metodologico de proyectos de investigacion.` },
   { keywords: ["cloudlabs"], reply: `${E.laptop} CloudLabs es un simulador de laboratorio disponible solo en el DataLab.` },
   { keywords: ["jove"], reply: `${E.chart} JoVE Business ofrece videos sobre negocios, finanzas y marketing.` },
-  { keywords: ["lectimus"], reply: `${E.target} Léctimus fortalece competencias lectoras y se habilita por solicitud.` },
-  { keywords: ["primal", "vr"], reply: `${E.sparkles} Primal VR ofrece anatomía en realidad virtual en la Torre inmersiva.` },
-  { keywords: ["horario"], reply: `${E.calendar} Horario biblioteca: L-V 6:00 a.m.-10:00 p.m.; sábados 8:00 a.m.-4:00 p.m.; externos L-V 7:00 a.m.-5:00 p.m.` },
-  { keywords: ["ubicacion"], reply: `${E.building} Ubicación: Av. Cra. 9 No. 131 A - 02, Bloque O, Piso 3, Bogotá.` },
+  { keywords: ["lectimus"], reply: `${E.target} Lectimus fortalece competencias lectoras y se habilita por solicitud.` },
+  { keywords: ["primal", "vr"], reply: `${E.sparkles} Primal VR ofrece anatomia en realidad virtual en la Torre inmersiva.` },
+  { keywords: ["horario"], reply: `${E.calendar} Horario biblioteca: L-V 6:00 a.m.-10:00 p.m.; sabados 8:00 a.m.-4:00 p.m.; externos L-V 7:00 a.m.-5:00 p.m.` },
+  { keywords: ["ubicacion"], reply: `${E.building} Ubicacion: Av. Cra. 9 No. 131 A - 02, Bloque O, Piso 3, Bogota.` },
 ];
 
 const normalizeKey = (value: string) =>
@@ -298,14 +298,14 @@ export const buildGuidedRecommendationPrompt = ({ categoryId, selectedOptionIds,
 
   const optionLabels = selectedOptions.map((option) => option.label);
   const noteText = userNote?.trim() ? userNote.trim() : "Sin nota adicional";
-  const categoryLabel = category?.label ?? "Sin categoría";
+  const categoryLabel = category?.label ?? "Sin categoria";
 
   return [
-    "Genera una recomendación personalizada para Zone Focus en español.",
-    "Mantén un tono cercano, claro y accionable en máximo 120 palabras.",
-    `Categoría principal: ${categoryLabel}`,
+    "Genera una recomendacion personalizada para Zone Focus en espanol.",
+    "Manten un tono cercano, claro y accionable en maximo 120 palabras.",
+    `Categoria principal: ${categoryLabel}`,
     `Opciones seleccionadas: ${optionLabels.length > 0 ? optionLabels.join(", ") : "Ninguna"}`,
     `Contexto adicional del usuario: ${noteText}`,
-    "Incluye un plan corto de 2 o 3 pasos y una siguiente acción concreta dentro de biblioteca o Focus Zone.",
+    "Incluye un plan corto de 2 o 3 pasos y una siguiente accion concreta dentro de biblioteca o Focus Zone.",
   ].join("\n");
 };
