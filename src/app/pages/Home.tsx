@@ -98,7 +98,7 @@ export default function Home() {
   const [horizontalCarouselApi, setHorizontalCarouselApi] = useState<CarouselApi | null>(null);
   const [activeHorizontalSlide, setActiveHorizontalSlide] = useState(0);
   const [isViewerTransitioning, setIsViewerTransitioning] = useState(false);
-  const [isLumiAlt, setIsLumiAlt] = useState(false);
+  const [isLumiAlt, setIsLumiAlt] = useState(true);
 
   const viewerItem = useMemo(() => (viewerIndex !== null ? artGallery[viewerIndex] : null), [viewerIndex]);
   const horizontalDesigns = useMemo(() => artGallery.filter((item) => item.orientation === "landscape"), []);
@@ -240,15 +240,15 @@ export default function Home() {
             <Card className="focus-campaign-card focus-reveal !gap-4 rounded-[1.2rem] p-5 md:p-7 lg:h-full">
               <p className="mt-3 text-base italic text-[#5b30d9] md:text-lg">La biblioteca como espacio de pausa digital.</p>
               <div className="focus-divider focus-divider-animated mt-4 max-w-xl" />
-              <div className="mt-4">
+              <div className="mt-4 grid items-center gap-4 md:grid-cols-[0.42fr_0.58fr]">
                 <button
                   type="button"
                   onClick={() => setIsLumiAlt((previous) => !previous)}
-                  onMouseEnter={() => setIsLumiAlt(true)}
-                  onMouseLeave={() => setIsLumiAlt(false)}
-                  onFocus={() => setIsLumiAlt(true)}
-                  onBlur={() => setIsLumiAlt(false)}
-                  className="w-full"
+                  onMouseEnter={() => setIsLumiAlt(false)}
+                  onMouseLeave={() => setIsLumiAlt(true)}
+                  onFocus={() => setIsLumiAlt(false)}
+                  onBlur={() => setIsLumiAlt(true)}
+                  className="mx-auto w-full max-w-[40%] md:max-w-[88%]"
                   aria-label="Cambiar expresión de Lumi"
                 >
                   <img
@@ -258,19 +258,19 @@ export default function Home() {
                     loading="lazy"
                   />
                 </button>
-              </div>
-              <div className="mt-4 grid gap-2 sm:grid-cols-3">
-                <div className="rounded-[0.8rem] border border-[#d1d5db] bg-white/95 p-3">
-                  <p className="display-font text-3xl leading-none text-[#f47c0f]">Foco</p>
-                  <p className="mt-1 text-xs font-bold uppercase tracking-[0.08em] text-[#5b30d9]/80">Sesiones guiadas</p>
-                </div>
-                <div className="rounded-[0.8rem] border border-[#d1d5db] bg-white/95 p-3">
-                  <p className="display-font text-3xl leading-none text-[#f47c0f]">+pts</p>
-                  <p className="mt-1 text-xs font-bold uppercase tracking-[0.08em] text-[#5b30d9]/80">Progreso visible</p>
-                </div>
-                <div className="rounded-[0.8rem] border border-[#d1d5db] bg-white/95 p-3">
-                  <p className="display-font text-3xl leading-none text-[#f47c0f]">Salas</p>
-                  <p className="mt-1 text-xs font-bold uppercase tracking-[0.08em] text-[#5b30d9]/80">Estudio guiado</p>
+                <div className="grid gap-2 sm:grid-cols-3 md:grid-cols-1">
+                  <div className="rounded-[0.8rem] border border-[#d1d5db] bg-white/95 p-3">
+                    <p className="display-font text-3xl leading-none text-[#f47c0f]">Foco</p>
+                    <p className="mt-1 text-xs font-bold uppercase tracking-[0.08em] text-[#5b30d9]/80">Sesiones guiadas</p>
+                  </div>
+                  <div className="rounded-[0.8rem] border border-[#d1d5db] bg-white/95 p-3">
+                    <p className="display-font text-3xl leading-none text-[#f47c0f]">+pts</p>
+                    <p className="mt-1 text-xs font-bold uppercase tracking-[0.08em] text-[#5b30d9]/80">Progreso visible</p>
+                  </div>
+                  <div className="rounded-[0.8rem] border border-[#d1d5db] bg-white/95 p-3">
+                    <p className="display-font text-3xl leading-none text-[#f47c0f]">Salas</p>
+                    <p className="mt-1 text-xs font-bold uppercase tracking-[0.08em] text-[#5b30d9]/80">Estudio guiado</p>
+                  </div>
                 </div>
               </div>
               <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
