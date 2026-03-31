@@ -38,7 +38,7 @@ const researchStats = [
   { value: "89%", label: "Dedica más de 3 horas al día a redes sociales", icon: "●" },
   { value: "64%", label: "Nota afiches físicos en la biblioteca", icon: "◆" },
   { value: "74%", label: "Ve pantallas digitales de biblioteca y universidad", icon: "◼" },
-  { value: "52", label: "Personas participaron en la muestra del formulario", icon: "▲" },
+  { value: "21", label: "Días del reto de enfoque digital", icon: "▲" },
 ];
 
 const manifestoLines = [
@@ -266,9 +266,9 @@ export default function Home() {
           </section>
 
           <section className="grid items-stretch gap-4 lg:grid-cols-[1.15fr_0.85fr]">
-            <div className="focus-campaign-card focus-reveal focus-reveal-delay-2 flex h-full flex-col rounded-[1.2rem] bg-white p-4 md:p-5">
+            <div className="focus-campaign-card focus-reveal focus-reveal-delay-2 flex h-full flex-col rounded-[1.2rem] border-[#7d4cd8]/70 bg-[#5a2dca] p-4 md:p-5">
               <div className="mb-4 flex items-center justify-between gap-2">
-                <h3 className="display-font text-3xl text-[#5b30d9] md:text-4xl">Recursos de la biblioteca</h3>
+                <h3 className="display-font text-3xl text-white md:text-4xl">Recursos de la biblioteca</h3>
               </div>
               <div className="grid flex-1 gap-3 sm:grid-cols-2 sm:gap-4">
                 {libraryResourceHighlights.map((item, index) => {
@@ -277,7 +277,7 @@ export default function Home() {
                   return (
                   <div
                     key={item.label}
-                    className={`rounded-[0.9rem] border-2 border-[#d1d5db] p-4 shadow-[0_10px_20px_-18px_rgba(69,36,179,0.45)] ${
+                    className={`rounded-[0.9rem] border-2 border-white/35 p-4 shadow-[0_10px_20px_-18px_rgba(69,36,179,0.45)] ${
                       isFeatured
                         ? "sm:col-span-2 bg-[linear-gradient(120deg,#fff8ef_0%,#ffffff_56%,#f7f2ff_100%)]"
                         : `${isLast ? "sm:col-span-2" : ""} bg-white/90 sm:min-h-[138px]`
@@ -294,7 +294,7 @@ export default function Home() {
                       {item.value ? <item.Icon className="size-5 text-[#5b30d9]/65" /> : null}
                     </div>
                     <p className={`font-bold text-[#5b30d9] ${item.value ? "mt-2" : "mt-3"} ${isFeatured ? "text-[1.2rem]" : "text-[1.05rem]"}`}>{item.label}</p>
-                    {isFeatured ? <p className="mt-1 text-sm font-semibold text-[#5b30d9]/70">Herramientas clave para potenciar estudio e investigacion.</p> : null}
+                    {isFeatured ? <p className="mt-1 text-sm font-semibold text-[#5b30d9]/70">Herramientas clave para potenciar estudio e investigación.</p> : null}
                   </div>
                   );
                 })}
@@ -421,17 +421,17 @@ export default function Home() {
               </div>
             </Card>
 
-            <Card className="focus-campaign-card focus-reveal focus-reveal-delay-1 rounded-[1.2rem] p-5 md:p-7 lg:col-span-2">
+            <Card className="focus-campaign-card focus-reveal focus-reveal-delay-1 rounded-[1.2rem] border-[#7d4cd8]/70 bg-[#5a2dca] p-5 md:p-7 lg:col-span-2">
               <div className="flex items-center gap-2">
                 <BookOpenText className="size-5 text-[#f47c0f]" />
-                <h3 className="display-font text-3xl text-[#5b30d9] md:text-4xl">Biblioteca como alternativa</h3>
+                <h3 className="display-font text-3xl text-white md:text-4xl">Biblioteca como alternativa</h3>
               </div>
-              <p className="mt-3 text-[1.02rem] leading-relaxed text-[#5b30d9] md:text-lg">
+              <p className="mt-3 text-[1.02rem] leading-relaxed text-white md:text-lg">
                 Focus Zone no es solo una app de pomodoro: Conecta hábitos saludables con recursos reales de la biblioteca como espacio de exploración tecnológica y bienestar académico.
               </p>
               <div className="mt-5 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
                 {libraryPillars.map(({ label, Icon }) => (
-                  <span key={label} className="focus-pill w-full justify-center sm:w-auto sm:justify-start">
+                  <span key={label} className="focus-pill w-full justify-center border-white/35 bg-white/95 text-[#5a2dca] sm:w-auto sm:justify-start">
                     <Icon className="size-3.5 text-[#f47c0f]" />
                     {label}
                   </span>
