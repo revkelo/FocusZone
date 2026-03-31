@@ -530,15 +530,25 @@ export default function Dashboard() {
       }
 
       if (membershipsResult.data) {
-        if (membershipsResult.data.length > 1) {
-          const roomIdsToRemove = membershipsResult.data.slice(1).map((item) => item.room_id);
-          if (roomIdsToRemove.length > 0) {
-            await supabase.from("pomodoro_room_presence").delete().eq("user_id", user.id).in("room_id", roomIdsToRemove);
-            await supabase.from("pomodoro_room_members").delete().eq("user_id", user.id).in("room_id", roomIdsToRemove);
-          }
+        const existingRoomIds = new Set((roomsResult.data ?? []).map((room) => room.id));
+        const membershipRoomIds = membershipsResult.data
+          .map((item) => item?.room_id)
+          .filter((roomId): roomId is number => typeof roomId === "number");
+
+        const invalidRoomIds = membershipRoomIds.filter((roomId) => !existingRoomIds.has(roomId));
+        if (invalidRoomIds.length > 0) {
+          await supabase.from("pomodoro_room_presence").delete().eq("user_id", user.id).in("room_id", invalidRoomIds);
+          await supabase.from("pomodoro_room_members").delete().eq("user_id", user.id).in("room_id", invalidRoomIds);
         }
 
-        const roomId = membershipsResult.data[0].room_id ?? null;
+        const validRoomIds = membershipRoomIds.filter((roomId) => existingRoomIds.has(roomId));
+        if (validRoomIds.length > 1) {
+          const roomIdsToRemove = validRoomIds.slice(1);
+          await supabase.from("pomodoro_room_presence").delete().eq("user_id", user.id).in("room_id", roomIdsToRemove);
+          await supabase.from("pomodoro_room_members").delete().eq("user_id", user.id).in("room_id", roomIdsToRemove);
+        }
+
+        const roomId = validRoomIds[0] ?? null;
         const singleMembership = roomId ? new Set([roomId]) : new Set<number>();
         setJoinedRoomIds(singleMembership);
         setSelectedRoomId((previous) => {
@@ -1277,15 +1287,25 @@ export default function Dashboard() {
       }
 
       if (membershipsResult.data) {
-        if (membershipsResult.data.length > 1) {
-          const roomIdsToRemove = membershipsResult.data.slice(1).map((item) => item.room_id);
-          if (roomIdsToRemove.length > 0) {
-            await supabase.from("pomodoro_room_presence").delete().eq("user_id", userId).in("room_id", roomIdsToRemove);
-            await supabase.from("pomodoro_room_members").delete().eq("user_id", userId).in("room_id", roomIdsToRemove);
-          }
+        const existingRoomIds = new Set((roomsResult.data ?? []).map((room) => room.id));
+        const membershipRoomIds = membershipsResult.data
+          .map((item) => item?.room_id)
+          .filter((roomId): roomId is number => typeof roomId === "number");
+
+        const invalidRoomIds = membershipRoomIds.filter((roomId) => !existingRoomIds.has(roomId));
+        if (invalidRoomIds.length > 0) {
+          await supabase.from("pomodoro_room_presence").delete().eq("user_id", userId).in("room_id", invalidRoomIds);
+          await supabase.from("pomodoro_room_members").delete().eq("user_id", userId).in("room_id", invalidRoomIds);
         }
 
-        const roomId = membershipsResult.data[0].room_id ?? null;
+        const validRoomIds = membershipRoomIds.filter((roomId) => existingRoomIds.has(roomId));
+        if (validRoomIds.length > 1) {
+          const roomIdsToRemove = validRoomIds.slice(1);
+          await supabase.from("pomodoro_room_presence").delete().eq("user_id", userId).in("room_id", roomIdsToRemove);
+          await supabase.from("pomodoro_room_members").delete().eq("user_id", userId).in("room_id", roomIdsToRemove);
+        }
+
+        const roomId = validRoomIds[0] ?? null;
         const singleMembership = roomId ? new Set([roomId]) : new Set<number>();
         setJoinedRoomIds(singleMembership);
         setSelectedRoomId((previous) => {
