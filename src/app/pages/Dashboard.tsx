@@ -189,9 +189,11 @@ const getLocalDateKey = (value: Date | string) => {
   return `${year}-${month}-${day}`;
 };
 
-const playEventSound = (event: "pomodoro" | "reward" | "notification" | "error") => {
+const playEventSound = (event: "pomodoro" | "reward" | "notification" | "error", volumeScale = 1) => {
   try {
     const audioContext = new window.AudioContext();
+    const safeVolumeScale = Math.max(0, Math.min(1, Number(volumeScale) || 0));
+    const peakGain = Math.max(0.0001, 0.16 * safeVolumeScale);
     const patterns: Record<"pomodoro" | "reward" | "notification" | "error", { freq: number; duration: number; delay: number }[]> = {
       pomodoro: [
         { freq: 880, duration: 0.16, delay: 0 },
@@ -218,7 +220,7 @@ const playEventSound = (event: "pomodoro" | "reward" | "notification" | "error")
       oscillator.type = event === "error" ? "square" : "triangle";
       oscillator.frequency.setValueAtTime(note.freq, startAt);
       gainNode.gain.setValueAtTime(0.0001, startAt);
-      gainNode.gain.exponentialRampToValueAtTime(0.16, startAt + 0.02);
+      gainNode.gain.exponentialRampToValueAtTime(peakGain, startAt + 0.02);
       gainNode.gain.exponentialRampToValueAtTime(0.0001, endAt);
 
       oscillator.connect(gainNode);
@@ -286,6 +288,8 @@ export default function Dashboard() {
   const [dailyReminderHour, setDailyReminderHour] = useState(String(DEFAULT_DAILY_REMINDER_HOUR));
   const [pomodoroReminderEnabled, setPomodoroReminderEnabled] = useState(true);
   const [pomodoroReminderMinutes, setPomodoroReminderMinutes] = useState(String(DEFAULT_POMODORO_REMINDER_MINUTES));
+  const [notificationVolume, setNotificationVolume] = useState("100");
+  const [lastNonZeroNotificationVolume, setLastNonZeroNotificationVolume] = useState("100");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
       id: 1,
@@ -352,6 +356,15 @@ export default function Dashboard() {
   const maxTimerSeconds = Math.max(getModeSeconds("focus"), getModeSeconds("shortBreak"), getModeSeconds("longBreak"));
   const sanitizeDigitsInput = (value: string, maxLength = MAX_NUMERIC_INPUT_LENGTH) => value.replace(/\D/g, "").slice(0, maxLength);
   const normalizeInputText = (value: string) => value.replace(/\s+/g, " ").trim();
+  const parseNotificationVolume = (value: unknown) => {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed)) {
+      return 100;
+    }
+    return Math.max(0, Math.min(100, parsed));
+  };
+  const notificationVolumeScale = parseNotificationVolume(notificationVolume) / 100;
+  const isSoundEnabled = parseNotificationVolume(notificationVolume) > 0;
   const ALLOWED_TEXT_PATTERN = /^[\p{L}\p{N}\s.,:;!'"()\-_/+#&]+$/u;
   const selectedGuidedCategory = useMemo(() => (guidedCategoryId ? getGuidedCategoryById(guidedCategoryId) : null), [guidedCategoryId]);
   const renderInlineMarkdown = (value: string) => {
@@ -416,6 +429,7 @@ export default function Dashboard() {
   };
   const activeLumiIcon = LUMI_CHAT_PRESETS[lumiSpeakingFrame] ?? LUMI_CHAT_PRESETS[0];
   const staticLumiIcon = "/assets/chatbot/lumi-speaking-01.png";
+  const menuLumiIcon = "/assets/chatbot/lumi-speaking-03.png";
 
   useEffect(() => {
     if (activeTab !== "chatbot" || !isSendingChat) {
@@ -625,12 +639,14 @@ export default function Dashboard() {
         dailyReminderHour: number;
         pomodoroReminderEnabled: boolean;
         pomodoroReminderMinutes: number;
+        notificationVolume: number;
       };
 
-      setDailyReminderEnabled(true);
+      setDailyReminderEnabled(Boolean(parsed.dailyReminderEnabled));
       setDailyReminderHour(String(Math.max(0, Math.min(23, Number(parsed.dailyReminderHour) || DEFAULT_DAILY_REMINDER_HOUR))));
-      setPomodoroReminderEnabled(true);
+      setPomodoroReminderEnabled(Boolean(parsed.pomodoroReminderEnabled));
       setPomodoroReminderMinutes(String(Math.max(1, Math.min(60, Number(parsed.pomodoroReminderMinutes) || DEFAULT_POMODORO_REMINDER_MINUTES))));
+      setNotificationVolume(String(parseNotificationVolume(parsed.notificationVolume)));
     } catch {
       // Ignore invalid local settings.
     }
@@ -644,10 +660,11 @@ export default function Dashboard() {
     window.localStorage.setItem(
       notificationSettingsStorageKey,
       JSON.stringify({
-        dailyReminderEnabled: true,
+        dailyReminderEnabled,
         dailyReminderHour: Math.max(0, Math.min(23, Number(dailyReminderHour) || DEFAULT_DAILY_REMINDER_HOUR)),
-        pomodoroReminderEnabled: true,
+        pomodoroReminderEnabled,
         pomodoroReminderMinutes: Math.max(1, Math.min(60, Number(pomodoroReminderMinutes) || DEFAULT_POMODORO_REMINDER_MINUTES)),
+        notificationVolume: parseNotificationVolume(notificationVolume),
       }),
     );
   }, [
@@ -656,7 +673,14 @@ export default function Dashboard() {
     dailyReminderHour,
     pomodoroReminderEnabled,
     pomodoroReminderMinutes,
+    notificationVolume,
   ]);
+
+  useEffect(() => {
+    if (parseNotificationVolume(notificationVolume) > 0) {
+      setLastNonZeroNotificationVolume(String(parseNotificationVolume(notificationVolume)));
+    }
+  }, [notificationVolume]);
 
   useEffect(() => {
     if (!pomodoroStorageKey || hydratedPomodoroKey === pomodoroStorageKey || typeof window === "undefined") {
@@ -746,6 +770,15 @@ export default function Dashboard() {
     setToasts((previous) => previous.filter((toast) => toast.id !== toastId));
   };
 
+  const toggleSoundEnabled = () => {
+    if (isSoundEnabled) {
+      setLastNonZeroNotificationVolume(String(Math.max(5, parseNotificationVolume(notificationVolume))));
+      setNotificationVolume("0");
+      return;
+    }
+    setNotificationVolume(lastNonZeroNotificationVolume || "100");
+  };
+
   const pushToast = (type: ToastType, title: string, description: string) => {
     const signature = `${type}|${title}|${description || ""}`;
     const now = Date.now();
@@ -800,9 +833,9 @@ export default function Dashboard() {
     }
 
     pushToast("success", "Listo", successMessage);
-    playEventSound("notification");
+    playEventSound("notification", notificationVolumeScale);
     setSuccessMessage("");
-  }, [successMessage]);
+  }, [successMessage, notificationVolumeScale]);
 
   useEffect(() => {
     if (!error) {
@@ -811,15 +844,15 @@ export default function Dashboard() {
 
     if (error.includes("Solo puedes completar 1 reto definido por d")) {
       pushToast("info", "Reto diario completado", "Hoy ya completaste tu reto definido. Mañana puedes continuar.");
-      playEventSound("notification");
+      playEventSound("notification", notificationVolumeScale);
       setError("");
       return;
     }
 
     pushToast("error", "Ups", error);
-    playEventSound("error");
+    playEventSound("error", notificationVolumeScale);
     setError("");
-  }, [error]);
+  }, [error, notificationVolumeScale]);
 
   useEffect(() => {
     if (notificationPermission !== "granted") {
@@ -2206,7 +2239,7 @@ export default function Dashboard() {
             : item,
         ),
       );
-      playEventSound("notification");
+      playEventSound("notification", notificationVolumeScale);
       return true;
     } catch (chatError) {
       setChatMessages((previous) =>
@@ -2242,7 +2275,7 @@ export default function Dashboard() {
         { id: baseId + 1, role: "assistant", text: withLumiPresentation(quickReply) },
       ]);
       setChatInput("");
-      playEventSound("notification");
+      playEventSound("notification", notificationVolumeScale);
       return;
     }
 
@@ -2267,7 +2300,7 @@ export default function Dashboard() {
       { id: baseId, role: "user", text: `Seleccion: ${selectedLabel}` },
       { id: baseId + 1, role: "assistant", text: withLumiPresentation(quickReply) },
     ]);
-    playEventSound("notification");
+    playEventSound("notification", notificationVolumeScale);
     resetGuidedSelection();
     setIsGuidedMenuOpen(false);
   };
@@ -2390,7 +2423,7 @@ export default function Dashboard() {
             </TabsList>
 
             <TabsContent value="pomodoro" className="focus-reveal space-y-5">
-              <Card className="focus-card rounded-[1.2rem] p-5 md:p-7">
+              <Card className="focus-card overflow-x-hidden rounded-[1.2rem] p-5 md:p-7">
                 <div className="flex items-center gap-2">
                   <Clock className="size-5 text-[#f47c0f]" />
                   <h2 className="display-font text-5xl text-[#5b30d9]">Pomodoro</h2>
@@ -2486,22 +2519,31 @@ export default function Dashboard() {
                       </div>
                     </div>
 
-                    <div className="grid w-full grid-cols-2 gap-3 sm:max-w-[360px]">
-                      <Button size="lg" onClick={toggleTimer} className="rounded-xl bg-[#f47c0f] px-6 text-white hover:bg-[#dd6900]">
+                    <div className="grid w-full grid-cols-1 gap-3 sm:max-w-[360px] sm:grid-cols-2">
+                      <Button
+                        size="lg"
+                        onClick={toggleTimer}
+                        className="h-14 rounded-2xl bg-[#f47c0f] px-6 text-lg font-extrabold text-white shadow-[0_14px_30px_-16px_rgba(244,124,15,0.75)] hover:bg-[#dd6900]"
+                      >
                         {!isActive || isPaused ? <><PlayCircle className="mr-2 size-5" /> {!isActive ? "Iniciar" : "Reanudar"}</> : <><PauseCircle className="mr-2 size-5" /> Pausar</>}
                       </Button>
-                      <Button size="lg" variant="outline" onClick={resetTimer} className="rounded-xl border-2 border-[#5b30d9] text-[#5b30d9]">
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        onClick={resetTimer}
+                        className="h-14 rounded-2xl border-2 border-[#5b30d9] bg-white text-lg font-extrabold text-[#5b30d9] hover:bg-[#f5f2ff]"
+                      >
                         <RotateCcw className="mr-2 size-5" />
                         Reiniciar
                       </Button>
                     </div>
 
-                    <div className="grid w-full grid-cols-3 gap-2 sm:max-w-[360px]">
+                    <div className="mt-1 grid w-full grid-cols-1 gap-2 sm:max-w-[360px] sm:grid-cols-3">
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => switchTimerMode("focus")}
-                        className={`rounded-xl border-2 ${timerMode === "focus" ? "border-[#f47c0f] bg-[#fff4ea] text-[#b05a00]" : "border-[#5b30d9]/35 text-[#5b30d9]"}`}
+                        className={`h-10 rounded-xl border ${timerMode === "focus" ? "border-[#f47c0f]/70 bg-[#fff7ef] text-[#b05a00]" : "border-[#5b30d9]/25 bg-white/80 text-[#5b30d9]"}`}
                       >
                         <ListTodo className="mr-2 size-4" />
                         Foco
@@ -2510,7 +2552,7 @@ export default function Dashboard() {
                         size="sm"
                         variant="outline"
                         onClick={() => switchTimerMode("shortBreak")}
-                        className={`rounded-xl border-2 ${timerMode === "shortBreak" ? "border-[#f47c0f] bg-[#fff4ea] text-[#b05a00]" : "border-[#5b30d9]/35 text-[#5b30d9]"}`}
+                        className={`h-10 rounded-xl border ${timerMode === "shortBreak" ? "border-[#f47c0f]/70 bg-[#fff7ef] text-[#b05a00]" : "border-[#5b30d9]/25 bg-white/80 text-[#5b30d9]"}`}
                       >
                         <Coffee className="mr-2 size-4" />
                         Descanso
@@ -2519,14 +2561,15 @@ export default function Dashboard() {
                         size="sm"
                         variant="outline"
                         onClick={() => switchTimerMode("longBreak")}
-                        className={`rounded-xl border-2 ${timerMode === "longBreak" ? "border-[#f47c0f] bg-[#fff4ea] text-[#b05a00]" : "border-[#5b30d9]/35 text-[#5b30d9]"}`}
+                        className={`h-10 rounded-xl border ${timerMode === "longBreak" ? "border-[#f47c0f]/70 bg-[#fff7ef] text-[#b05a00]" : "border-[#5b30d9]/25 bg-white/80 text-[#5b30d9]"}`}
                       >
                         <Moon className="mr-2 size-4" />
                         Largo
                       </Button>
                     </div>
 
-                    <div className="flex w-full items-center justify-center gap-2 sm:max-w-[520px]">
+                    <div className="w-full max-w-full overflow-x-auto pb-1 sm:max-w-[520px]">
+                      <div className="mx-auto flex w-max items-center justify-center gap-2">
                       {(() => {
                         const completedInCycle = focusStreak % 4;
                         return (
@@ -2539,7 +2582,7 @@ export default function Dashboard() {
                               return (
                                 <div key={index} className="flex items-center gap-2">
                                   <span
-                                    className={`grid size-10 place-items-center rounded-full border-2 ${
+                                    className={`grid size-8 place-items-center rounded-full border-2 sm:size-10 ${
                                       isCompleted || isCurrent
                                         ? "border-[#f47c0f] bg-[#f47c0f] text-white"
                                         : "border-[#5b30d9] bg-[#f2f0f3] text-[#5b30d9]"
@@ -2547,12 +2590,12 @@ export default function Dashboard() {
                                   >
                                     <ListTodo className="size-4" />
                                   </span>
-                                  {index < 3 && <span className={`h-1.5 w-14 rounded-full ${connectorActive ? "bg-[#d9793e]" : "bg-[#5b30d9]/45"}`} />}
+                                  {index < 3 && <span className={`h-1.5 w-8 rounded-full sm:w-14 ${connectorActive ? "bg-[#d9793e]" : "bg-[#5b30d9]/45"}`} />}
                                 </div>
                               );
                             })}
                             <span
-                              className={`grid size-10 place-items-center rounded-full border-2 ${
+                              className={`grid size-8 place-items-center rounded-full border-2 sm:size-10 ${
                                 focusStreak > 0 && focusStreak % 4 === 0
                                   ? "border-[#f47c0f] bg-[#f47c0f] text-white"
                                   : "border-[#5b30d9] bg-[#f2f0f3] text-[#5b30d9]"
@@ -2563,6 +2606,7 @@ export default function Dashboard() {
                           </>
                         );
                       })()}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -2789,7 +2833,7 @@ export default function Dashboard() {
               <Card className="focus-card flex h-full flex-1 flex-col rounded-xl gap-3 px-3 pb-3 pt-3 sm:p-6 md:p-8">
                 <div className="flex items-center gap-2">
                   <img
-                    src="/assets/chatbot/lumi-speaking-03.png"
+                    src="/assets/chatbot/lumi-speaking-04.png"
                     alt="Lumi hablando"
                     className="size-20 rounded-full border border-[#5b30d9]/30 object-cover object-top sm:size-24"
                     loading="lazy"
@@ -2825,7 +2869,7 @@ export default function Dashboard() {
                     <div className="mb-1 flex items-center justify-between gap-2">
                       <div className="flex items-center gap-1.5">
                         <img
-                          src={staticLumiIcon}
+                          src={menuLumiIcon}
                           alt="Lumi hablando"
                           className="size-14 rounded-full border border-[#5b30d9]/25 object-cover object-top sm:size-16"
                           loading="lazy"
@@ -3138,16 +3182,28 @@ export default function Dashboard() {
                         <span className="font-bold">Sonidos y notificaciones</span>
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        <Button variant="outline" disabled className="rounded-xl border-[#5b30d9] text-[#5b30d9]">
-                          Sonido: ON
+                        <Button
+                          variant={isSoundEnabled ? "default" : "outline"}
+                          onClick={toggleSoundEnabled}
+                          className={isSoundEnabled ? "rounded-xl bg-[#f47c0f] text-white hover:bg-[#dd6900]" : "rounded-xl border-[#5b30d9] text-[#5b30d9]"}
+                        >
+                          Sonido: {isSoundEnabled ? "ON" : "OFF"}
                         </Button>
-                        <Button variant="outline" disabled className="rounded-xl border-[#5b30d9] text-[#5b30d9]">
-                          {notificationPermission === "granted"
-                            ? "Notificaciones activas"
-                            : notificationPermission === "unsupported"
-                              ? "Notificaciones no soportadas"
-                              : "Notificaciones limitadas"}
-                        </Button>
+                      </div>
+                      <div className="mt-3 space-y-2">
+                        <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Volumen notificación</p>
+                        <div className="flex items-center gap-3">
+                          <Input
+                            type="range"
+                            min={0}
+                            max={100}
+                            step={5}
+                            value={notificationVolume}
+                            onChange={(event) => setNotificationVolume(String(parseNotificationVolume(event.target.value)))}
+                            className="h-10"
+                          />
+                          <span className="w-12 text-right text-sm font-bold text-[#5b30d9]">{parseNotificationVolume(notificationVolume)}%</span>
+                        </div>
                       </div>
                       <div className="mt-3 grid gap-3 sm:grid-cols-2">
                         <div className="space-y-2">
@@ -3155,10 +3211,10 @@ export default function Dashboard() {
                           <div className="flex items-center gap-2">
                             <Button
                               variant={dailyReminderEnabled ? "default" : "outline"}
-                              disabled
+                              onClick={() => setDailyReminderEnabled((current) => !current)}
                               className={dailyReminderEnabled ? "rounded-xl bg-[#5b30d9] text-white hover:bg-[#4a22be]" : "rounded-xl border-[#5b30d9] text-[#5b30d9]"}
                             >
-                              Siempre activo
+                              {dailyReminderEnabled ? "Activo" : "Inactivo"}
                             </Button>
                             <Input
                               type="number"
@@ -3167,6 +3223,7 @@ export default function Dashboard() {
                               inputMode="numeric"
                               value={dailyReminderHour}
                               onChange={(event) => setDailyReminderHour(sanitizeDigitsInput(event.target.value, 2))}
+                              disabled={!dailyReminderEnabled}
                               className="w-24"
                             />
                           </div>
@@ -3177,10 +3234,10 @@ export default function Dashboard() {
                           <div className="flex items-center gap-2">
                             <Button
                               variant={pomodoroReminderEnabled ? "default" : "outline"}
-                              disabled
+                              onClick={() => setPomodoroReminderEnabled((current) => !current)}
                               className={pomodoroReminderEnabled ? "rounded-xl bg-[#5b30d9] text-white hover:bg-[#4a22be]" : "rounded-xl border-[#5b30d9] text-[#5b30d9]"}
                             >
-                              Siempre activo
+                              {pomodoroReminderEnabled ? "Activo" : "Inactivo"}
                             </Button>
                             <Input
                               type="number"
@@ -3189,6 +3246,7 @@ export default function Dashboard() {
                               inputMode="numeric"
                               value={pomodoroReminderMinutes}
                               onChange={(event) => setPomodoroReminderMinutes(sanitizeDigitsInput(event.target.value, 2))}
+                              disabled={!pomodoroReminderEnabled}
                               className="w-24"
                             />
                           </div>
