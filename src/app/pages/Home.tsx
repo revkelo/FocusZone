@@ -390,8 +390,6 @@ export default function Home() {
                   onClick={() => updateLumiAlt((previous) => !previous)}
                   onMouseEnter={() => updateLumiAlt(false)}
                   onMouseLeave={() => updateLumiAlt(true)}
-                  onFocus={() => updateLumiAlt(false)}
-                  onBlur={() => updateLumiAlt(true)}
                   className="mx-auto w-full max-w-[52%] sm:max-w-[44%] md:max-w-[88%]"
                   aria-label="Cambiar expresión de Lumi"
                 >
