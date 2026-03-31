@@ -2699,9 +2699,9 @@ export default function Dashboard() {
               <Card className="focus-card flex h-full flex-1 flex-col rounded-xl gap-3 px-3 pb-3 pt-3 sm:p-6 md:p-8">
                 <div className="flex items-center gap-2">
                   <img
-                    src={activeLumiIcon}
+                    src="/assets/chatbot/lumi-speaking-03.png"
                     alt="Lumi hablando"
-                    className="size-12 rounded-full border border-[#5b30d9]/30 object-cover object-top sm:size-14"
+                    className="size-20 rounded-full border border-[#5b30d9]/30 object-cover object-top sm:size-24"
                     loading="lazy"
                   />
                   <h2 className="display-font text-4xl text-[#5b30d9] sm:text-5xl">Chatbot Lumi</h2>
@@ -2722,7 +2722,7 @@ export default function Dashboard() {
                           <img
                             src={activeLumiIcon}
                             alt="Lumi hablando"
-                            className="size-8 rounded-full border border-[#5b30d9]/25 object-cover object-top"
+                            className="size-14 rounded-full border border-[#5b30d9]/25 object-cover object-top sm:size-16"
                             loading="lazy"
                           />
                         ) : null}
@@ -2737,7 +2737,7 @@ export default function Dashboard() {
                         <img
                           src={activeLumiIcon}
                           alt="Lumi hablando"
-                          className="size-8 rounded-full border border-[#5b30d9]/25 object-cover object-top"
+                          className="size-14 rounded-full border border-[#5b30d9]/25 object-cover object-top sm:size-16"
                           loading="lazy"
                         />
                         <p className="text-[11px] font-black uppercase tracking-wide opacity-80">Lumi</p>
@@ -3109,26 +3109,6 @@ export default function Dashboard() {
 
                     <div className="space-y-4 rounded-xl border border-[#5b30d9]/20 bg-white/70 p-4">
                       <h3 className="font-bold uppercase tracking-wide text-[#5b30d9]">Perfil</h3>
-                      <div className="space-y-2">
-                        <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Cambiar nickname</p>
-                        <div className="flex flex-col gap-2 sm:flex-row">
-                          <Input
-                            type="text"
-                            value={nicknameInput}
-                            maxLength={30}
-                            onChange={(event) => setNicknameInput(event.target.value.replace(/\s+/g, ""))}
-                            placeholder="tu_nickname"
-                            className="sm:flex-1"
-                          />
-                          <Button
-                            onClick={() => void handleUpdateNickname()}
-                            disabled={isUpdatingNickname}
-                            className="rounded-xl bg-[#5b30d9] text-white hover:bg-[#4a22be]"
-                          >
-                            {isUpdatingNickname ? "Guardando..." : "Actualizar"}
-                          </Button>
-                        </div>
-                      </div>
 
                       <div className="space-y-2">
                         <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Cambiar contraseña</p>

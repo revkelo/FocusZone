@@ -10,6 +10,7 @@ import { getNicknameValidationError, MAX_NICKNAME_LENGTH } from "../lib/nickname
 import { supabase } from "../lib/supabase";
 
 type AuthView = "login" | "register" | "registerCode" | "recoverRequest" | "recoverCode" | "verifyLoginCode";
+const RESEND_COOLDOWN_SECONDS = 60;
 
 type ApiResult = {
   ok: boolean;
@@ -34,6 +35,8 @@ export default function Login() {
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isResendingCode, setIsResendingCode] = useState(false);
+  const [resendCooldownSeconds, setResendCooldownSeconds] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -54,6 +57,20 @@ export default function Login() {
     };
   }, [navigate]);
 
+  useEffect(() => {
+    if (resendCooldownSeconds <= 0) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setResendCooldownSeconds((current) => Math.max(0, current - 1));
+    }, 1000);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [resendCooldownSeconds]);
+
   const postAuth = async (url: string, payload: Record<string, unknown>) => {
     const response = await fetch(url, {
       method: "POST",
@@ -70,6 +87,10 @@ export default function Login() {
   const resetMessages = () => {
     setError("");
     setInfo("");
+  };
+
+  const startResendCooldown = () => {
+    setResendCooldownSeconds(RESEND_COOLDOWN_SECONDS);
   };
 
   const handleLogin = async (event: React.FormEvent) => {
@@ -111,6 +132,7 @@ export default function Login() {
           setView("verifyLoginCode");
           setEmail(loginEmail);
           setInfo("Tu correo no está verificado. Te enviamos un código de 4 dígitos.");
+          startResendCooldown();
           setLoading(false);
           return;
         } catch (requestError) {
@@ -175,6 +197,7 @@ export default function Login() {
       });
       setInfo("Te enviamos un código de 4 dígitos a tu correo.");
       setView("registerCode");
+      startResendCooldown();
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "No se pudo enviar el código.");
     } finally {
@@ -226,6 +249,7 @@ export default function Login() {
       await postAuth("/api/request-password-reset-code", { email: normalizedEmail });
       setView("recoverCode");
       setInfo("Código enviado. Revisa tu correo para continuar.");
+      startResendCooldown();
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "No se pudo enviar el código.");
     } finally {
@@ -293,6 +317,67 @@ export default function Login() {
       setError(requestError instanceof Error ? requestError.message : "No se pudo verificar el correo.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    if (resendCooldownSeconds > 0 || isResendingCode) {
+      return;
+    }
+
+    resetMessages();
+    setIsResendingCode(true);
+    try {
+      if (view === "registerCode") {
+        const normalizedEmail = normalizeInput(email).toLowerCase();
+        const normalizedNickname = normalizeInput(nickname);
+        const nicknameError = getNicknameValidationError(normalizedNickname);
+        if (!normalizedEmail.includes("@")) {
+          setError("Ingresa un correo válido.");
+          return;
+        }
+        if (nicknameError) {
+          setError(nicknameError);
+          return;
+        }
+
+        await postAuth("/api/request-signup-code", {
+          email: normalizedEmail,
+          nickname: normalizedNickname,
+        });
+        setInfo("Código reenviado. Revisa tu correo.");
+        startResendCooldown();
+        return;
+      }
+
+      if (view === "recoverCode") {
+        const normalizedEmail = normalizeInput(email).toLowerCase();
+        if (!normalizedEmail.includes("@")) {
+          setError("Ingresa tu correo para recuperar contraseña.");
+          return;
+        }
+
+        await postAuth("/api/request-password-reset-code", { email: normalizedEmail });
+        setInfo("Código reenviado. Revisa tu correo.");
+        startResendCooldown();
+        return;
+      }
+
+      if (view === "verifyLoginCode") {
+        const normalizedEmail = normalizeInput(email).toLowerCase();
+        if (!normalizedEmail.includes("@")) {
+          setError("Ingresa un correo válido.");
+          return;
+        }
+
+        await postAuth("/api/request-existing-verification-code", { email: normalizedEmail });
+        setInfo("Código reenviado. Revisa tu correo.");
+        startResendCooldown();
+      }
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : "No se pudo reenviar el código.");
+    } finally {
+      setIsResendingCode(false);
     }
   };
 
@@ -524,6 +609,20 @@ export default function Login() {
               >
                 Volver al paso 1
               </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void handleResendCode()}
+                disabled={isResendingCode || resendCooldownSeconds > 0}
+                className="h-11 w-full rounded-xl border-[#5b30d9]/35 text-[#5b30d9]"
+              >
+                {isResendingCode
+                  ? "Reenviando..."
+                  : resendCooldownSeconds > 0
+                    ? `Reenviar código en ${resendCooldownSeconds}s`
+                    : "Reenviar código"}
+              </Button>
             </form>
           )}
 
@@ -613,9 +712,23 @@ export default function Login() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="h-12 w-full rounded-xl bg-[#9adf45] text-base font-bold text-[#1f3c0d] hover:bg-[#87cc39] focus-glow-green"
+                className="h-12 w-full rounded-xl bg-[#f47c0f] text-base font-bold text-white hover:bg-[#dd6900] focus-glow-orange"
               >
                 {loading ? "Actualizando..." : "Cambiar contraseña"}
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void handleResendCode()}
+                disabled={isResendingCode || resendCooldownSeconds > 0}
+                className="h-11 w-full rounded-xl border-[#5b30d9]/35 text-[#5b30d9]"
+              >
+                {isResendingCode
+                  ? "Reenviando..."
+                  : resendCooldownSeconds > 0
+                    ? `Reenviar código en ${resendCooldownSeconds}s`
+                    : "Reenviar código"}
               </Button>
             </form>
           )}
@@ -643,6 +756,20 @@ export default function Login() {
                 className="h-12 w-full rounded-xl bg-[#9adf45] text-base font-bold text-[#1f3c0d] hover:bg-[#87cc39] focus-glow-green"
               >
                 {loading ? "Verificando..." : "Verificar correo"}
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void handleResendCode()}
+                disabled={isResendingCode || resendCooldownSeconds > 0}
+                className="h-11 w-full rounded-xl border-[#5b30d9]/35 text-[#5b30d9]"
+              >
+                {isResendingCode
+                  ? "Reenviando..."
+                  : resendCooldownSeconds > 0
+                    ? `Reenviar código en ${resendCooldownSeconds}s`
+                    : "Reenviar código"}
               </Button>
             </form>
           )}
