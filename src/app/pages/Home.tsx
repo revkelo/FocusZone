@@ -123,9 +123,13 @@ export default function Home() {
   const [horizontalCarouselApi, setHorizontalCarouselApi] = useState<CarouselApi | null>(null);
   const [activeHorizontalSlide, setActiveHorizontalSlide] = useState(0);
   const [activeNewsIndex, setActiveNewsIndex] = useState(0);
-  const [isNewsAutoplayEnabled, setIsNewsAutoplayEnabled] = useState(true);
+  const [isNewsTransitioning, setIsNewsTransitioning] = useState(false);
+  const [newsTransitionDirection, setNewsTransitionDirection] = useState<"next" | "prev">("next");
   const [isViewerTransitioning, setIsViewerTransitioning] = useState(false);
   const [isVideoViewerOpen, setIsVideoViewerOpen] = useState(false);
+  const [isHomeVideoMuted, setIsHomeVideoMuted] = useState(true);
+  const [homeVideoVolume, setHomeVideoVolume] = useState(1);
+  const [homeVideoCurrentTime, setHomeVideoCurrentTime] = useState(0);
   const [isLumiAlt, setIsLumiAlt] = useState(true);
   const [isLumiSpeaking, setIsLumiSpeaking] = useState(false);
   const [lumiSpeakingFrame, setLumiSpeakingFrame] = useState(0);
@@ -133,8 +137,17 @@ export default function Home() {
   const [lumiAudioDuration, setLumiAudioDuration] = useState(0);
   const [isLumiAudioReady, setIsLumiAudioReady] = useState(false);
   const [lumiAudioError, setLumiAudioError] = useState<string | null>(null);
+  const homeVideoRef = useRef<HTMLVideoElement | null>(null);
+  const viewerVideoRef = useRef<HTMLVideoElement | null>(null);
   const lumiAudioRef = useRef<HTMLAudioElement | null>(null);
   const lumiTransitionAudioContextRef = useRef<AudioContext | null>(null);
+  const wasVideoViewerOpenRef = useRef(false);
+  const videoSyncStateRef = useRef({
+    muted: true,
+    volume: 1,
+    currentTime: 0,
+    shouldResume: true,
+  });
 
   const viewerItem = useMemo(() => (viewerIndex !== null ? artGallery[viewerIndex] : null), [viewerIndex]);
   const horizontalDesigns = useMemo(() => artGallery.filter((item) => item.orientation === "landscape"), []);
@@ -177,7 +190,7 @@ export default function Home() {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setViewerIndex(null);
-        setIsVideoViewerOpen(false);
+        closeVideoViewer();
       }
     };
 
@@ -186,6 +199,60 @@ export default function Home() {
       window.removeEventListener("keydown", handleEscape);
     };
   }, [viewerIndex, isVideoViewerOpen]);
+
+  useEffect(() => {
+    if (!isVideoViewerOpen) {
+      if (!wasVideoViewerOpenRef.current) {
+        return;
+      }
+      wasVideoViewerOpenRef.current = false;
+      const homeVideo = homeVideoRef.current;
+      if (!homeVideo) {
+        return;
+      }
+
+      const nextState = videoSyncStateRef.current;
+      homeVideo.muted = nextState.muted;
+      homeVideo.volume = nextState.volume;
+      try {
+        homeVideo.currentTime = Math.max(0, nextState.currentTime);
+      } catch {
+        // Keep playing with current position if browser blocks assignment.
+      }
+      if (nextState.shouldResume) {
+        void homeVideo.play().catch(() => {});
+      }
+      return;
+    }
+
+    wasVideoViewerOpenRef.current = true;
+    const viewerVideo = viewerVideoRef.current;
+    if (!viewerVideo) {
+      return;
+    }
+
+    const syncViewerState = () => {
+      const nextState = videoSyncStateRef.current;
+      viewerVideo.muted = nextState.muted;
+      viewerVideo.volume = nextState.volume;
+      try {
+        viewerVideo.currentTime = Math.max(0, nextState.currentTime);
+      } catch {
+        // Fallback to current position if assignment fails.
+      }
+      void viewerVideo.play().catch(() => {});
+    };
+
+    if (viewerVideo.readyState >= 1) {
+      syncViewerState();
+      return;
+    }
+
+    viewerVideo.addEventListener("loadedmetadata", syncViewerState, { once: true });
+    return () => {
+      viewerVideo.removeEventListener("loadedmetadata", syncViewerState);
+    };
+  }, [isVideoViewerOpen]);
 
   useEffect(() => {
     if (!horizontalCarouselApi) {
@@ -204,20 +271,6 @@ export default function Home() {
       horizontalCarouselApi.off("select", onSelect);
     };
   }, [horizontalCarouselApi]);
-
-  useEffect(() => {
-    if (!isNewsAutoplayEnabled || relatedNews.length < 2) {
-      return;
-    }
-
-    const autoplayNews = window.setInterval(() => {
-      setActiveNewsIndex((previous) => (previous + 1) % relatedNews.length);
-    }, 5000);
-
-    return () => {
-      window.clearInterval(autoplayNews);
-    };
-  }, [isNewsAutoplayEnabled]);
 
   useEffect(() => {
     return () => {
@@ -349,14 +402,71 @@ export default function Home() {
     setLumiAudioCurrentTime(nextTime);
   };
 
+  const switchNews = (direction: "next" | "prev") => {
+    if (isNewsTransitioning || relatedNews.length < 2) {
+      return;
+    }
+
+    setNewsTransitionDirection(direction);
+    setIsNewsTransitioning(true);
+    window.setTimeout(() => {
+      setActiveNewsIndex((previous) =>
+        direction === "next"
+          ? (previous + 1) % relatedNews.length
+          : (previous - 1 + relatedNews.length) % relatedNews.length,
+      );
+      window.requestAnimationFrame(() => {
+        setIsNewsTransitioning(false);
+      });
+    }, 140);
+  };
+
   const goPrevNews = () => {
-    setIsNewsAutoplayEnabled(false);
-    setActiveNewsIndex((previous) => (previous - 1 + relatedNews.length) % relatedNews.length);
+    switchNews("prev");
   };
 
   const goNextNews = () => {
-    setIsNewsAutoplayEnabled(false);
-    setActiveNewsIndex((previous) => (previous + 1) % relatedNews.length);
+    switchNews("next");
+  };
+
+  const syncVideoAudioState = (video: HTMLVideoElement | null) => {
+    if (!video) {
+      return;
+    }
+    setIsHomeVideoMuted(video.muted);
+    setHomeVideoVolume(video.volume);
+    videoSyncStateRef.current.muted = video.muted;
+    videoSyncStateRef.current.volume = video.volume;
+  };
+
+  const syncVideoTimeState = (video: HTMLVideoElement | null) => {
+    if (!video) {
+      return;
+    }
+    setHomeVideoCurrentTime(video.currentTime || 0);
+    videoSyncStateRef.current.currentTime = video.currentTime || 0;
+  };
+
+  const openVideoViewer = () => {
+    const homeVideo = homeVideoRef.current;
+    if (homeVideo) {
+      syncVideoAudioState(homeVideo);
+      syncVideoTimeState(homeVideo);
+      videoSyncStateRef.current.shouldResume = !homeVideo.paused && !homeVideo.ended;
+      homeVideo.pause();
+    }
+    setIsVideoViewerOpen(true);
+  };
+
+  const closeVideoViewer = () => {
+    const expandedVideo = viewerVideoRef.current;
+    if (expandedVideo) {
+      syncVideoAudioState(expandedVideo);
+      syncVideoTimeState(expandedVideo);
+      videoSyncStateRef.current.shouldResume = !expandedVideo.paused && !expandedVideo.ended;
+      expandedVideo.pause();
+    }
+    setIsVideoViewerOpen(false);
   };
 
   const playLumiTransitionSound = () => {
@@ -496,21 +606,24 @@ export default function Home() {
                 <div className="mx-auto flex h-full w-full max-w-[420px] rounded-[1rem] border border-[#d1d5db] bg-[linear-gradient(180deg,#ffffff_0%,#f7f8ff_100%)] px-3 pb-3 pt-2 sm:px-4 sm:pb-4 sm:pt-2">
                   <div className="relative w-full overflow-hidden rounded-[1rem] border-2 border-[#d1d5db] bg-[#111111] shadow-[0_14px_24px_-16px_rgba(17,17,17,0.55)]">
                     <video
+                      ref={homeVideoRef}
                       className="aspect-[9/16] h-auto w-full object-cover"
                       autoPlay
                       loop
-                      muted
+                      muted={isHomeVideoMuted}
                       playsInline
                       controls
                       controlsList="nofullscreen"
                       preload="metadata"
+                      onTimeUpdate={() => syncVideoTimeState(homeVideoRef.current)}
+                      onVolumeChange={() => syncVideoAudioState(homeVideoRef.current)}
                     >
                       <source src="/assets/focus%20zone%20video3.mp4" type="video/mp4" />
                       Tu navegador no soporta video HTML5.
                     </video>
                     <button
                       type="button"
-                      onClick={() => setIsVideoViewerOpen(true)}
+                      onClick={openVideoViewer}
                       className="absolute right-2 top-2 grid size-8 place-items-center rounded-full border border-white/65 bg-black/45 text-white backdrop-blur-sm transition hover:bg-black/65"
                       aria-label="Abrir video en visor"
                     >
@@ -748,16 +861,18 @@ export default function Home() {
                       <button
                         type="button"
                         onClick={goPrevNews}
+                        disabled={isNewsTransitioning}
                         aria-label="Noticia anterior"
-                        className="inline-flex size-7 items-center justify-center rounded-full border border-[#f47c0f]/45 bg-white text-[#f47c0f] hover:bg-[#fff1e5]"
+                        className="inline-flex size-7 items-center justify-center rounded-full border border-[#f47c0f]/45 bg-white text-[#f47c0f] hover:bg-[#fff1e5] disabled:cursor-not-allowed disabled:opacity-55"
                       >
                         <ChevronLeft className="size-4" />
                       </button>
                       <button
                         type="button"
                         onClick={goNextNews}
+                        disabled={isNewsTransitioning}
                         aria-label="Siguiente noticia"
-                        className="inline-flex size-7 items-center justify-center rounded-full border border-[#f47c0f]/45 bg-white text-[#f47c0f] hover:bg-[#fff1e5]"
+                        className="inline-flex size-7 items-center justify-center rounded-full border border-[#f47c0f]/45 bg-white text-[#f47c0f] hover:bg-[#fff1e5] disabled:cursor-not-allowed disabled:opacity-55"
                       >
                         <ChevronRight className="size-4" />
                       </button>
@@ -765,7 +880,15 @@ export default function Home() {
                   </div>
                 </div>
                 <article className="overflow-hidden rounded-[1rem] border-2 border-[#d1d5db] bg-[linear-gradient(145deg,#ffffff_0%,#f8faff_100%)] shadow-[0_14px_24px_-20px_rgba(17,24,39,0.45)]">
-                  <div className="grid gap-0 sm:grid-cols-[170px_1fr]">
+                  <div
+                    className={`grid gap-0 transition-all duration-200 will-change-transform sm:grid-cols-[170px_1fr] ${
+                      isNewsTransitioning
+                        ? newsTransitionDirection === "next"
+                          ? "translate-x-2 opacity-0"
+                          : "-translate-x-2 opacity-0"
+                        : "translate-x-0 opacity-100"
+                    }`}
+                  >
                     <div className="relative border-b border-[#d1d5db] bg-[linear-gradient(160deg,#f2f0ff_0%,#eef7ff_100%)] p-4 sm:border-b-0 sm:border-r">
                       <span className="absolute right-2 top-2 rounded-full bg-[#f47c0f] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.08em] text-white">
                         Noticia
@@ -981,12 +1104,12 @@ export default function Home() {
         )}
 
         {isVideoViewerOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#f2f0f3]/95 p-3 md:p-8" onClick={() => setIsVideoViewerOpen(false)}>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#f2f0f3]/95 p-3 md:p-8" onClick={closeVideoViewer}>
             <div className="relative w-full max-w-6xl" onClick={(event) => event.stopPropagation()}>
               <div className="mb-3 flex items-center justify-end text-[#2a2a2a]">
                 <button
                   type="button"
-                  onClick={() => setIsVideoViewerOpen(false)}
+                  onClick={closeVideoViewer}
                   className="grid size-10 place-items-center rounded-full border border-[#5b30d9]/60 bg-white/95 text-[#5b30d9] shadow-sm hover:bg-[#ece8f9]"
                   aria-label="Cerrar visor de video"
                 >
@@ -996,14 +1119,16 @@ export default function Home() {
 
               <div className="relative flex items-center justify-center overflow-hidden rounded-[1.2rem] border border-[#5b30d9]/25 bg-white p-2 md:p-3">
                 <video
+                  ref={viewerVideoRef}
                   className="max-h-[84vh] w-full rounded-[1rem] bg-black object-contain"
-                  autoPlay
                   loop
-                  muted
+                  muted={isHomeVideoMuted}
                   playsInline
                   controls
                   controlsList="nofullscreen"
                   preload="metadata"
+                  onTimeUpdate={() => syncVideoTimeState(viewerVideoRef.current)}
+                  onVolumeChange={() => syncVideoAudioState(viewerVideoRef.current)}
                 >
                   <source src="/assets/focus%20zone%20video3.mp4" type="video/mp4" />
                   Tu navegador no soporta video HTML5.
