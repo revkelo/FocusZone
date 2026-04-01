@@ -730,6 +730,11 @@
     cursor: pointer;
   }
 
+  .focus-volume-slider:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
   .focus-volume-slider::-webkit-slider-runnable-track {
     height: 8px;
     border-radius: 9999px;

@@ -131,6 +131,8 @@ export default function Home() {
   const [lumiSpeakingFrame, setLumiSpeakingFrame] = useState(0);
   const [lumiAudioCurrentTime, setLumiAudioCurrentTime] = useState(0);
   const [lumiAudioDuration, setLumiAudioDuration] = useState(0);
+  const [isLumiAudioReady, setIsLumiAudioReady] = useState(false);
+  const [lumiAudioError, setLumiAudioError] = useState<string | null>(null);
   const lumiAudioRef = useRef<HTMLAudioElement | null>(null);
   const lumiTransitionAudioContextRef = useRef<AudioContext | null>(null);
 
@@ -302,16 +304,22 @@ export default function Home() {
 
     if (audio.paused) {
       try {
+        if (audio.currentTime >= (Number.isFinite(audio.duration) ? audio.duration : 0)) {
+          audio.currentTime = 0;
+        }
+        setLumiAudioError(null);
         await audio.play();
         setIsLumiSpeaking(true);
       } catch {
         setIsLumiSpeaking(false);
+        setLumiAudioError("No se pudo reproducir el audio en este momento.");
       }
       return;
     }
 
     audio.pause();
     setIsLumiSpeaking(false);
+    syncLumiAudioTiming();
   };
 
   const syncLumiAudioTiming = () => {
@@ -319,8 +327,12 @@ export default function Home() {
     if (!audio) {
       return;
     }
+    const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
     setLumiAudioCurrentTime(audio.currentTime || 0);
-    setLumiAudioDuration(Number.isFinite(audio.duration) ? audio.duration : 0);
+    setLumiAudioDuration(duration);
+    if (duration > 0) {
+      setIsLumiAudioReady(true);
+    }
   };
 
   const handleLumiAudioSeek = (value: string) => {
@@ -328,7 +340,11 @@ export default function Home() {
     if (!audio) {
       return;
     }
-    const nextTime = Math.max(0, Math.min(Number(value) || 0, Number.isFinite(audio.duration) ? audio.duration : 0));
+    const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
+    if (duration <= 0) {
+      return;
+    }
+    const nextTime = Math.max(0, Math.min(Number(value) || 0, duration));
     audio.currentTime = nextTime;
     setLumiAudioCurrentTime(nextTime);
   };
@@ -476,9 +492,9 @@ export default function Home() {
 
           <section className="focus-reveal focus-reveal-delay-1">
             <Card className="focus-campaign-card rounded-[1.2rem] p-4 md:p-6">
-              <div className="grid items-start gap-4 lg:grid-cols-[minmax(220px,280px)_minmax(0,1fr)] lg:gap-6">
-                <div className="mx-auto w-full max-w-[280px] rounded-[1rem] border border-[#d1d5db] bg-[linear-gradient(180deg,#ffffff_0%,#f7f8ff_100%)] px-3 pb-3 pt-2 sm:px-4 sm:pb-4 sm:pt-2">
-                  <div className="relative overflow-hidden rounded-[1rem] border-2 border-[#d1d5db] bg-[#111111] shadow-[0_14px_24px_-16px_rgba(17,17,17,0.55)]">
+              <div className="grid items-stretch gap-4 lg:grid-cols-[minmax(220px,280px)_minmax(0,1fr)] lg:gap-6">
+                <div className="mx-auto flex h-full w-full max-w-[420px] rounded-[1rem] border border-[#d1d5db] bg-[linear-gradient(180deg,#ffffff_0%,#f7f8ff_100%)] px-3 pb-3 pt-2 sm:px-4 sm:pb-4 sm:pt-2">
+                  <div className="relative w-full overflow-hidden rounded-[1rem] border-2 border-[#d1d5db] bg-[#111111] shadow-[0_14px_24px_-16px_rgba(17,17,17,0.55)]">
                     <video
                       className="aspect-[9/16] h-auto w-full object-cover"
                       autoPlay
@@ -503,7 +519,7 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="rounded-[1rem] border-2 border-[#d1d5db] bg-[linear-gradient(180deg,#ffffff_0%,#f9fafb_100%)] p-4 md:p-5">
+                <div className="flex h-full flex-col rounded-[1rem] border-2 border-[#d1d5db] bg-[linear-gradient(180deg,#ffffff_0%,#f9fafb_100%)] p-4 md:p-5">
                   <div className="flex items-center gap-2">
                     <Bot className="size-5 text-[#f47c0f]" />
                     <h3 className="display-font text-3xl text-[#5b30d9] md:text-4xl">Chatbot Lumi con IA</h3>
@@ -546,16 +562,18 @@ export default function Home() {
                             <input
                               type="range"
                               min={0}
-                              max={Math.max(1, Math.floor(lumiAudioDuration || 1))}
-                              step={1}
-                              value={Math.min(lumiAudioCurrentTime, Math.max(1, Math.floor(lumiAudioDuration || 1)))}
+                              max={Math.max(1, lumiAudioDuration || 1)}
+                              step={0.1}
+                              value={Math.min(lumiAudioCurrentTime, Math.max(1, lumiAudioDuration || 1))}
                               onChange={(event) => handleLumiAudioSeek(event.target.value)}
+                              disabled={!isLumiAudioReady}
                               className="focus-volume-slider w-full"
                             />
                             <span className="w-9 shrink-0 text-right text-[11px] font-bold text-[#5b30d9]/75">{formatAudioTime(lumiAudioDuration)}</span>
                           </div>
                         </div>
                       </div>
+                      {lumiAudioError ? <p className="text-[11px] font-semibold text-[#c74b00]">{lumiAudioError}</p> : null}
                       <audio
                         ref={lumiAudioRef}
                         preload="metadata"
@@ -569,7 +587,17 @@ export default function Home() {
                         }}
                         onEnded={() => {
                           setIsLumiSpeaking(false);
+                          setLumiAudioCurrentTime(0);
                           syncLumiAudioTiming();
+                        }}
+                        onCanPlay={() => {
+                          setIsLumiAudioReady(true);
+                          setLumiAudioError(null);
+                        }}
+                        onError={() => {
+                          setIsLumiSpeaking(false);
+                          setIsLumiAudioReady(false);
+                          setLumiAudioError("No se pudo cargar el audio de Lumi.");
                         }}
                         onTimeUpdate={syncLumiAudioTiming}
                         onLoadedMetadata={syncLumiAudioTiming}
@@ -580,12 +608,12 @@ export default function Home() {
                       </audio>
                     </div>
                   </div>
-                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-[0.75rem] border border-[#d1d5db] bg-white p-3">
+                  <div className="mt-4 grid items-stretch gap-3 sm:grid-cols-2">
+                    <div className="h-full rounded-[0.75rem] border border-[#d1d5db] bg-white p-3">
                       <p className="text-xs font-black uppercase tracking-[0.1em] text-[#f47c0f]">Te ayuda con</p>
                       <p className="mt-1 text-sm font-semibold text-[#5b30d9]">Plan de estudio corto, manejo de distracciones y ritmo de trabajo.</p>
                     </div>
-                    <div className="rounded-[0.75rem] border border-[#d1d5db] bg-white p-3">
+                    <div className="h-full rounded-[0.75rem] border border-[#d1d5db] bg-white p-3">
                       <p className="text-xs font-black uppercase tracking-[0.1em] text-[#f47c0f]">Conecta contigo</p>
                       <p className="mt-1 text-sm font-semibold text-[#5b30d9]">Recomendaciones de recursos, cursos y rutas de exploración.</p>
                     </div>
@@ -686,15 +714,15 @@ export default function Home() {
               <h2 className="display-font text-3xl text-[#5b30d9] md:text-4xl">Lo que descubrimos</h2>
               <span className="focus-kicker hidden border-[#b7d989]/55 bg-[#f4fbe8] text-[#7aa048] md:inline-flex">Datos de investigación</span>
             </div>
-            <div className="grid gap-4 md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-4">
               {researchStats.map((stat) => (
-                <Card key={stat.label} className="focus-campaign-card rounded-[1rem] border-[#d3c7f5] p-4">
-                  <div className="mb-2 flex items-center justify-between">
-                    <div className="h-1.5 w-14 rounded-full bg-[#d4ebad]" />
-                    <span className="text-sm font-black text-[#7aa048]">{stat.icon}</span>
+                <Card key={stat.label} className="focus-campaign-card min-h-[138px] rounded-[0.85rem] border-[#d3c7f5] p-3 md:min-h-[unset] md:rounded-[1rem] md:p-4">
+                  <div className="mb-1.5 flex items-center justify-between md:mb-2">
+                    <div className="h-1 w-10 rounded-full bg-[#d4ebad] md:h-1.5 md:w-14" />
+                    <span className="text-xs font-black text-[#7aa048] md:text-sm">{stat.icon}</span>
                   </div>
-                  <p className="display-font text-4xl text-[#f47c0f] md:text-5xl">{stat.value}</p>
-                  <p className="mt-2 text-sm font-bold text-[#5b30d9]">{stat.label}</p>
+                  <p className="display-font text-3xl text-[#f47c0f] md:text-5xl">{stat.value}</p>
+                  <p className="mt-1.5 text-xs leading-snug font-bold text-[#5b30d9] md:mt-2 md:text-sm">{stat.label}</p>
                 </Card>
               ))}
             </div>
@@ -775,19 +803,19 @@ export default function Home() {
               </div>
             </Card>
 
-            <Card className="focus-campaign-card focus-grid focus-reveal focus-reveal-delay-1 h-full rounded-[1.2rem] p-5 md:p-7 lg:min-h-[430px]">
+            <Card className="focus-campaign-card focus-grid focus-reveal focus-reveal-delay-1 h-full rounded-[1.2rem] p-4 md:p-7 lg:min-h-[430px]">
               <div className="flex items-center gap-2">
                 <Lightbulb className="size-5 text-[#f47c0f]" />
-                <h3 className="display-font text-3xl text-[#5b30d9] md:text-4xl">El problema no es lo digital</h3>
+                <h3 className="display-font text-2xl leading-tight text-[#5b30d9] md:text-4xl">El problema no es lo digital</h3>
               </div>
-              <p className="mt-2 text-sm font-bold uppercase tracking-[0.08em] text-[#5b30d9]/70">Manifiesto de atención consciente</p>
+              <p className="mt-1.5 text-sm font-bold uppercase tracking-[0.08em] text-[#5b30d9]/70 md:mt-2 md:text-sm">Manifiesto de atención consciente</p>
               <p className="mt-1 text-xs text-[#5b30d9]/65 md:text-sm">Ideas clave para transformar hábitos digitales en acciones concretas.</p>
-              <div className="focus-divider mt-4 max-w-xl" />
-              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <div className="focus-divider mt-3 max-w-xl md:mt-4" />
+              <div className="mt-3 grid grid-cols-2 gap-2 sm:mt-5 sm:gap-3">
                 {manifestoLines.map((line, index) => (
-                  <div key={line} className="rounded-[0.75rem] border border-[#d1d5db] bg-white/95 p-3">
-                    <p className="mb-2 text-xs font-black uppercase tracking-[0.1em] text-[#f47c0f]">Clave {index + 1}</p>
-                    <p className="text-[1rem] font-semibold leading-[1.35] text-[#5b30d9]">{line}</p>
+                  <div key={line} className="rounded-[0.75rem] border border-[#d1d5db] bg-white/95 p-2.5 sm:p-3">
+                    <p className="mb-1.5 text-[11px] font-black uppercase tracking-[0.1em] text-[#f47c0f] sm:mb-2 sm:text-xs">Clave {index + 1}</p>
+                    <p className="text-sm font-semibold leading-[1.3] text-[#5b30d9] sm:text-[1rem] sm:leading-[1.35]">{line}</p>
                   </div>
                 ))}
               </div>
