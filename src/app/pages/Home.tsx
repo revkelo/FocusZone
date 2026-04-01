@@ -1,6 +1,6 @@
 ﻿import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router";
-import { ArrowUpRight, BookOpenText, Bot, Building2, ChevronLeft, ChevronRight, Cpu, Database, Glasses, GraduationCap, Lightbulb, MessageSquareQuote, Monitor, Newspaper, Pause, Play, Trophy, Volume2, WandSparkles, X } from "lucide-react";
+import { ArrowUpRight, BookOpenText, Bot, Building2, ChevronLeft, ChevronRight, Cpu, Database, Glasses, GraduationCap, Lightbulb, Maximize2, MessageSquareQuote, Monitor, Newspaper, Pause, Play, Trophy, Volume2, WandSparkles, X } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "../components/ui/carousel";
@@ -125,6 +125,7 @@ export default function Home() {
   const [activeNewsIndex, setActiveNewsIndex] = useState(0);
   const [isNewsAutoplayEnabled, setIsNewsAutoplayEnabled] = useState(true);
   const [isViewerTransitioning, setIsViewerTransitioning] = useState(false);
+  const [isVideoViewerOpen, setIsVideoViewerOpen] = useState(false);
   const [isLumiAlt, setIsLumiAlt] = useState(true);
   const [isLumiSpeaking, setIsLumiSpeaking] = useState(false);
   const [lumiSpeakingFrame, setLumiSpeakingFrame] = useState(0);
@@ -167,13 +168,14 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (viewerIndex === null) {
+    if (viewerIndex === null && !isVideoViewerOpen) {
       return;
     }
 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setViewerIndex(null);
+        setIsVideoViewerOpen(false);
       }
     };
 
@@ -181,7 +183,7 @@ export default function Home() {
     return () => {
       window.removeEventListener("keydown", handleEscape);
     };
-  }, [viewerIndex]);
+  }, [viewerIndex, isVideoViewerOpen]);
 
   useEffect(() => {
     if (!horizontalCarouselApi) {
@@ -474,23 +476,31 @@ export default function Home() {
 
           <section className="focus-reveal focus-reveal-delay-1">
             <Card className="focus-campaign-card rounded-[1.2rem] p-4 md:p-6">
-              <div className="grid items-start gap-4 lg:grid-cols-[0.9fr_1.1fr] lg:gap-6">
-                <div className="mx-auto w-full max-w-[320px] rounded-[1rem] border border-[#d1d5db] bg-[linear-gradient(180deg,#ffffff_0%,#f7f8ff_100%)] p-3 sm:p-4">
-                  <div className="mb-2">
-                    <p className="text-xs font-black uppercase tracking-[0.11em] text-[#5b30d9]/75">Video tutorial</p>
-                  </div>
-                  <div className="overflow-hidden rounded-[1rem] border-2 border-[#d1d5db] bg-[#111111] shadow-[0_14px_24px_-16px_rgba(17,17,17,0.55)]">
+              <div className="grid items-start gap-4 lg:grid-cols-[minmax(220px,280px)_minmax(0,1fr)] lg:gap-6">
+                <div className="mx-auto w-full max-w-[280px] rounded-[1rem] border border-[#d1d5db] bg-[linear-gradient(180deg,#ffffff_0%,#f7f8ff_100%)] px-3 pb-3 pt-2 sm:px-4 sm:pb-4 sm:pt-2">
+                  <div className="relative overflow-hidden rounded-[1rem] border-2 border-[#d1d5db] bg-[#111111] shadow-[0_14px_24px_-16px_rgba(17,17,17,0.55)]">
                     <video
                       className="aspect-[9/16] h-auto w-full object-cover"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
                       controls
+                      controlsList="nofullscreen"
                       preload="metadata"
-                      poster="/assets/tutorial-poster-01.png"
                     >
-                      <source src="/assets/focuszone/tutorial-vertical.mp4" type="video/mp4" />
+                      <source src="/assets/focus%20zone%20video3.mp4" type="video/mp4" />
                       Tu navegador no soporta video HTML5.
                     </video>
+                    <button
+                      type="button"
+                      onClick={() => setIsVideoViewerOpen(true)}
+                      className="absolute right-2 top-2 grid size-8 place-items-center rounded-full border border-white/65 bg-black/45 text-white backdrop-blur-sm transition hover:bg-black/65"
+                      aria-label="Abrir video en visor"
+                    >
+                      <Maximize2 className="size-4" />
+                    </button>
                   </div>
-                  <p className="mt-2 text-xs font-semibold leading-relaxed text-[#5b30d9]/72">Demostración rápida de uso de Focus Zone en formato vertical.</p>
                 </div>
 
                 <div className="rounded-[1rem] border-2 border-[#d1d5db] bg-[linear-gradient(180deg,#ffffff_0%,#f9fafb_100%)] p-4 md:p-5">
@@ -580,11 +590,6 @@ export default function Home() {
                       <p className="mt-1 text-sm font-semibold text-[#5b30d9]">Recomendaciones de recursos, cursos y rutas de exploración.</p>
                     </div>
                   </div>
-                  <Link to="/login" className="mt-4 inline-block w-full sm:w-auto">
-                    <Button className="focus-cta h-11 w-full rounded-xl border-2 border-[#5b30d9] bg-white px-5 text-base font-bold text-[#5b30d9] hover:bg-[#5b30d9] hover:text-white sm:w-auto">
-                      Abrir chat con Lumi
-                    </Button>
-                  </Link>
                 </div>
               </div>
             </Card>
@@ -942,6 +947,39 @@ export default function Home() {
                 >
                   {">"}
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isVideoViewerOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#f2f0f3]/95 p-3 md:p-8" onClick={() => setIsVideoViewerOpen(false)}>
+            <div className="relative w-full max-w-6xl" onClick={(event) => event.stopPropagation()}>
+              <div className="mb-3 flex items-center justify-end text-[#2a2a2a]">
+                <button
+                  type="button"
+                  onClick={() => setIsVideoViewerOpen(false)}
+                  className="grid size-10 place-items-center rounded-full border border-[#5b30d9]/60 bg-white/95 text-[#5b30d9] shadow-sm hover:bg-[#ece8f9]"
+                  aria-label="Cerrar visor de video"
+                >
+                  <X className="size-5" />
+                </button>
+              </div>
+
+              <div className="relative flex items-center justify-center overflow-hidden rounded-[1.2rem] border border-[#5b30d9]/25 bg-white p-2 md:p-3">
+                <video
+                  className="max-h-[84vh] w-full rounded-[1rem] bg-black object-contain"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  controls
+                  controlsList="nofullscreen"
+                  preload="metadata"
+                >
+                  <source src="/assets/focus%20zone%20video3.mp4" type="video/mp4" />
+                  Tu navegador no soporta video HTML5.
+                </video>
               </div>
             </div>
           </div>

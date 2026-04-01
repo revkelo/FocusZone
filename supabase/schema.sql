@@ -186,6 +186,7 @@ alter table public.pomodoro_room_members enable row level security;
 alter table public.pomodoro_room_presence enable row level security;
 alter table public.challenge_catalog enable row level security;
 alter table public.push_subscriptions enable row level security;
+alter table public.auth_email_codes enable row level security;
 
 -- 3) user_challenge_progress policies
 drop policy if exists "challenge_select_own" on public.user_challenge_progress;
@@ -532,6 +533,37 @@ create policy "push_subscriptions_delete_own"
   on public.push_subscriptions
   for delete
   using (auth.uid() = user_id);
+
+-- 15) auth_email_codes policies (no direct client access)
+drop policy if exists "auth_email_codes_no_select" on public.auth_email_codes;
+drop policy if exists "auth_email_codes_no_insert" on public.auth_email_codes;
+drop policy if exists "auth_email_codes_no_update" on public.auth_email_codes;
+drop policy if exists "auth_email_codes_no_delete" on public.auth_email_codes;
+
+create policy "auth_email_codes_no_select"
+  on public.auth_email_codes
+  for select
+  to anon, authenticated
+  using (false);
+
+create policy "auth_email_codes_no_insert"
+  on public.auth_email_codes
+  for insert
+  to anon, authenticated
+  with check (false);
+
+create policy "auth_email_codes_no_update"
+  on public.auth_email_codes
+  for update
+  to anon, authenticated
+  using (false)
+  with check (false);
+
+create policy "auth_email_codes_no_delete"
+  on public.auth_email_codes
+  for delete
+  to anon, authenticated
+  using (false);
 
 -- 5) Indexes
 create index if not exists idx_user_challenge_progress_user_id on public.user_challenge_progress (user_id);
