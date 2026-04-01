@@ -42,7 +42,7 @@ const researchStats = [
 ];
 
 const manifestoLines = [
-  "El problema no es lo digital, es como lo usamos.",
+  "El problema no es lo digital, es cómo lo usamos.",
   "La biblioteca es una alternativa real para recuperar foco.",
   "Puedes recuperar el control de tu atención.",
   "Tu atención es un recurso valioso.",
