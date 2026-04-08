@@ -2587,7 +2587,7 @@ export default function Dashboard() {
                         />
                       </svg>
                       <div className="text-center">
-                        <p className="display-font text-8xl text-[#5b30d9]">{formatTime(timeLeft)}</p>
+                        <p className="display-font text-7xl leading-none text-[#5b30d9] sm:text-8xl">{formatTime(timeLeft)}</p>
                         <p className="mt-1 font-bold text-[#5b30d9]/85">{isActive ? (isPaused ? "Pausado" : getModeLabel(timerMode)) : "Listo"}</p>
                         <p className="text-xs font-bold uppercase tracking-wide text-[#5b30d9]/75">Ciclo {Math.min(focusStreak % 4, 3) + 1}/4</p>
                       </div>
