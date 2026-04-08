@@ -1094,6 +1094,7 @@ export default function Dashboard() {
       if (hour < reminderHour) {
         return;
       }
+      const todayKey = getLocalDateKey(now);
 
       const reminderKey = `focuszone:daily-challenge-reminder:${userId}:${todayKey}`;
       if (window.localStorage.getItem(reminderKey) === "1") {
@@ -1114,7 +1115,7 @@ export default function Dashboard() {
     return () => {
       clearInterval(interval);
     };
-  }, [userId, notificationPermission, hasCompletedBaseToday, dailyReminderEnabled, dailyReminderHour, todayKey, name]);
+  }, [userId, notificationPermission, hasCompletedBaseToday, dailyReminderEnabled, dailyReminderHour, name]);
 
   useEffect(() => {
     if (!userId || !name) {
