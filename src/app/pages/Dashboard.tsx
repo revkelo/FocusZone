@@ -1027,30 +1027,56 @@ export default function Dashboard() {
   }, [rooms, roomSearchQuery]);
   const ownedRoom = useMemo(() => rooms.find((room) => room.ownerId === userId) ?? null, [rooms, userId]);
 
-  const completedCount = allChallenges.filter((challenge) => completedChallenges.has(challenge.id)).length;
-  const completedBaseCount = baseChallenges.filter((challenge) => completedChallenges.has(challenge.id)).length;
-  const nextBaseChallengeId = orderedBaseChallenges.find((challenge) => !completedChallenges.has(challenge.id))?.id ?? null;
-  const allBaseCompleted = baseChallenges.length > 0 && completedBaseCount === baseChallenges.length;
-  const todayKey = getLocalDateKey(new Date());
-  const hasCompletedBaseToday = baseChallenges.some(
-    (challenge) => completedChallenges.has(challenge.id) && challengeCompletionDateKeys.get(challenge.id) === todayKey,
-  );
-  const customCreatedToday = customChallenges.filter((challenge) => getLocalDateKey(challenge.createdAt) === todayKey).length;
-  const remainingCustomCreationsToday = Math.max(0, MAX_CUSTOM_CHALLENGES_PER_DAY - customCreatedToday);
-  const progressPercentage = allChallenges.length === 0 ? 0 : (completedCount / allChallenges.length) * 100;
-  const challengePoints = allChallenges
-    .filter((challenge) => completedChallenges.has(challenge.id))
-    .reduce((sum, challenge) => sum + challenge.points, 0);
-  const currentChallengeStreak = getCurrentStreak(completedChallenges, baseChallenges);
-  const streakBonusPoints = baseChallenges.reduce((sum, challenge) => {
-    if (!completedChallenges.has(challenge.id)) {
-      return sum;
-    }
-    if (!challenge.day || challenge.day > currentChallengeStreak) {
-      return sum;
-    }
-    return sum + getChallengeStreakBonus(challenge);
-  }, 0);
+  const challengeSummary = useMemo(() => {
+    const completedCount = allChallenges.filter((challenge) => completedChallenges.has(challenge.id)).length;
+    const completedBaseCount = baseChallenges.filter((challenge) => completedChallenges.has(challenge.id)).length;
+    const nextBaseChallengeId = orderedBaseChallenges.find((challenge) => !completedChallenges.has(challenge.id))?.id ?? null;
+    const allBaseCompleted = baseChallenges.length > 0 && completedBaseCount === baseChallenges.length;
+    const todayKey = getLocalDateKey(new Date());
+    const hasCompletedBaseToday = baseChallenges.some(
+      (challenge) => completedChallenges.has(challenge.id) && challengeCompletionDateKeys.get(challenge.id) === todayKey,
+    );
+    const customCreatedToday = customChallenges.filter((challenge) => getLocalDateKey(challenge.createdAt) === todayKey).length;
+    const remainingCustomCreationsToday = Math.max(0, MAX_CUSTOM_CHALLENGES_PER_DAY - customCreatedToday);
+    const progressPercentage = allChallenges.length === 0 ? 0 : (completedCount / allChallenges.length) * 100;
+    const challengePoints = allChallenges
+      .filter((challenge) => completedChallenges.has(challenge.id))
+      .reduce((sum, challenge) => sum + challenge.points, 0);
+    const currentChallengeStreak = getCurrentStreak(completedChallenges, baseChallenges);
+    const streakBonusPoints = baseChallenges.reduce((sum, challenge) => {
+      if (!completedChallenges.has(challenge.id)) {
+        return sum;
+      }
+      if (!challenge.day || challenge.day > currentChallengeStreak) {
+        return sum;
+      }
+      return sum + getChallengeStreakBonus(challenge);
+    }, 0);
+
+    return {
+      completedCount,
+      nextBaseChallengeId,
+      allBaseCompleted,
+      hasCompletedBaseToday,
+      remainingCustomCreationsToday,
+      progressPercentage,
+      challengePoints,
+      currentChallengeStreak,
+      streakBonusPoints,
+    };
+  }, [allChallenges, baseChallenges, orderedBaseChallenges, completedChallenges, challengeCompletionDateKeys, customChallenges]);
+
+  const {
+    completedCount,
+    nextBaseChallengeId,
+    allBaseCompleted,
+    hasCompletedBaseToday,
+    remainingCustomCreationsToday,
+    progressPercentage,
+    challengePoints,
+    currentChallengeStreak,
+    streakBonusPoints,
+  } = challengeSummary;
 
   const points = sessions.length * SESSION_POINTS + challengePoints + streakBonusPoints;
   const availablePoints = points;
@@ -1480,7 +1506,7 @@ export default function Dashboard() {
   }, [selectedRoomId, userId, timeLeft, isActive, isPaused, timerMode]);
 
   useEffect(() => {
-    if (!userId || !selectedRoomId || !joinedRoomIds.has(selectedRoomId)) {
+    if (activeTab !== "pomodoro" || !userId || !selectedRoomId || !joinedRoomIds.has(selectedRoomId)) {
       return;
     }
 
@@ -1518,10 +1544,10 @@ export default function Dashboard() {
           : member,
       );
     });
-  }, [userId, selectedRoomId, joinedRoomIds, timeLeft, isActive, isPaused, timerMode, name, email]);
+  }, [activeTab, userId, selectedRoomId, joinedRoomIds, timeLeft, isActive, isPaused, timerMode, name, email]);
 
   useEffect(() => {
-    if (!selectedRoomId) {
+    if (activeTab !== "pomodoro" || !selectedRoomId) {
       return;
     }
 
@@ -1542,12 +1568,12 @@ export default function Dashboard() {
           };
         }),
       );
-    }, 1000);
+    }, 1500);
 
     return () => {
       clearInterval(interval);
     };
-  }, [selectedRoomId, userId]);
+  }, [activeTab, selectedRoomId, userId]);
 
   const handleTimerComplete = async () => {
     if (!userId) {
@@ -2468,6 +2494,7 @@ export default function Dashboard() {
               <TabsTrigger value="cuenta" className="rounded-xl px-4 py-2 font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Cuenta</TabsTrigger>
             </TabsList>
 
+            {activeTab === "pomodoro" && (
             <TabsContent value="pomodoro" className="focus-reveal space-y-5">
               <Card className="focus-card overflow-x-hidden rounded-[1.2rem] p-5 md:p-7">
                 <div className="flex items-center gap-2">
@@ -2817,7 +2844,9 @@ export default function Dashboard() {
                 </Card>
               </section>
             </TabsContent>
+            )}
 
+            {activeTab === "resumen" && (
             <TabsContent value="resumen" className="focus-reveal space-y-5">
               <section className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
                 <Card className="focus-card rounded-[1.2rem] gap-3 border-2 border-[#f47c0f]/40 bg-[#f47c0f] p-4 text-white sm:p-6">
@@ -2867,7 +2896,9 @@ export default function Dashboard() {
                 ) : null}
               </Card>
             </TabsContent>
+            )}
 
+            {activeTab === "chatbot" && (
             <TabsContent value="chatbot" className="focus-reveal flex flex-1 flex-col">
               <Card className="focus-card flex h-full flex-1 flex-col rounded-xl gap-3 px-3 pb-3 pt-3 sm:p-6 md:p-8">
                 <div className="flex items-center gap-2">
@@ -3032,7 +3063,10 @@ export default function Dashboard() {
                   </div>
                 </div>
               </Card>
-            </TabsContent>            <TabsContent value="tareas" className="focus-reveal">
+            </TabsContent>
+            )}
+            {activeTab === "tareas" && (
+            <TabsContent value="tareas" className="focus-reveal">
               <Card className="focus-card rounded-[1.2rem] p-7 md:p-8">
                 <div className="mb-5 flex items-center justify-between">
                   <h2 className="display-font text-5xl text-[#5b30d9]">Retos</h2>
@@ -3197,7 +3231,9 @@ export default function Dashboard() {
                 </Tabs>
               </Card>
             </TabsContent>
+            )}
 
+            {activeTab === "cuenta" && (
             <TabsContent value="cuenta" className="focus-reveal">
               <div className="grid gap-4 md:grid-cols-2">
                 <Card className="focus-card rounded-[1.2rem] p-6">
@@ -3372,6 +3408,7 @@ export default function Dashboard() {
                 </Card>
               </div>
             </TabsContent>
+            )}
           </Tabs>
         </main>
 
