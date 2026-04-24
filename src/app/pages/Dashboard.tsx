@@ -1147,8 +1147,7 @@ export default function Dashboard() {
           .from("user_leaderboard")
           .select("user_id, display_name, total_points")
           .order("total_points", { ascending: false })
-          .order("updated_at", { ascending: true })
-          .limit(10),
+          .order("updated_at", { ascending: true }),
         supabase.from("user_leaderboard").select("user_id", { count: "exact", head: true }),
         supabase
           .from("user_leaderboard")
