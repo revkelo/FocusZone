@@ -268,6 +268,7 @@ export default function Home() {
     horizontalCarouselApi.on("reInit", onSelect);
 
     return () => {
+      horizontalCarouselApi.off("reInit", onSelect);
       horizontalCarouselApi.off("select", onSelect);
     };
   }, [horizontalCarouselApi]);
@@ -306,20 +307,6 @@ export default function Home() {
       window.clearInterval(interval);
     };
   }, [isLumiSpeaking]);
-
-  useEffect(() => {
-    if (!horizontalCarouselApi) {
-      return;
-    }
-
-    const autoplay = window.setInterval(() => {
-      horizontalCarouselApi.scrollNext();
-    }, 3200);
-
-    return () => {
-      window.clearInterval(autoplay);
-    };
-  }, [horizontalCarouselApi]);
 
   const switchDesign = (nextIndex: number) => {
     if (isViewerTransitioning) {
@@ -977,7 +964,7 @@ export default function Home() {
                 <p className="text-xs font-black uppercase tracking-[0.12em] text-[#5b30d9]/70">Carrusel horizontal</p>
                 <p className="text-xs text-[#5b30d9]/70">Piezas panorámicas</p>
               </div>
-              <Carousel setApi={setHorizontalCarouselApi} opts={{ align: "start", loop: true }} className="w-full overflow-hidden rounded-[1.15rem] border-2 border-[#5b30d9]/45">
+              <Carousel setApi={setHorizontalCarouselApi} opts={{ align: "start", loop: false }} className="w-full overflow-hidden rounded-[1.15rem] border-2 border-[#5b30d9]/45">
                 <CarouselContent>
                   {horizontalDesigns.map((item) => {
                     const originalIndex = artGallery.findIndex((entry) => entry.src === item.src);

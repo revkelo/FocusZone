@@ -2516,7 +2516,6 @@ export default function Dashboard() {
               <TabsTrigger value="cuenta" className="rounded-xl px-4 py-2 font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Cuenta</TabsTrigger>
             </TabsList>
 
-            {activeTab === "pomodoro" && (
             <TabsContent value="pomodoro" className="focus-reveal space-y-5">
               <Card className="focus-card overflow-x-hidden rounded-[1.2rem] p-5 md:p-7">
                 <div className="flex items-center gap-2">
@@ -2866,9 +2865,7 @@ export default function Dashboard() {
                 </Card>
               </section>
             </TabsContent>
-            )}
 
-            {activeTab === "resumen" && (
             <TabsContent value="resumen" className="focus-reveal space-y-5">
               <section className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
                 <Card className="focus-card rounded-[1.2rem] gap-3 border-2 border-[#f47c0f]/40 bg-[#f47c0f] p-4 text-white sm:p-6">
@@ -2918,9 +2915,7 @@ export default function Dashboard() {
                 ) : null}
               </Card>
             </TabsContent>
-            )}
 
-            {activeTab === "chatbot" && (
             <TabsContent value="chatbot" className="focus-reveal flex flex-1 flex-col">
               <Card className="focus-card flex h-full flex-1 flex-col rounded-xl gap-3 px-3 pb-3 pt-3 sm:p-6 md:p-8">
                 <div className="flex items-center gap-2">
@@ -3086,8 +3081,7 @@ export default function Dashboard() {
                 </div>
               </Card>
             </TabsContent>
-            )}
-            {activeTab === "tareas" && (
+
             <TabsContent value="tareas" className="focus-reveal">
               <Card className="focus-card rounded-[1.2rem] p-7 md:p-8">
                 <div className="mb-5 flex items-center justify-between">
@@ -3257,9 +3251,7 @@ export default function Dashboard() {
                 </Tabs>
               </Card>
             </TabsContent>
-            )}
 
-            {activeTab === "cuenta" && (
             <TabsContent value="cuenta" className="focus-reveal">
               <div className="grid gap-4 md:grid-cols-2">
                 <Card className="focus-card rounded-[1.2rem] p-6">
@@ -3434,7 +3426,6 @@ export default function Dashboard() {
                 </Card>
               </div>
             </TabsContent>
-            )}
           </Tabs>
         </main>
 
@@ -3491,13 +3482,4 @@ export default function Dashboard() {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
 
