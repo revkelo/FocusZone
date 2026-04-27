@@ -313,6 +313,7 @@ export default function Dashboard() {
   const [successMessage, setSuccessMessage] = useState("");
   const [toasts, setToasts] = useState<AppToast[]>([]);
   const [hydratedPomodoroKey, setHydratedPomodoroKey] = useState<string | null>(null);
+  const nextUiIdRef = useRef<number>(2);
   const lastToastRef = useRef<{ signature: string; at: number } | null>(null);
   const lastPomodoroReminderAtRef = useRef<number>(0);
   const lastTimerTickAtRef = useRef<number | null>(null);
@@ -384,6 +385,11 @@ export default function Dashboard() {
   const notificationVolumeScale = (parseNotificationVolume(notificationVolume) / 100) * NOTIFICATION_VOLUME_BOOST_FACTOR;
   const isSoundEnabled = parseNotificationVolume(notificationVolume) > 0;
   const ALLOWED_TEXT_PATTERN = /^[\p{L}\p{N}\s.,:;!'"()\-_/+#&]+$/u;
+  const getNextUiId = () => {
+    const nextId = nextUiIdRef.current;
+    nextUiIdRef.current += 1;
+    return nextId;
+  };
   const selectedGuidedCategory = useMemo(() => (guidedCategoryId ? getGuidedCategoryById(guidedCategoryId) : null), [guidedCategoryId]);
   const renderInlineMarkdown = (value: string) => {
     const parts = value.split(/(\*\*[^*\n]+\*\*|\*[^*\n]+\*)/g);
@@ -805,7 +811,7 @@ export default function Dashboard() {
     }
     lastToastRef.current = { signature, at: now };
 
-    const toastId = Date.now() + Math.floor(Math.random() * 1000);
+    const toastId = getNextUiId();
     setToasts((previous) => [...previous.slice(-3), { id: toastId, type, title, description }]);
     window.setTimeout(() => {
       removeToast(toastId);
@@ -1694,6 +1700,20 @@ export default function Dashboard() {
     setSuccessMessage("");
     const isCompleted = completedChallenges.has(challengeId);
     const challenge = allChallenges.find((item) => item.id === challengeId);
+    if (!challenge) {
+      setError("No se encontró el reto seleccionado.");
+      return;
+    }
+
+    if (challenge.kind === "base" && isCompleted) {
+      setError("Los retos generales completados no se pueden desmarcar.");
+      return;
+    }
+
+    if (challenge.kind === "base" && !isCompleted && challengeId !== nextBaseChallengeId) {
+      setError("Solo puedes completar el reto consecutivo disponible.");
+      return;
+    }
 
     if (isCompleted) {
       const { error: deleteError } = await supabase
@@ -2270,10 +2290,10 @@ export default function Dashboard() {
       return false;
     }
 
-    const baseId = Date.now();
-    const pendingAssistantId = baseId + 1;
+    const userMessageId = getNextUiId();
+    const pendingAssistantId = getNextUiId();
     const userMessage: ChatMessage = {
-      id: baseId,
+      id: userMessageId,
       role: "user",
       text: userVisibleText || message,
     };
@@ -2346,11 +2366,12 @@ export default function Dashboard() {
 
     const quickReply = getQuickReplyForQuestion(message);
     if (quickReply) {
-      const baseId = Date.now();
+      const userMessageId = getNextUiId();
+      const assistantMessageId = getNextUiId();
       setChatMessages((previous) => [
         ...previous,
-        { id: baseId, role: "user", text: message },
-        { id: baseId + 1, role: "assistant", text: withLumiPresentation(quickReply) },
+        { id: userMessageId, role: "user", text: message },
+        { id: assistantMessageId, role: "assistant", text: withLumiPresentation(quickReply) },
       ]);
       setChatInput("");
       playEventSound("notification", notificationVolumeScale);
@@ -2372,11 +2393,12 @@ export default function Dashboard() {
       return;
     }
 
-    const baseId = Date.now();
+    const userMessageId = getNextUiId();
+    const assistantMessageId = getNextUiId();
     setChatMessages((previous) => [
       ...previous,
-      { id: baseId, role: "user", text: `Seleccion: ${selectedLabel}` },
-      { id: baseId + 1, role: "assistant", text: withLumiPresentation(quickReply) },
+      { id: userMessageId, role: "user", text: `Seleccion: ${selectedLabel}` },
+      { id: assistantMessageId, role: "assistant", text: withLumiPresentation(quickReply) },
     ]);
     playEventSound("notification", notificationVolumeScale);
     resetGuidedSelection();
@@ -3186,23 +3208,27 @@ export default function Dashboard() {
                         </div>
                         {weekGroup.items.map((challenge) => {
                           const done = completedChallenges.has(challenge.id);
+                          const isSequentialNext = challenge.id === nextBaseChallengeId;
+                          const isLocked = !done && !isSequentialNext;
+                          const isDisabled = done || isLocked;
                           const streakBonus = getChallengeStreakBonus(challenge);
                           const bonusActive = Boolean(challenge.day && challenge.day <= currentChallengeStreak && streakBonus > 0);
 
                           return (
                             <button
                               key={challenge.id}
+                              disabled={isDisabled}
                               onClick={() => void toggleChallenge(challenge.id)}
                               className={`flex w-full items-center gap-3 rounded-xl border p-4 text-left transition ${
                                 done
                                   ? "border-[#4f7c0f]/40 bg-[#b8ee73]/35"
-                                  : challenge.id === nextBaseChallengeId
+                                  : isSequentialNext
                                     ? "border-[#5b30d9]/25 bg-white"
                                     : "border-[#c8c2d8] bg-[#efedf4]"
-                              }`}
+                              } ${isDisabled ? "cursor-not-allowed opacity-75" : ""}`}
                             >
-                              {done ? <CheckCircle className="size-5 shrink-0 text-[#4f7c0f]" /> : <Circle className="size-5 shrink-0 text-[#7d4cd8]" />}
-                              <span className={`flex-1 font-bold ${done ? "text-[#325f0b]" : "text-[#5b30d9]"}`}>
+                              {done ? <CheckCircle className="size-5 shrink-0 text-[#4f7c0f]" /> : <Circle className={`size-5 shrink-0 ${isLocked ? "text-[#9b96ad]" : "text-[#7d4cd8]"}`} />}
+                              <span className={`flex-1 font-bold ${done ? "text-[#325f0b]" : isLocked ? "text-[#8a849e]" : "text-[#5b30d9]"}`}>
                                 Día {challenge.day}: {challenge.title}
                               </span>
                               <div className="text-right">
