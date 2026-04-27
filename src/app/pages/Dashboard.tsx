@@ -2507,16 +2507,46 @@ export default function Dashboard() {
           className={`mx-auto flex min-h-[calc(100dvh-84px)] w-full max-w-6xl flex-col px-3 py-2 ${activeTab === "chatbot" ? "pb-[4.5rem]" : "pb-24"} md:min-h-0 md:px-5 md:py-6 md:pb-10 lg:px-8 lg:py-8`}
         >
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex w-full flex-1 flex-col">
-            <TabsList className="mb-6 hidden h-auto w-full flex-wrap rounded-2xl bg-[#5b30d9] p-1.5 md:flex">
-              <TabsTrigger value="pomodoro" className="rounded-xl px-4 py-2 font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Pomodoro</TabsTrigger>
-              <TabsTrigger value="resumen" className="rounded-xl px-4 py-2 font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Resumen</TabsTrigger>
-              <TabsTrigger value="chatbot" className="rounded-xl px-4 py-2 font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Chatbot</TabsTrigger>
-              <TabsTrigger value="tareas" className="rounded-xl px-4 py-2 font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Retos</TabsTrigger>
-              <TabsTrigger value="cuenta" className="rounded-xl px-4 py-2 font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Cuenta</TabsTrigger>
-            </TabsList>
+          <div className="flex w-full flex-1 flex-col">
+            <div className="mb-6 hidden h-auto w-full flex-wrap rounded-2xl bg-[#5b30d9] p-1.5 md:flex">
+              <button
+                type="button"
+                onClick={() => setActiveTab("pomodoro")}
+                className={`rounded-xl px-4 py-2 font-bold ${activeTab === "pomodoro" ? "bg-[#f47c0f] text-white" : "text-white"}`}
+              >
+                Pomodoro
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("resumen")}
+                className={`rounded-xl px-4 py-2 font-bold ${activeTab === "resumen" ? "bg-[#f47c0f] text-white" : "text-white"}`}
+              >
+                Resumen
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("chatbot")}
+                className={`rounded-xl px-4 py-2 font-bold ${activeTab === "chatbot" ? "bg-[#f47c0f] text-white" : "text-white"}`}
+              >
+                Chatbot
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("tareas")}
+                className={`rounded-xl px-4 py-2 font-bold ${activeTab === "tareas" ? "bg-[#f47c0f] text-white" : "text-white"}`}
+              >
+                Retos
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("cuenta")}
+                className={`rounded-xl px-4 py-2 font-bold ${activeTab === "cuenta" ? "bg-[#f47c0f] text-white" : "text-white"}`}
+              >
+                Cuenta
+              </button>
+            </div>
 
-            <TabsContent value="pomodoro" forceMount className="focus-reveal space-y-5">
+            <div className={`${activeTab === "pomodoro" ? "focus-reveal space-y-5" : "hidden"}`}>
               <Card className="focus-card overflow-x-hidden rounded-[1.2rem] p-5 md:p-7">
                 <div className="flex items-center gap-2">
                   <Clock className="size-5 text-[#f47c0f]" />
@@ -2864,9 +2894,9 @@ export default function Dashboard() {
                   )}
                 </Card>
               </section>
-            </TabsContent>
+            </div>
 
-            <TabsContent value="resumen" forceMount className="focus-reveal space-y-5">
+            <div className={`${activeTab === "resumen" ? "focus-reveal space-y-5" : "hidden"}`}>
               <section className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
                 <Card className="focus-card rounded-[1.2rem] gap-3 border-2 border-[#f47c0f]/40 bg-[#f47c0f] p-4 text-white sm:p-6">
                   <p className="text-xs font-bold uppercase tracking-wider sm:text-sm">Puntos</p>
@@ -2914,9 +2944,9 @@ export default function Dashboard() {
                   </div>
                 ) : null}
               </Card>
-            </TabsContent>
+            </div>
 
-            <TabsContent value="chatbot" forceMount className="focus-reveal flex flex-1 flex-col">
+            <div className={`${activeTab === "chatbot" ? "focus-reveal flex flex-1 flex-col" : "hidden"}`}>
               <Card className="focus-card flex h-full flex-1 flex-col rounded-xl gap-3 px-3 pb-3 pt-3 sm:p-6 md:p-8">
                 <div className="flex items-center gap-2">
                   <img
@@ -3080,9 +3110,9 @@ export default function Dashboard() {
                   </div>
                 </div>
               </Card>
-            </TabsContent>
+            </div>
 
-            <TabsContent value="tareas" forceMount className="focus-reveal">
+            <div className={`${activeTab === "tareas" ? "focus-reveal" : "hidden"}`}>
               <Card className="focus-card rounded-[1.2rem] p-7 md:p-8">
                 <div className="mb-5 flex items-center justify-between">
                   <h2 className="display-font text-5xl text-[#5b30d9]">Retos</h2>
@@ -3250,9 +3280,9 @@ export default function Dashboard() {
                   </TabsContent>
                 </Tabs>
               </Card>
-            </TabsContent>
+            </div>
 
-            <TabsContent value="cuenta" forceMount className="focus-reveal">
+            <div className={`${activeTab === "cuenta" ? "focus-reveal" : "hidden"}`}>
               <div className="grid gap-4 md:grid-cols-2">
                 <Card className="focus-card rounded-[1.2rem] p-6">
                   <h2 className="display-font text-5xl text-[#5b30d9]">Cuenta</h2>
@@ -3425,8 +3455,8 @@ export default function Dashboard() {
                   </Button>
                 </Card>
               </div>
-            </TabsContent>
-          </Tabs>
+            </div>
+          </div>
         </main>
 
         <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-[#5b30d9]/30 bg-[#f2f0f3]/95 px-4 py-2 backdrop-blur md:hidden">
