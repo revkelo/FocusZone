@@ -2516,7 +2516,7 @@ export default function Dashboard() {
               <TabsTrigger value="cuenta" className="rounded-xl px-4 py-2 font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">Cuenta</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="pomodoro" className="focus-reveal space-y-5">
+            <TabsContent value="pomodoro" forceMount className="focus-reveal space-y-5">
               <Card className="focus-card overflow-x-hidden rounded-[1.2rem] p-5 md:p-7">
                 <div className="flex items-center gap-2">
                   <Clock className="size-5 text-[#f47c0f]" />
@@ -2866,7 +2866,7 @@ export default function Dashboard() {
               </section>
             </TabsContent>
 
-            <TabsContent value="resumen" className="focus-reveal space-y-5">
+            <TabsContent value="resumen" forceMount className="focus-reveal space-y-5">
               <section className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
                 <Card className="focus-card rounded-[1.2rem] gap-3 border-2 border-[#f47c0f]/40 bg-[#f47c0f] p-4 text-white sm:p-6">
                   <p className="text-xs font-bold uppercase tracking-wider sm:text-sm">Puntos</p>
@@ -2916,7 +2916,7 @@ export default function Dashboard() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="chatbot" className="focus-reveal flex flex-1 flex-col">
+            <TabsContent value="chatbot" forceMount className="focus-reveal flex flex-1 flex-col">
               <Card className="focus-card flex h-full flex-1 flex-col rounded-xl gap-3 px-3 pb-3 pt-3 sm:p-6 md:p-8">
                 <div className="flex items-center gap-2">
                   <img
@@ -3082,7 +3082,7 @@ export default function Dashboard() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="tareas" className="focus-reveal">
+            <TabsContent value="tareas" forceMount className="focus-reveal">
               <Card className="focus-card rounded-[1.2rem] p-7 md:p-8">
                 <div className="mb-5 flex items-center justify-between">
                   <h2 className="display-font text-5xl text-[#5b30d9]">Retos</h2>
@@ -3099,7 +3099,7 @@ export default function Dashboard() {
                     </TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="misRetos" className="space-y-6">
+                  <TabsContent value="misRetos" forceMount className="space-y-6">
                     <div className="space-y-3 border border-[#5b30d9]/20 bg-white/70 p-4">
                       <p className="font-bold text-[#5b30d9]">Crear reto personalizado</p>
                       <p className="text-xs font-bold text-[#5b30d9]/75">
@@ -3173,7 +3173,7 @@ export default function Dashboard() {
                     )}
                   </TabsContent>
 
-                  <TabsContent value="retosGenerales" className="space-y-6">
+                  <TabsContent value="retosGenerales" forceMount className="space-y-6">
                     <div className="sticky top-0 z-10 space-y-3 bg-[#f2f0f3] pb-2">
                       <Progress value={progressPercentage} className="h-3 rounded-xl bg-[#5b30d9]/20 [&>div]:rounded-xl [&>div]:bg-[#f47c0f]" />
                       <div className="grid gap-3 sm:grid-cols-3">
@@ -3252,7 +3252,7 @@ export default function Dashboard() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="cuenta" className="focus-reveal">
+            <TabsContent value="cuenta" forceMount className="focus-reveal">
               <div className="grid gap-4 md:grid-cols-2">
                 <Card className="focus-card rounded-[1.2rem] p-6">
                   <h2 className="display-font text-5xl text-[#5b30d9]">Cuenta</h2>
