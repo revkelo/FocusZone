@@ -28,7 +28,6 @@ import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Progress } from "../components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { CHALLENGES } from "../lib/challenges";
 import {
   GUIDED_CATEGORIES,
@@ -2508,7 +2507,7 @@ export default function Dashboard() {
         >
 
           <div className="flex w-full flex-1 flex-col">
-            <div className="mb-6 hidden h-auto w-full flex-wrap rounded-2xl bg-[#5b30d9] p-1.5 md:flex">
+            <div className="mb-6 hidden h-auto w-full flex-wrap items-center justify-center gap-1 rounded-2xl bg-[#5b30d9] p-1.5 md:flex">
               <button
                 type="button"
                 onClick={() => setActiveTab("pomodoro")}
@@ -3119,17 +3118,25 @@ export default function Dashboard() {
                   <div className="focus-tag">{completedCount}/{allChallenges.length || 1}</div>
                 </div>
 
-                <Tabs value={tasksSubTab} onValueChange={setTasksSubTab} className="w-full">
-                  <TabsList className="mb-6 grid h-auto w-full grid-cols-2 rounded-xl bg-[#5b30d9] p-1">
-                    <TabsTrigger value="retosGenerales" className="rounded-xl font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">
+                <div className="w-full">
+                  <div className="mb-6 grid h-auto w-full grid-cols-2 rounded-xl bg-[#5b30d9] p-1">
+                    <button
+                      type="button"
+                      onClick={() => setTasksSubTab("retosGenerales")}
+                      className={`rounded-xl px-2 py-2 font-bold ${tasksSubTab === "retosGenerales" ? "bg-[#f47c0f] text-white" : "text-white"}`}
+                    >
                       Retos generales
-                    </TabsTrigger>
-                    <TabsTrigger value="misRetos" className="rounded-xl font-bold text-white data-[state=active]:bg-[#f47c0f] data-[state=active]:text-white">
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTasksSubTab("misRetos")}
+                      className={`rounded-xl px-2 py-2 font-bold ${tasksSubTab === "misRetos" ? "bg-[#f47c0f] text-white" : "text-white"}`}
+                    >
                       Mis retos
-                    </TabsTrigger>
-                  </TabsList>
+                    </button>
+                  </div>
 
-                  <TabsContent value="misRetos" forceMount className="space-y-6">
+                  <div className={tasksSubTab === "misRetos" ? "space-y-6" : "hidden"}>
                     <div className="space-y-3 border border-[#5b30d9]/20 bg-white/70 p-4">
                       <p className="font-bold text-[#5b30d9]">Crear reto personalizado</p>
                       <p className="text-xs font-bold text-[#5b30d9]/75">
@@ -3201,9 +3208,9 @@ export default function Dashboard() {
                         })}
                       </div>
                     )}
-                  </TabsContent>
+                  </div>
 
-                  <TabsContent value="retosGenerales" forceMount className="space-y-6">
+                  <div className={tasksSubTab === "retosGenerales" ? "space-y-6" : "hidden"}>
                     <div className="sticky top-0 z-10 space-y-3 bg-[#f2f0f3] pb-2">
                       <Progress value={progressPercentage} className="h-3 rounded-xl bg-[#5b30d9]/20 [&>div]:rounded-xl [&>div]:bg-[#f47c0f]" />
                       <div className="grid gap-3 sm:grid-cols-3">
@@ -3277,8 +3284,8 @@ export default function Dashboard() {
                         </Button>
                       </div>
                     )}
-                  </TabsContent>
-                </Tabs>
+                  </div>
+                </div>
               </Card>
             </div>
 
