@@ -3,7 +3,6 @@ import { Link } from "react-router";
 import { ArrowUpRight, BookOpenText, Bot, Building2, ChevronLeft, ChevronRight, Cpu, Database, Glasses, GraduationCap, Lightbulb, Maximize2, MessageSquareQuote, Monitor, Newspaper, Pause, Play, Trophy, Volume2, WandSparkles, X } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "../components/ui/carousel";
 import { supabase } from "../lib/supabase";
 
 interface RankItem {
@@ -120,8 +119,6 @@ const formatAudioTime = (seconds: number) => {
 export default function Home() {
   const [ranking, setRanking] = useState<RankItem[]>([]);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
-  const [horizontalCarouselApi, setHorizontalCarouselApi] = useState<CarouselApi | null>(null);
-  const [activeHorizontalSlide, setActiveHorizontalSlide] = useState(0);
   const [activeNewsIndex, setActiveNewsIndex] = useState(0);
   const [isNewsTransitioning, setIsNewsTransitioning] = useState(false);
   const [newsTransitionDirection, setNewsTransitionDirection] = useState<"next" | "prev">("next");
@@ -253,25 +250,6 @@ export default function Home() {
       viewerVideo.removeEventListener("loadedmetadata", syncViewerState);
     };
   }, [isVideoViewerOpen]);
-
-  useEffect(() => {
-    if (!horizontalCarouselApi) {
-      return;
-    }
-
-    const onSelect = () => {
-      setActiveHorizontalSlide(horizontalCarouselApi.selectedScrollSnap());
-    };
-
-    onSelect();
-    horizontalCarouselApi.on("select", onSelect);
-    horizontalCarouselApi.on("reInit", onSelect);
-
-    return () => {
-      horizontalCarouselApi.off("reInit", onSelect);
-      horizontalCarouselApi.off("select", onSelect);
-    };
-  }, [horizontalCarouselApi]);
 
   useEffect(() => {
     return () => {
@@ -964,37 +942,24 @@ export default function Home() {
                 <p className="text-xs font-black uppercase tracking-[0.12em] text-[#5b30d9]/70">Carrusel horizontal</p>
                 <p className="text-xs text-[#5b30d9]/70">Piezas panorámicas</p>
               </div>
-              <Carousel setApi={setHorizontalCarouselApi} opts={{ align: "start", loop: false }} className="w-full overflow-hidden rounded-[1.15rem] border-2 border-[#5b30d9]/45">
-                <CarouselContent>
+              <div className="w-full overflow-x-auto rounded-[1.15rem] border-2 border-[#5b30d9]/45">
+                <div className="flex snap-x snap-mandatory gap-3 p-3">
                   {horizontalDesigns.map((item) => {
                     const originalIndex = artGallery.findIndex((entry) => entry.src === item.src);
                     return (
-                      <CarouselItem key={item.src} className="basis-full">
-                        <button
-                          type="button"
-                          onClick={() => setViewerIndex(originalIndex)}
-                          className="focus-gallery-tile group w-full overflow-hidden rounded-[1rem] border border-[#5b30d9]/20 bg-white text-left transition hover:border-[#5b30d9]/45"
-                        >
-                          <div className="relative rounded-[0.85rem] bg-[#f9fafb] p-3">
-                            <img src={item.src} alt={item.title} className="h-auto w-full object-contain" loading="lazy" />
-                          </div>
-                        </button>
-                      </CarouselItem>
+                      <button
+                        key={item.src}
+                        type="button"
+                        onClick={() => setViewerIndex(originalIndex)}
+                        className="focus-gallery-tile group w-full min-w-full snap-start overflow-hidden rounded-[1rem] border border-[#5b30d9]/20 bg-white text-left transition hover:border-[#5b30d9]/45"
+                      >
+                        <div className="relative rounded-[0.85rem] bg-[#f9fafb] p-3">
+                          <img src={item.src} alt={item.title} className="h-auto w-full object-contain" loading="lazy" />
+                        </div>
+                      </button>
                     );
                   })}
-                </CarouselContent>
-                <CarouselPrevious className="hidden md:flex md:size-9 border-[#5b30d9]/55 bg-white/45 text-[#5b30d9]/90 hover:bg-[#5b30d9]/80 hover:text-white md:left-3" />
-                <CarouselNext className="hidden md:flex md:size-9 border-[#5b30d9]/55 bg-white/45 text-[#5b30d9]/90 hover:bg-[#5b30d9]/80 hover:text-white md:right-3" />
-              </Carousel>
-              <div className="mt-3 flex justify-center gap-1.5">
-                {horizontalDesigns.map((item, index) => (
-                  <button
-                    key={`horizontal-dot-${item.src}`}
-                    onClick={() => horizontalCarouselApi?.scrollTo(index)}
-                    className={`h-2.5 w-6 rounded-full transition ${activeHorizontalSlide === index ? "bg-[#f47c0f]" : "bg-[#5b30d9]/20"}`}
-                    aria-label={`Ir al horizontal ${index + 1}`}
-                  />
-                ))}
+                </div>
               </div>
             </div>
 
