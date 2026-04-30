@@ -1083,7 +1083,12 @@ export default function Dashboard() {
     streakBonusPoints,
   } = challengeSummary;
 
-  const points = sessions.length * SESSION_POINTS + challengePoints + streakBonusPoints;
+  const calculatedPoints = sessions.length * SESSION_POINTS + challengePoints + streakBonusPoints;
+  const leaderboardPoints = useMemo(
+    () => leaderboard.find((entry) => entry.userId === userId)?.totalPoints ?? null,
+    [leaderboard, userId],
+  );
+  const points = leaderboardPoints ?? calculatedPoints;
   const availablePoints = points;
 
   useEffect(() => {
@@ -1138,7 +1143,7 @@ export default function Dashboard() {
         await supabase.from("user_leaderboard").insert({
           user_id: userId,
           display_name: name,
-          total_points: points,
+          total_points: calculatedPoints,
           updated_at: new Date().toISOString(),
         });
         return;
