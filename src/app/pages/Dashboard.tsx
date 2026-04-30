@@ -1127,16 +1127,34 @@ export default function Dashboard() {
       return;
     }
 
-    const upsertOwnLeaderboard = async () => {
-      await supabase.from("user_leaderboard").upsert({
-        user_id: userId,
-        display_name: name,
-        total_points: points,
-        updated_at: new Date().toISOString(),
-      });
+    const syncOwnLeaderboardProfile = async () => {
+      const { data: existingRow } = await supabase
+        .from("user_leaderboard")
+        .select("user_id")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (!existingRow) {
+        await supabase.from("user_leaderboard").insert({
+          user_id: userId,
+          display_name: name,
+          total_points: points,
+          updated_at: new Date().toISOString(),
+        });
+        return;
+      }
+
+      // Mantiene el nombre sincronizado sin sobrescribir puntos manuales en BD.
+      await supabase
+        .from("user_leaderboard")
+        .update({
+          display_name: name,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("user_id", userId);
     };
 
-    void upsertOwnLeaderboard();
+    void syncOwnLeaderboardProfile();
   }, [userId, name, points]);
 
   useEffect(() => {

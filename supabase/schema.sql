@@ -706,3 +706,15 @@ set
   display_name = excluded.display_name,
   total_points = greatest(public.user_leaderboard.total_points, excluded.total_points),
   updated_at = now();
+
+-- Ajuste puntual de puntos para usuario especifico
+update public.user_leaderboard l
+set total_points = 60, updated_at = now()
+from auth.users u
+where l.user_id = u.id
+  and (
+    lower(coalesce(u.raw_user_meta_data->>'nickname', '')) = lower('KevinDev')
+    or lower(coalesce(u.raw_user_meta_data->>'full_name', '')) = lower('KevinDev')
+    or lower(split_part(coalesce(u.email, ''), '@', 1)) = lower('KevinDev')
+    or lower(l.display_name) = lower('KevinDev')
+  );

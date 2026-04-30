@@ -99,6 +99,18 @@ set
   total_points = excluded.total_points,
   updated_at = excluded.updated_at;
 
+-- Ajuste puntual de puntos para usuario especifico
+update public.user_leaderboard l
+set total_points = 60, updated_at = now()
+from auth.users u
+where l.user_id = u.id
+  and (
+    lower(coalesce(u.raw_user_meta_data->>'nickname', '')) = lower('KevinDev')
+    or lower(coalesce(u.raw_user_meta_data->>'full_name', '')) = lower('KevinDev')
+    or lower(split_part(coalesce(u.email, ''), '@', 1)) = lower('KevinDev')
+    or lower(l.display_name) = lower('KevinDev')
+  );
+
 -- Pomodoros historicos (10 por usuario)
 insert into public.pomodoro_sessions (user_id, duration_seconds, completed_at, created_at)
 select
